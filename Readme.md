@@ -5,12 +5,15 @@ The objective of this repository is to track the progress and pre-requisites to 
 ## Pending upstream
 
 * [ ] Go (https://github.com/golang/go/issues/27532 / https://github.com/4a6f656c/riscv-go)
-* [ ] `golang.org/x/sys` (https://go-review.googlesource.com/c/sys/+/177799)
 
 ## PR submitted
+
 * [ ] `kr/pty` (https://github.com/kr/pty/pull/81)
+* [ ] Prometheus (https://github.com/prometheus/prometheus/pull/5621)
 
 ## Already upstreamed
+
+* [x] `golang.org/x/sys` (https://go-review.googlesource.com/c/sys/+/177799)
 * [x] `golang.org/x/net` (https://go-review.googlesource.com/c/net/+/177997)
 * [x] `etcd-io/bbolt`
 
@@ -20,19 +23,20 @@ The objective of this repository is to track the progress and pre-requisites to 
 
 ### Runc
 
-  * [ ] CGO (to build nsenter)
-  * [ ] `buildmode=pie` support
-  * [ ] Add `riscv64` to `libcontainer/system/syscall_linux_64.go`
-  * [ ] After upstreaming, update `x/sys` and `x/net` modules
-  * [ ] libseccomp-dev - Track (https://github.com/seccomp/libseccomp/pull/108) and Kernel support
-  * [ ] apparmor - (`$ sudo aa-status -> apparmor module is not loaded.`)
+* [ ] CGO (to build nsenter)
+* [ ] `buildmode=pie` support
+* [ ] Add `riscv64` to `libcontainer/system/syscall_linux_64.go`
+* [ ] After upstreaming, update `x/sys` and `x/net` modules
+* [ ] libseccomp-dev - Track (https://github.com/seccomp/libseccomp/pull/108) and Kernel support
+* [ ] apparmor - (`$ sudo aa-status -> apparmor module is not loaded.`)
 
 ### Prometheus
 
 Already builds successfully
 
-* [ ] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
-* [ ] Apply PR from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
+* [ ] Opened PR https://github.com/prometheus/prometheus/pull/5621
+* [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
+* [x] Apply PR from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
 
 ### Docker
 
@@ -66,6 +70,18 @@ Already builds succefully.
 
 * [ ] CGO
 * [ ] ???
+
+### SQlite
+
+Repository mirror: https://github.com/CanonicalLtd/sqlite
+
+* [ ] Update `config.guess` and `config.sub` to newer version. Posted to mailing list.
+
+### LXD
+
+* [x] LXC build successfully
+* [ ] SQLite `config` update to build successfully
+* [ ] CGO to build storage backends
 
 --------------------------------------------------------------------------------
 
