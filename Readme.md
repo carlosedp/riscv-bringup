@@ -66,3 +66,10 @@ Already builds succefully.
 
 * [ ] CGO
 * [ ] ???
+
+--------------------------------------------------------------------------------
+
+## References
+
+* [RISC-V Assembly Programmer's Manual](https://github.com/riscv/riscv-asm-manual/blob/master/riscv-asm.md)
+* [RISC-V ELF psABI specification](https://github.com/riscv/riscv-elf-psabi-doc/blob/master/riscv-elf.md)
