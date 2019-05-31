@@ -65,6 +65,7 @@ Already builds succefully.
 * [ ] Update `bbolt` (already upstreamed)
 * [ ] `x/net`
 * [ ] `x/sys`
+* [ ] Backport changes to release 3.2 (used by Kubernetes)
 
 ### Kubernetes
 
@@ -82,6 +83,13 @@ Repository mirror: https://github.com/CanonicalLtd/sqlite
 * [x] LXC build successfully
 * [ ] SQLite `config` update to build successfully
 * [ ] CGO to build storage backends
+
+### Go-jsonnet
+
+Repository on: https://github.com/google/go-jsonnet
+
+* [x] Update `x/sys`
+* [ ] Submitted PR https://github.com/google/go-jsonnet/pull/284
 
 --------------------------------------------------------------------------------
 
