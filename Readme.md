@@ -35,8 +35,16 @@ The objective of this repository is to track the progress and pre-requisites to 
 Already builds successfully
 
 * [ ] Opened PR https://github.com/prometheus/prometheus/pull/5621
+* [ ] Wait PR from `kr/pty` gets merged to update module.
 * [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
 * [x] Apply PR from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
+
+### Promu
+
+Already builds successfully
+
+* [ ] Opened PR https://github.com/prometheus/promu/pull/146
+* [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
 
 ### Docker
 
@@ -84,12 +92,28 @@ Repository mirror: https://github.com/CanonicalLtd/sqlite
 * [ ] SQLite `config` update to build successfully
 * [ ] CGO to build storage backends
 
-### Go-jsonnet
+### github.com/google/go-jsonnet
 
 Repository on: https://github.com/google/go-jsonnet
 
 * [x] Update `x/sys`
 * [ ] Submitted PR https://github.com/google/go-jsonnet/pull/284
+
+### github.com/github/hub
+
+* [x] Update `x/sys`
+* [ ] Submitted PR https://github.com/github/hub/pull/2153
+
+### github.com/labstack/echo
+
+* [x] Update `x/sys`
+* [x] Update `x/net`
+* [ ] Submitted PR https://github.com/labstack/echo/pull/1344
+
+### github.com/labstack/gommon
+
+* [x] Update `x/sys`
+* [ ] Submitted PR https://github.com/labstack/gommon/pull/32
 
 --------------------------------------------------------------------------------
 
