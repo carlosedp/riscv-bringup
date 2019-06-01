@@ -5,6 +5,7 @@ The objective of this repository is to track the progress and pre-requisites to 
 ## Pending upstream
 
 * [ ] Go (https://github.com/golang/go/issues/27532 / https://github.com/4a6f656c/riscv-go)
+* [ ] CGO implementation - Draft on https://github.com/carlosedp/riscv-go but far from complete/funtcional.
 
 ## PR submitted
 
@@ -116,6 +117,10 @@ Repository on: https://github.com/google/go-jsonnet
 * [ ] Submitted PR https://github.com/labstack/gommon/pull/32
 
 --------------------------------------------------------------------------------
+
+## Community
+
+* Slack channel #risc-v on https://invite.slack.golangbridge.org
 
 ## References
 
