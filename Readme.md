@@ -2,6 +2,10 @@
 
 The objective of this repository is to track the progress and pre-requisites to allow containers and Go applications on Risc-V.
 
+To make the development easier, there is a Qemu virtual machine based on Debian with some developer tools already installed.
+
+The pack can be downloaded [here](https://drive.google.com/open?id=1z8b45YFGTN7aVkqPJIRn3a8hU9bXFaXl) and there is a [readme for it](Qemu-VM.md).
+
 ## Pending upstream
 
 * [ ] Go (https://github.com/golang/go/issues/27532 / https://github.com/4a6f656c/riscv-go)
@@ -10,7 +14,6 @@ The objective of this repository is to track the progress and pre-requisites to 
 ## PR submitted
 
 * [ ] `kr/pty` (https://github.com/kr/pty/pull/81)
-* [ ] Prometheus (https://github.com/prometheus/prometheus/pull/5621)
 
 ## Already upstreamed
 
@@ -103,7 +106,7 @@ Repository on: https://github.com/google/go-jsonnet
 ### github.com/github/hub
 
 * [x] Update `x/sys`
-* [ ] Submitted PR https://github.com/github/hub/pull/2153
+* [x] PR https://github.com/github/hub/pull/2153
 
 ### github.com/labstack/echo
 
