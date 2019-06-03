@@ -12,6 +12,8 @@ To run the VM, use the script:
 
     ./run_debian.sh
 
+There is currently a problem with Qemu atomics where on some occasions thread sync fails. There is a report on [qemu mailing list](http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html) with a patch that fixes the problem. You can build Qemu with this patch to solve this until it get merged.
+
 ## SSH login into the guest
 
     ssh -p 22222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost
