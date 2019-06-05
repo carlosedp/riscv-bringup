@@ -6,6 +6,33 @@ To make the development easier, there is a Qemu virtual machine based on Debian 
 
 The pack can be downloaded [here](https://drive.google.com/open?id=1z8b45YFGTN7aVkqPJIRn3a8hU9bXFaXl) and there is a [readme for it](Qemu-VM.md).
 
+## Building Go on your Risc-V VM or SBC
+
+First checkout and bootstrap Go Risc-V tree into a host that has Go installed (could be Mac, Linux):
+
+```bash
+git clone https://github.com/4a6f656c/riscv-go
+cd riscv-go/src
+GOOS=linux GOARCH=riscv64 ./bootstrap.bash
+# Copy the generated boostrap pack to the VM/SBC
+scp -P 22222 ../../go-linux-riscv64-bootstrap.tbz root@localhost: # In case you use the VM provided above
+```
+
+Now on your Risc-V VM/SBC, clone the repository, export the path and bootstrap path you unpacked and build/test:
+
+```bash
+tar vxf go-linux-riscv64-bootstrap.tbz
+git clone https://github.com/4a6f656c/riscv-go
+cd riscv-go
+export GOROOT_BOOTSTRAP=$HOME/go-linux-riscv64-bootstrap
+export PATH="$(pwd)/misc/riscv:$(pwd)/bin:$PATH"
+cd src
+GOGC=off ./make.bash                            # Builds go on $HOME/riscv-go/bin that can be added to your path
+GOGC=off  GO_TEST_TIMEOUT_SCALE=10 ./run.bash   # Tests the build
+```
+
+Now you can use this go build for testing/developing other projects.
+
 ## Pending upstream
 
 * [ ] Go (https://github.com/golang/go/issues/27532 / https://github.com/4a6f656c/riscv-go)
@@ -88,7 +115,7 @@ Already builds succefully.
 
 Repository mirror: https://github.com/CanonicalLtd/sqlite
 
-* [ ] Update `config.guess` and `config.sub` to newer version. Posted to mailing list.
+* [ ] Update `config.guess` and `config.sub` to newer version. Posted to [mailing list](https://www.mail-archive.com/sqlite-users@mailinglists.sqlite.org/msg115489.html).
 
 ### LXD
 
@@ -101,7 +128,7 @@ Repository mirror: https://github.com/CanonicalLtd/sqlite
 Repository on: https://github.com/google/go-jsonnet
 
 * [x] Update `x/sys`
-* [ ] Submitted PR https://github.com/google/go-jsonnet/pull/284
+* [ ] PR https://github.com/google/go-jsonnet/pull/284
 
 ### github.com/github/hub
 
@@ -112,12 +139,12 @@ Repository on: https://github.com/google/go-jsonnet
 
 * [x] Update `x/sys`
 * [x] Update `x/net`
-* [ ] Submitted PR https://github.com/labstack/echo/pull/1344
+* [ ] PR https://github.com/labstack/echo/pull/1344
 
 ### github.com/labstack/gommon
 
 * [x] Update `x/sys`
-* [ ] Submitted PR https://github.com/labstack/gommon/pull/32
+* [x] PR https://github.com/labstack/gommon/pull/32
 
 --------------------------------------------------------------------------------
 
