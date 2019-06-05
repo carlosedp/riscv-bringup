@@ -33,16 +33,22 @@ GOGC=off  GO_TEST_TIMEOUT_SCALE=10 ./run.bash   # Tests the build
 
 Now you can use this go build for testing/developing other projects.
 
-## Pending upstream
+--------------------------------------------------------------------------------
+
+## Main dependencies
+
+### Pending upstream
 
 * [ ] Go (https://github.com/golang/go/issues/27532 / https://github.com/4a6f656c/riscv-go)
 * [ ] CGO implementation - Draft on https://github.com/carlosedp/riscv-go but far from complete/funtcional.
+* [ ] Go Builder - https://go-review.googlesource.com/c/build/+/177918
+* [ ] Qemu CAS bug - Patch works - http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html
 
-## PR submitted
+### PR submitted
 
 * [ ] `kr/pty` (https://github.com/kr/pty/pull/81)
 
-## Already upstreamed
+### Already upstreamed
 
 * [x] `golang.org/x/sys` (https://go-review.googlesource.com/c/sys/+/177799)
 * [x] `golang.org/x/net` (https://go-review.googlesource.com/c/net/+/177997)
@@ -60,22 +66,6 @@ Now you can use this go build for testing/developing other projects.
 * [ ] After upstreaming, update `x/sys` and `x/net` modules
 * [ ] libseccomp-dev - Track (https://github.com/seccomp/libseccomp/pull/108) and Kernel support
 * [ ] apparmor - (`$ sudo aa-status -> apparmor module is not loaded.`)
-
-### Prometheus
-
-Already builds successfully
-
-* [ ] Opened PR https://github.com/prometheus/prometheus/pull/5621
-* [ ] Wait PR from `kr/pty` gets merged to update module.
-* [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
-* [x] Apply PR from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
-
-### Promu
-
-Already builds successfully
-
-* [ ] Opened PR https://github.com/prometheus/promu/pull/146
-* [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
 
 ### Docker
 
@@ -110,6 +100,22 @@ Already builds succefully.
 
 * [ ] CGO
 * [ ] ???
+
+### Prometheus
+
+Already builds successfully
+
+* [ ] Opened PR https://github.com/prometheus/prometheus/pull/5621
+* [ ] Wait PR from `kr/pty` gets merged to update module.
+* [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
+* [x] Apply patch from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
+
+### Promu
+
+Already builds successfully
+
+* [ ] Opened PR https://github.com/prometheus/promu/pull/146
+* [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
 
 ### SQlite
 
