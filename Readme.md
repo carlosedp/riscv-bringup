@@ -56,7 +56,16 @@ Now you can use this go build for testing/developing other projects.
 
 --------------------------------------------------------------------------------
 
-## Projects
+## Docker containers and pre-reqs
+
+To build a complete container environment, check the [build-env.md](build-env.md) document.
+
+### Libseccomp
+
+Builds fine with PR 134 even without Kernel support.
+
+* [ ] Depends on upstreaming Kernel support (https://patchwork.kernel.org/patch/10716119/ and https://patchwork.kernel.org/patch/10716121/). Also https://github.com/riscv/riscv-linux/commit/0712587b63964272397ed34864130912d2a87020
+* [ ] PR https://github.com/seccomp/libseccomp/pull/134, Issue https://github.com/seccomp/libseccomp/issues/110
 
 ### Runc
 
@@ -64,25 +73,46 @@ Now you can use this go build for testing/developing other projects.
 * [ ] `buildmode=pie` support
 * [ ] Add `riscv64` to `libcontainer/system/syscall_linux_64.go`
 * [ ] After upstreaming, update `x/sys` and `x/net` modules
-* [ ] libseccomp-dev - Track (https://github.com/seccomp/libseccomp/pull/108) and Kernel support
+* [ ] libseccomp-dev
 * [ ] apparmor - (`$ sudo aa-status -> apparmor module is not loaded.`)
 
+### Crun (https://github.com/giuseppe/crun)
+
+No changes required, builds fine even without Kernel support for seccomp
+
+* [ ] libseccomp
+
+### Containerd (https://github.com/containerd/containerd/)
+
+* [ ] PR https://github.com/containerd/containerd/pull/3328
+
 ### Docker
-
-**Docker daemon**
-
-* [ ] Runc
-* [ ] After upstreaming, update `x/sys` and `x/net` modules in `vendor`.
-* [ ] `etcd-io/bbolt`
-* [ ] `github.com/vishvananda/netns` - update to latest version or add `netns_linux_riscv64.go`
-* [ ] `github.com/kr/pty/` - update to latest version
 
 **Docker cli** (github.com/docker/cli)
 
 Already builds successfully
 
-* [ ] Update continuity version (https://github.com/containerd/continuity)
-* [ ] After upstreaming, update `x/sys` and `x/net` modules in `vendor`.
+* [x] Update `x/sys` and `x/net` modules in `vendor`. [PR](https://github.com/docker/cli/pull/1926)
+
+**Docker daemon**
+
+* [ ] Update `x/sys` and `x/net` modules in `vendor`.
+* [ ] Update `etcd-io/bbolt` in `vendor`.
+* [ ] `github.com/vishvananda/netns` - https://github.com/vishvananda/netns/pull/34
+* [ ] Libnetwork PR - https://github.com/docker/libnetwork/pull/2389
+* [ ] PR https://github.com/moby/moby/pull/39327
+
+### docker-init (https://github.com/krallin/tini)
+
+No changes required. Just build and copy tini-static to /usr/local/bin/docker-init
+
+### docker-proxy
+
+Run dockerd as: `sudo dockerd  --userland-proxy=false`
+
+--------------------------------------------------------------------------------
+
+## Additional projects / libraries
 
 ### ETCD
 
