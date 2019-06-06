@@ -8,7 +8,7 @@ To make the development easier, there is a Qemu virtual machine based on Debian 
 
 The pack can be downloaded [here](https://drive.google.com/open?id=1z8b45YFGTN7aVkqPJIRn3a8hU9bXFaXl) and there is a [readme for it](Qemu-VM.md).
 
-If you want to run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ).
+If you want to run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script.
 
 To test it out after install, just run `docker run -d -p 8080:8080 carlosedp/echo_on_riscv` and then `curl http://localhost:8080`.
 
