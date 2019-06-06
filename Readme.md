@@ -2,9 +2,15 @@
 
 The objective of this repository is to track the progress and pre-requisites to allow containers and Go applications on Risc-V.
 
+## Virtual machine and pre-built Docker
+
 To make the development easier, there is a Qemu virtual machine based on Debian with some developer tools already installed.
 
 The pack can be downloaded [here](https://drive.google.com/open?id=1z8b45YFGTN7aVkqPJIRn3a8hU9bXFaXl) and there is a [readme for it](Qemu-VM.md).
+
+If you want to run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ).
+
+To test it out after install, just run `docker run -d -p 8080:8080 carlosedp/echo_on_riscv` and then `curl http://localhost:8080`.
 
 ## Building Go on your Risc-V VM or SBC
 
