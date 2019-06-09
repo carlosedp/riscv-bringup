@@ -6,7 +6,7 @@ The objective of this repository is to track the progress and pre-requisites to 
 
 To make the development easier, there is a Qemu virtual machine based on Debian with some developer tools already installed.
 
-The pack can be downloaded [here](https://drive.google.com/open?id=1z8b45YFGTN7aVkqPJIRn3a8hU9bXFaXl) and there is a [readme for it](Qemu-VM.md).
+The pack can be downloaded [here](https://drive.google.com/open?id=1O3dQouOqygnBtP5cZZ3uOghQO7hlrFhD) and there is a [readme for it](Qemu-VM.md).
 
 If you want to run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script.
 
@@ -106,7 +106,7 @@ Already builds successfully
 * [ ] Update `etcd-io/bbolt` in `vendor`.
 * [ ] `github.com/vishvananda/netns` - https://github.com/vishvananda/netns/pull/34
 * [ ] Libnetwork PR - https://github.com/docker/libnetwork/pull/2389
-* [ ] PR https://github.com/moby/moby/pull/39327
+* [x] PR https://github.com/moby/moby/pull/39327
 
 ### docker-init (https://github.com/krallin/tini)
 
@@ -181,12 +181,16 @@ Repository on: https://github.com/google/go-jsonnet
 
 * [x] Update `x/sys`
 * [x] Update `x/net`
-* [ ] PR https://github.com/labstack/echo/pull/1344
+* [x] PR https://github.com/labstack/echo/pull/1344
 
 ### github.com/labstack/gommon
 
 * [x] Update `x/sys`
 * [x] PR https://github.com/labstack/gommon/pull/32
+
+### VNDR (https://github.com/LK4D4/vndr)
+
+* [ ] PR https://github.com/LK4D4/vndr/pull/80
 
 --------------------------------------------------------------------------------
 
