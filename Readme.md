@@ -90,7 +90,7 @@ No changes required, builds fine even without Kernel support for seccomp
 
 ### Containerd (https://github.com/containerd/containerd/)
 
-* [ ] PR https://github.com/containerd/containerd/pull/3328
+* [x] PR https://github.com/containerd/containerd/pull/3328
 
 ### Docker
 
