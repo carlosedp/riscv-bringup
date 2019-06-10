@@ -192,6 +192,11 @@ Repository on: https://github.com/google/go-jsonnet
 
 * [ ] PR https://github.com/LK4D4/vndr/pull/80
 
+
+### Inlets (https://github.com/alexellis/inlets)
+
+* [ ] PR https://github.com/alexellis/inlets/pull/70
+
 --------------------------------------------------------------------------------
 
 ## Community
