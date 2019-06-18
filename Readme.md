@@ -122,14 +122,11 @@ Run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ### ETCD
 
-Already builds succefully.
-
 **Dependencies:**
 
-* [ ] Update `kr/pty` (https://github.com/kr/pty/pull/81)
-* [ ] Update `bbolt` (already upstreamed)
-* [ ] `x/net`
-* [ ] `x/sys`
+* [ ] PR https://github.com/etcd-io/etcd/pull/10834
+* [x] `x/net`
+* [x] `x/sys`
 * [ ] Backport changes to release 3.2 (used by Kubernetes)
 
 ### Kubernetes
@@ -142,7 +139,6 @@ Already builds succefully.
 Already builds successfully
 
 * [ ] Opened PR https://github.com/prometheus/prometheus/pull/5621
-* [ ] Wait PR from `kr/pty` gets merged to update module.
 * [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
 * [x] Apply patch from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
 
@@ -150,7 +146,7 @@ Already builds successfully
 
 Already builds successfully
 
-* [ ] Opened PR https://github.com/prometheus/promu/pull/146
+* [x] Opened PR https://github.com/prometheus/promu/pull/146
 * [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
 
 ### SQlite
@@ -170,7 +166,7 @@ Repository mirror: https://github.com/CanonicalLtd/sqlite
 Repository on: https://github.com/google/go-jsonnet
 
 * [x] Update `x/sys`
-* [ ] PR https://github.com/google/go-jsonnet/pull/284
+* [x] PR https://github.com/google/go-jsonnet/pull/284
 
 ### github.com/github/hub
 
@@ -190,7 +186,7 @@ Repository on: https://github.com/google/go-jsonnet
 
 ### VNDR (https://github.com/LK4D4/vndr)
 
-* [ ] PR https://github.com/LK4D4/vndr/pull/80
+* [x] PR https://github.com/LK4D4/vndr/pull/80
 
 
 ### Inlets (https://github.com/alexellis/inlets)
