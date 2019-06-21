@@ -84,7 +84,7 @@ Builds fine with PR 134 even without Kernel support.
 
 ### Crun (https://github.com/giuseppe/crun)
 
-No changes required, builds fine even without Kernel support for seccomp
+No changes required, builds fine even without Kernel support for seccomp. Depends on libseccomp.
 
 * [ ] libseccomp
 
@@ -102,11 +102,16 @@ Already builds successfully
 
 **Docker daemon**
 
+* [x] PR https://github.com/moby/moby/pull/39327 - Remove CGO dependency
 * [ ] Update `x/sys` and `x/net` modules in `vendor`.
 * [ ] Update `etcd-io/bbolt` in `vendor`.
-* [ ] `github.com/vishvananda/netns` - https://github.com/vishvananda/netns/pull/34
-* [ ] Libnetwork PR - https://github.com/docker/libnetwork/pull/2389
-* [x] PR https://github.com/moby/moby/pull/39327
+* [ ] Update `github.com/vishvananda/netns` in `vendor`
+* [ ] Update `github.com/docker/libnetwork` in `vendor`
+
+Dependency lib PRs:
+
+* [ ] netns PR - https://github.com/vishvananda/netns/pull/34
+* [ ] libnetwork PR - https://github.com/docker/libnetwork/pull/2389
 
 ### docker-init (https://github.com/krallin/tini)
 
@@ -131,7 +136,13 @@ Run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ### Kubernetes
 
-* [ ] CGO
+Dependencies for **kubelet**:
+
+* [ ] `x/net`
+* [ ] `x/sys`
+* [ ] bbolt
+* [ ] runc/libcontainers -> CGO
+* [ ] cadvisor/accelerators/nvidia -> github.com/mindprince/gonvml -> CGO
 * [ ] ???
 
 ### Prometheus

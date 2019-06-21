@@ -51,8 +51,6 @@ mkdir -p $GOPATH/src/github.com/containerd/
 pushd $GOPATH/src/github.com/containerd/
 git clone https://github.com/containerd/containerd
 pushd containerd
-git fetch origin pull/3328/head:riscv64
-git checkout riscv64
 go build ./cmd/ctr
 go build ./cmd/containerd-shim
 go build -tags no_btrfs ./cmd/containerd
@@ -84,6 +82,7 @@ git clone git://github.com/tonistiigi/docker
 pushd docker
 git checkout 3de77084d559055e87414c2669b22091a8396990
 go build -tags "no_quota_support exclude_graphdriver_devicemapper" ./cmd/dockerd/
+#go build -tags "exclude_disk_quota exclude_graphdriver_devicemapper" ./cmd/dockerd/    # On new trees
 sudo cp dockerd /usr/local/bin
 ```
 
