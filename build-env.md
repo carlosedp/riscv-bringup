@@ -78,12 +78,14 @@ popd
 ```bash
 mkdir -p $GOPATH/src/github.com/docker/
 pushd $GOPATH/src/github.com/docker/
-git clone git://github.com/tonistiigi/docker
+git clone git://github.com/moby/moby docker
 pushd docker
-git checkout 3de77084d559055e87414c2669b22091a8396990
-go build -tags "no_quota_support exclude_graphdriver_devicemapper" ./cmd/dockerd/
-#go build -tags "exclude_disk_quota exclude_graphdriver_devicemapper" ./cmd/dockerd/    # On new trees
+git fetch origin pull/39423/head:riscv64
+git checkout riscv64
+go build -tags "exclude_disk_quota exclude_graphdriver_devicemapper" ./cmd/dockerd/
 sudo cp dockerd /usr/local/bin
+popd
+popd
 ```
 
 ## docker-init
