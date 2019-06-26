@@ -102,16 +102,19 @@ Already builds successfully
 
 **Docker daemon**
 
+* [ ] PR https://github.com/moby/moby/pull/39423 - Update dependencies
 * [x] PR https://github.com/moby/moby/pull/39327 - Remove CGO dependency
-* [ ] Update `x/sys` and `x/net` modules in `vendor`.
-* [ ] Update `etcd-io/bbolt` in `vendor`.
-* [ ] Update `github.com/vishvananda/netns` in `vendor`
-* [ ] Update `github.com/docker/libnetwork` in `vendor`
+* [x] Update `x/sys` and `x/net` modules in `vendor`.
+* [x] Update `etcd-io/bbolt` in `vendor`.
+* [x] Update `github.com/vishvananda/netns` in `vendor`
+* [x] Update `github.com/vishvananda/netlink` in `vendor`
+* [x] Update `github.com/ishidawataru/sctp` in `vendor`
+* [x] Update `github.com/docker/libnetwork` in `vendor`
 
 Dependency lib PRs:
 
-* [ ] netns PR - https://github.com/vishvananda/netns/pull/34
-* [ ] libnetwork PR - https://github.com/docker/libnetwork/pull/2389
+* [x] netns PR - https://github.com/vishvananda/netns/pull/34 or fork into moby as https://github.com/moby/moby/issues/39404
+* [x] libnetwork PR - https://github.com/docker/libnetwork/pull/2389
 
 ### docker-init (https://github.com/krallin/tini)
 
@@ -119,7 +122,15 @@ No changes required. Just build and copy tini-static to /usr/local/bin/docker-in
 
 ### docker-proxy
 
-Run dockerd as: `sudo dockerd  --userland-proxy=false`
+No changes required. https://github.com/docker/libnetwork/cmd/proxy
+
+Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
+
+### Podman - libpod (https://github.com/containers/libpod)
+
+* [ ] PR to remove CGO dependency https://github.com/containers/libpod/pull/3437
+* [ ] PR for containers/storage - https://github.com/containers/storage/pull/375
+* [ ] PR for containers/psgo - https://github.com/containers/psgo/pull/53
 
 --------------------------------------------------------------------------------
 
@@ -132,7 +143,7 @@ Run dockerd as: `sudo dockerd  --userland-proxy=false`
 * [ ] PR https://github.com/etcd-io/etcd/pull/10834
 * [x] `x/net`
 * [x] `x/sys`
-* [ ] Backport changes to release 3.2 (used by Kubernetes)
+* [ ] Backport changes to release 3.2?
 
 ### Kubernetes
 
