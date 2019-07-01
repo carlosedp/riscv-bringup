@@ -2,7 +2,7 @@
 
 Here is a quick guide on how to use and build [podman](https://podman.io/) for Risc-V architecture.
 
-To install, download the tarball with all the requirements and run the `install.sh` script to quickly have it ready.
+To install the prebuilt pack, download the [tarball here](https://drive.google.com/file/d/1rUoCbtMCkQjVtwz0S4uq-WGZjikB1gSA/view?usp=sharing) with all the requirements and run the `install.sh` script to quickly have it ready.
 
 Use this pack in the [Qemu Risc-V virtual machine](Qemu-VM.md).
 
