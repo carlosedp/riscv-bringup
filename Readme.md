@@ -2,15 +2,39 @@
 
 The objective of this repository is to track the progress and pre-requisites to allow containers and Go applications on Risc-V.
 
-## Virtual machine and pre-built Docker
+There is a companion article available on https://medium.com/@carlosedp/docker-containers-on-risc-v-architecture-5bc45725624b.
+
+## Virtual machine, pre-built Go and Docker
 
 To make the development easier, there is a Qemu virtual machine based on Debian with some developer tools already installed.
 
-The pack can be downloaded [here](https://drive.google.com/open?id=1O3dQouOqygnBtP5cZZ3uOghQO7hlrFhD) and there is a [readme for it](Qemu-VM.md).
+The VM pack can be downloaded [here](https://drive.google.com/open?id=1O3dQouOqygnBtP5cZZ3uOghQO7hlrFhD) and there is a [readme for it](Qemu-VM.md).
 
-If you want to run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script.
+To run Go on this VM, download the tarball from here and install with the commands:
+
+```bash
+# Copy the tarball to the VM
+scp -P 22222 go-1.13dev-riscv.tar.gz root@localhost:
+
+# In the VM, unpack (in root dir for example)
+tar vxf go-1.13dev-riscv.tar.gz
+
+# Link the files
+rmdir /usr/local/go
+ln -sf /root/riscv-go/ /usr/local/go
+
+# Add to your PATH
+export PATH="/usr/local/go/bin:$PATH"
+
+# Addto bashrc
+echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
+```
+
+To run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script.
 
 To test it out after install, just run `docker run -d -p 8080:8080 carlosedp/echo_on_riscv` and then `curl http://localhost:8080`.
+
+There is also a [Podman](https://podman.io) package. Check more info on [build-podman-env.md](build-podman-env.md).
 
 ## Building Go on your Risc-V VM or SBC
 
@@ -50,33 +74,32 @@ Now you can use this go build for testing/developing other projects.
 * [ ] Go Builder - https://go-review.googlesource.com/c/build/+/177918
 * [ ] Qemu CAS bug - Patch works - http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html
 
-### PR submitted
-
-* [ ] `kr/pty` (https://github.com/kr/pty/pull/81)
-
 ### Already upstreamed
 
 * [x] `golang.org/x/sys` (https://go-review.googlesource.com/c/sys/+/177799)
 * [x] `golang.org/x/net` (https://go-review.googlesource.com/c/net/+/177997)
-* [x] `etcd-io/bbolt`
 
 --------------------------------------------------------------------------------
 
 ## Docker containers and pre-reqs
 
-To build a complete container environment, check the [build-env.md](build-env.md) document.
+To build a complete container environment, check the [build-docker-env.md](build-docker-env.md) document.
 
-### Libseccomp
+### Libseccomp (https://github.com/seccomp/libseccomp)
 
 Builds fine with PR 134 even without Kernel support.
 
-* [ ] Depends on upstreaming Kernel support (https://patchwork.kernel.org/patch/10716119/ and https://patchwork.kernel.org/patch/10716121/). Also https://github.com/riscv/riscv-linux/commit/0712587b63964272397ed34864130912d2a87020
-* [ ] PR https://github.com/seccomp/libseccomp/pull/134, Issue https://github.com/seccomp/libseccomp/issues/110
+* [ ] Depends on upstreaming Kernel support
+  * [ ] https://patchwork.kernel.org/patch/10716119/
+  * [ ] https://patchwork.kernel.org/patch/10716121/)
+  * [ ] Also https://github.com/riscv/riscv-linux/commit/0712587b63964272397ed34864130912d2a87020
+* [ ] PR - https://github.com/seccomp/libseccomp/pull/134
+* [ ] Issue - https://github.com/seccomp/libseccomp/issues/110
 
-### Runc
+### Runc (https://github.com/opencontainers/runc)
 
-* [ ] CGO (to build nsenter)
-* [ ] `buildmode=pie` support
+* [ ] **CGO** (to build nsenter)
+* [ ] Support `buildmode=pie`
 * [ ] Add `riscv64` to `libcontainer/system/syscall_linux_64.go`
 * [ ] After upstreaming, update `x/sys` and `x/net` modules
 * [ ] libseccomp-dev
@@ -115,6 +138,7 @@ Dependency lib PRs:
 
 * [x] netns PR - https://github.com/vishvananda/netns/pull/34 or fork into moby as https://github.com/moby/moby/issues/39404
 * [x] libnetwork PR - https://github.com/docker/libnetwork/pull/2389
+* [x] libnetwork PR netns - https://github.com/docker/libnetwork/pull/2412
 
 ### docker-init (https://github.com/krallin/tini)
 
@@ -126,15 +150,24 @@ No changes required. https://github.com/docker/libnetwork/cmd/proxy
 
 Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
-### Podman - libpod (https://github.com/containers/libpod)
+## Podman - libpod (https://github.com/containers/libpod)
 
 * [ ] PR to remove CGO dependency https://github.com/containers/libpod/pull/3437
-* [ ] PR for containers/storage - https://github.com/containers/storage/pull/375
-* [ ] PR for containers/psgo - https://github.com/containers/psgo/pull/53
+* [x] PR for containers/storage - https://github.com/containers/storage/pull/375
+* [x] PR for containers/psgo - https://github.com/containers/psgo/pull/53
+* [ ] CNI Bug - https://github.com/containers/libpod/issues/3462
 
 --------------------------------------------------------------------------------
 
 ## Additional projects / libraries
+
+
+### bbolt (https://github.com/etcd-io/bbolt)
+* [x] PR - https://github.com/etcd-io/bbolt/pull/159
+
+### Pty (https://github.com/kr/pty)
+
+* [x] `kr/pty` (https://github.com/kr/pty/pull/81)
 
 ### ETCD
 
@@ -143,7 +176,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 * [ ] PR https://github.com/etcd-io/etcd/pull/10834
 * [x] `x/net`
 * [x] `x/sys`
-* [ ] Backport changes to release 3.2?
+* [ ] Backport changes to release 3.2.x for Kubernetes?
 
 ### Kubernetes
 
@@ -153,14 +186,14 @@ Dependencies for **kubelet**:
 * [ ] `x/sys`
 * [ ] bbolt
 * [ ] runc/libcontainers -> CGO
-* [ ] cadvisor/accelerators/nvidia -> github.com/mindprince/gonvml -> CGO
+* [ ] cadvisor/accelerators/nvidia -> github.com/mindprince/gonvml depends on CGO
 * [ ] ???
 
 ### Prometheus
 
 Already builds successfully
 
-* [ ] Opened PR https://github.com/prometheus/prometheus/pull/5621
+* [ ] PR https://github.com/prometheus/prometheus/pull/5621
 * [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
 * [x] Apply patch from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
 
@@ -168,7 +201,7 @@ Already builds successfully
 
 Already builds successfully
 
-* [x] Opened PR https://github.com/prometheus/promu/pull/146
+* [x] PR https://github.com/prometheus/promu/pull/146
 * [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
 
 ### SQlite
