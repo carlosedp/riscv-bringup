@@ -117,13 +117,13 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 
 ### Docker
 
-**Docker cli** (github.com/docker/cli)
+#### Docker cli (github.com/docker/cli)
 
 Already builds successfully
 
 * [x] Update `x/sys` and `x/net` modules in `vendor`. [PR](https://github.com/docker/cli/pull/1926)
 
-**Docker daemon**
+#### Docker daemon
 
 * [x] PR https://github.com/moby/moby/pull/39423 - Update dependencies
 * [x] PR https://github.com/moby/moby/pull/39327 - Remove CGO dependency
@@ -140,22 +140,27 @@ Dependency lib PRs:
 * [x] libnetwork PR - https://github.com/docker/libnetwork/pull/2389
 * [x] libnetwork PR netns - https://github.com/docker/libnetwork/pull/2412
 
-### docker-init (https://github.com/krallin/tini)
+#### docker-init (https://github.com/krallin/tini)
 
 No changes required. Just build and copy tini-static to /usr/local/bin/docker-init
 
-### docker-proxy
+#### docker-proxy
 
 No changes required. https://github.com/docker/libnetwork/cmd/proxy
 
 Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
+#### Issues
+
+* [ ] Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
+* [ ] Sometimes containerd spins cpu to 100%
+
 ## Podman - libpod (https://github.com/containers/libpod)
 
-* [ ] PR to remove CGO dependency https://github.com/containers/libpod/pull/3437
+* [x] PR to remove CGO dependency https://github.com/containers/libpod/pull/3437
 * [x] PR for containers/storage - https://github.com/containers/storage/pull/375
 * [x] PR for containers/psgo - https://github.com/containers/psgo/pull/53
-* [ ] CNI Bug - https://github.com/containers/libpod/issues/3462
+* [ ] CNI Issue - https://github.com/containers/libpod/issues/3462
 
 --------------------------------------------------------------------------------
 
