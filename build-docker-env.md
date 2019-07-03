@@ -80,8 +80,6 @@ mkdir -p $GOPATH/src/github.com/docker/
 pushd $GOPATH/src/github.com/docker/
 git clone git://github.com/moby/moby docker
 pushd docker
-git fetch origin pull/39423/head:riscv64
-git checkout riscv64
 go build -tags "exclude_disk_quota exclude_graphdriver_devicemapper" ./cmd/dockerd/
 sudo cp dockerd /usr/local/bin
 popd

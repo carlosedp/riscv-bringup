@@ -125,7 +125,7 @@ Already builds successfully
 
 **Docker daemon**
 
-* [ ] PR https://github.com/moby/moby/pull/39423 - Update dependencies
+* [x] PR https://github.com/moby/moby/pull/39423 - Update dependencies
 * [x] PR https://github.com/moby/moby/pull/39327 - Remove CGO dependency
 * [x] Update `x/sys` and `x/net` modules in `vendor`.
 * [x] Update `etcd-io/bbolt` in `vendor`.
