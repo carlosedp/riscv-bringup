@@ -152,8 +152,8 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 #### Issues
 
-* [ ] Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
-* [ ] Sometimes containerd spins cpu to 100%
+* [ ] https://github.com/moby/moby/issues/39461 - Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
+* [ ] https://github.com/containerd/containerd/issues/3389 - Containerd CPU 100% Issue
 
 ## Podman - libpod (https://github.com/containers/libpod)
 
