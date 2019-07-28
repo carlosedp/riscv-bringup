@@ -1,8 +1,53 @@
-# Risc-V bring-up tracker
+# Risc-V bring-up tracker <!-- omit in toc -->
 
 The objective of this repository is to track the progress and pre-requisites to allow containers and Go applications on Risc-V.
 
 There is a companion article available on https://medium.com/@carlosedp/docker-containers-on-risc-v-architecture-5bc45725624b.
+
+## Contents <!-- omit in toc -->
+
+* [Virtual machine, pre-built Go and Docker](#virtual-machine-pre-built-go-and-docker)
+* [Building Go on your Risc-V VM or SBC](#building-go-on-your-risc-v-vm-or-sbc)
+* [Go Dependencies](#go-dependencies)
+  * [Pending upstream](#pending-upstream)
+  * [Upstreamed](#upstreamed)
+* [Docker and pre-reqs](#docker-and-pre-reqs)
+  * [Libseccomp (https://github.com/seccomp/libseccomp)](#libseccomp-httpsgithubcomseccomplibseccomp)
+  * [Runc (https://github.com/opencontainers/runc)](#runc-httpsgithubcomopencontainersrunc)
+  * [Crun (https://github.com/giuseppe/crun)](#crun-httpsgithubcomgiuseppecrun)
+  * [Containerd (https://github.com/containerd/containerd/)](#containerd-httpsgithubcomcontainerdcontainerd)
+  * [Docker](#docker)
+    * [Docker cli (github.com/docker/cli)](#docker-cli-githubcomdockercli)
+    * [Docker daemon](#docker-daemon)
+    * [docker-init (https://github.com/krallin/tini)](#docker-init-httpsgithubcomkrallintini)
+    * [docker-proxy](#docker-proxy)
+* [Podman - libpod (https://github.com/containers/libpod)](#podman---libpod-httpsgithubcomcontainerslibpod)
+* [Base Container Images](#base-container-images)
+* [Additional projects / libraries](#additional-projects--libraries)
+  * [OpenFaaS](#openfaas)
+    * [faas-cli (https://github.com/openfaas/faas-cli/)](#faas-cli-httpsgithubcomopenfaasfaas-cli)
+    * [FaaS (https://github.com/openfaas/faas/)](#faas-httpsgithubcomopenfaasfaas)
+    * [nats-streaming-server (https://github.com/nats-io/nats-streaming-server)](#nats-streaming-server-httpsgithubcomnats-ionats-streaming-server)
+    * [nats-queue-worker (https://github.com/openfaas/nats-queue-worker)](#nats-queue-worker-httpsgithubcomopenfaasnats-queue-worker)
+    * [faas-swarm (https://github.com/openfaas/faas-swarm)](#faas-swarm-httpsgithubcomopenfaasfaas-swarm)
+    * [Sample Functions](#sample-functions)
+  * [bbolt (https://github.com/etcd-io/bbolt)](#bbolt-httpsgithubcometcd-iobbolt)
+  * [Pty (https://github.com/kr/pty)](#pty-httpsgithubcomkrpty)
+  * [ETCD](#etcd)
+  * [Kubernetes](#kubernetes)
+  * [Prometheus](#prometheus)
+  * [Promu](#promu)
+  * [SQlite](#sqlite)
+  * [LXD](#lxd)
+  * [Go-Jsonnet (https://github.com/google/go-jsonnet)](#go-jsonnet-httpsgithubcomgooglego-jsonnet)
+  * [Github Hub tool (https://github.com/github/hub)](#github-hub-tool-httpsgithubcomgithubhub)
+  * [Labstack Echo Framework (https://github.com/labstack/echo)](#labstack-echo-framework-httpsgithubcomlabstackecho)
+    * [Labstack Gommon (https://github.com/labstack/gommon)](#labstack-gommon-httpsgithubcomlabstackgommon)
+  * [VNDR (https://github.com/LK4D4/vndr)](#vndr-httpsgithubcomlk4d4vndr)
+  * [Inlets (https://github.com/alexellis/inlets)](#inlets-httpsgithubcomalexellisinlets)
+* [Community](#community)
+* [References](#references)
+
 
 ## Virtual machine, pre-built Go and Docker
 
@@ -65,7 +110,7 @@ Now you can use this go build for testing/developing other projects.
 
 --------------------------------------------------------------------------------
 
-## Main dependencies
+## Go Dependencies
 
 ### Pending upstream
 
@@ -74,14 +119,15 @@ Now you can use this go build for testing/developing other projects.
 * [ ] Go Builder - https://go-review.googlesource.com/c/build/+/177918
 * [ ] Qemu CAS bug - Patch works - http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html
 
-### Already upstreamed
+### Upstreamed
 
 * [x] `golang.org/x/sys` (https://go-review.googlesource.com/c/sys/+/177799)
 * [x] `golang.org/x/net` (https://go-review.googlesource.com/c/net/+/177997)
+* [x] `golang.org/x/sys` - Add riscv64 to `endian_little.go` (https://github.com/golang/sys/pull/38)
 
 --------------------------------------------------------------------------------
 
-## Docker containers and pre-reqs
+## Docker and pre-reqs
 
 To build a complete container environment, check the [build-docker-env.md](build-docker-env.md) document.
 
@@ -98,6 +144,7 @@ Builds fine with PR 134 even without Kernel support.
 
 ### Runc (https://github.com/opencontainers/runc)
 
+* [ ] Upstreamed / Works
 * [ ] **CGO** (to build nsenter)
 * [ ] Support `buildmode=pie`
 * [ ] Add `riscv64` to `libcontainer/system/syscall_linux_64.go`
@@ -109,22 +156,24 @@ Builds fine with PR 134 even without Kernel support.
 
 No changes required, builds fine even without Kernel support for seccomp. Depends on libseccomp.
 
+* [x] Upstreamed / Works
 * [ ] libseccomp
 
 ### Containerd (https://github.com/containerd/containerd/)
 
+* [x] Upstreamed / Works
 * [x] PR https://github.com/containerd/containerd/pull/3328
 
 ### Docker
 
 #### Docker cli (github.com/docker/cli)
 
-Already builds successfully
-
+* [x] Upstreamed / Works
 * [x] Update `x/sys` and `x/net` modules in `vendor`. [PR](https://github.com/docker/cli/pull/1926)
 
 #### Docker daemon
 
+* [x] Upstreamed / Works
 * [x] PR https://github.com/moby/moby/pull/39423 - Update dependencies
 * [x] PR https://github.com/moby/moby/pull/39327 - Remove CGO dependency
 * [x] Update `x/sys` and `x/net` modules in `vendor`.
@@ -136,6 +185,7 @@ Already builds successfully
 
 Dependency lib PRs:
 
+* [x] Upstreamed / Works
 * [x] netns PR - https://github.com/vishvananda/netns/pull/34 or fork into moby as https://github.com/moby/moby/issues/39404
 * [x] libnetwork PR - https://github.com/docker/libnetwork/pull/2389
 * [x] libnetwork PR netns - https://github.com/docker/libnetwork/pull/2412
@@ -144,13 +194,17 @@ Dependency lib PRs:
 
 No changes required. Just build and copy tini-static to /usr/local/bin/docker-init
 
+* [x] Upstreamed / Works
+
 #### docker-proxy
 
 No changes required. https://github.com/docker/libnetwork/cmd/proxy
 
+* [x] Upstreamed / Works
+
 Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
-#### Issues
+**Issues:**
 
 * [ ] https://github.com/moby/moby/issues/39461 - Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
 * [ ] https://github.com/containerd/containerd/issues/3389 - Containerd CPU 100% Issue
@@ -160,24 +214,82 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 * [x] PR to remove CGO dependency https://github.com/containers/libpod/pull/3437
 * [x] PR for containers/storage - https://github.com/containers/storage/pull/375
 * [x] PR for containers/psgo - https://github.com/containers/psgo/pull/53
+
+**Issues:**
+
 * [ ] CNI Issue - https://github.com/containers/libpod/issues/3462
+
+## Base Container Images
+
+* [ ] Debian (sid) -> `carlosedp/debian:sid-riscv64`
+* [ ] Alpine -> No MUSL available
+* [ ] Busybox (1.31.0) -> ``
+* [ ] Go (1.13 dev) -> `carlosedp/golang:1.13-riscv64`
 
 --------------------------------------------------------------------------------
 
 ## Additional projects / libraries
 
+### OpenFaaS
+
+#### faas-cli (https://github.com/openfaas/faas-cli/)
+
+* [ ] Migrate to go modules
+* [ ] Update `x/sys`
+* [ ] PR -
+
+#### FaaS (https://github.com/openfaas/faas/)
+
+* [ ] Migrate to go modules
+* [ ] Update `x/sys`
+* [ ] PR -
+
+**Images:**
+
+* [x] gateway - carlosedp/faas-gateway:riscv64
+* [x] faas-basic-auth-plugin - carlosedp/faas-basic-auth-plugin:riscv64
+* [x] faas-swarm - carlosedp/faas-swarm:riscv64
+* [x] nats-streaming - carlosedp/faas-nats-streaming:riscv64
+* [x] queue-worker - carlosedp/faas-queue-worker:riscv64
+* [x] watchdog - carlosedp/faas-watchdog:riscv64
+* [x] Function base - carlosedp/faas-debianfunction:riscv64
+
+#### nats-streaming-server (https://github.com/nats-io/nats-streaming-server)
+
+* [ ] Migrate to go modules
+* [ ] Update `x/sys`
+* [ ] PR -
+
+#### nats-queue-worker (https://github.com/openfaas/nats-queue-worker)
+
+* [ ] Migrate to go modules
+* [ ] Update `x/sys`
+* [ ] PR -
+
+#### faas-swarm (https://github.com/openfaas/faas-swarm)
+
+* [x] Depends on `x/sys` PR https://github.com/golang/sys/pull/38
+* [ ] Migrate to go modules
+* [ ] Update `x/sys`
+* [ ] PR - 
+
+#### Sample Functions
+
+* [x] Sample Function - Figlet - carlosedp/faas-figlet:riscv64
 
 ### bbolt (https://github.com/etcd-io/bbolt)
+
+* [x] Upstreamed / Works
 * [x] PR - https://github.com/etcd-io/bbolt/pull/159
 
 ### Pty (https://github.com/kr/pty)
 
+* [x] Upstreamed / Works
 * [x] `kr/pty` (https://github.com/kr/pty/pull/81)
 
 ### ETCD
 
-**Dependencies:**
-
+* [ ] Upstreamed / Works
 * [ ] PR https://github.com/etcd-io/etcd/pull/10834
 * [x] `x/net`
 * [x] `x/sys`
@@ -187,6 +299,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 Dependencies for **kubelet**:
 
+* [ ] Upstreamed / Works
 * [ ] `x/net`
 * [ ] `x/sys`
 * [ ] bbolt
@@ -198,6 +311,7 @@ Dependencies for **kubelet**:
 
 Already builds successfully
 
+* [ ] Upstreamed / Works
 * [ ] PR https://github.com/prometheus/prometheus/pull/5621
 * [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
 * [x] Apply patch from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
@@ -206,6 +320,7 @@ Already builds successfully
 
 Already builds successfully
 
+* [x] Upstreamed / Works
 * [x] PR https://github.com/prometheus/promu/pull/146
 * [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
 
@@ -213,44 +328,49 @@ Already builds successfully
 
 Repository mirror: https://github.com/CanonicalLtd/sqlite
 
+* [ ] Upstreamed / Works
 * [ ] Update `config.guess` and `config.sub` to newer version. Posted to [mailing list](https://www.mail-archive.com/sqlite-users@mailinglists.sqlite.org/msg115489.html).
 
 ### LXD
 
+* [ ] Upstreamed / Works
 * [x] LXC build successfully
 * [ ] SQLite `config` update to build successfully
 * [ ] CGO to build storage backends
 
-### github.com/google/go-jsonnet
+### Go-Jsonnet (https://github.com/google/go-jsonnet)
 
-Repository on: https://github.com/google/go-jsonnet
-
+* [x] Upstreamed / Works
 * [x] Update `x/sys`
 * [x] PR https://github.com/google/go-jsonnet/pull/284
 
-### github.com/github/hub
+### Github Hub tool (https://github.com/github/hub)
 
+* [x] Upstreamed / Works
 * [x] Update `x/sys`
 * [x] PR https://github.com/github/hub/pull/2153
 
-### github.com/labstack/echo
+### Labstack Echo Framework (https://github.com/labstack/echo)
 
+* [x] Upstreamed / Works
 * [x] Update `x/sys`
 * [x] Update `x/net`
 * [x] PR https://github.com/labstack/echo/pull/1344
 
-### github.com/labstack/gommon
+#### Labstack Gommon (https://github.com/labstack/gommon)
 
+* [x] Upstreamed / Works
 * [x] Update `x/sys`
 * [x] PR https://github.com/labstack/gommon/pull/32
 
 ### VNDR (https://github.com/LK4D4/vndr)
 
+* [x] Upstreamed / Works
 * [x] PR https://github.com/LK4D4/vndr/pull/80
-
 
 ### Inlets (https://github.com/alexellis/inlets)
 
+* [ ] Upstreamed / Works
 * [ ] PR https://github.com/alexellis/inlets/pull/70
 
 --------------------------------------------------------------------------------
