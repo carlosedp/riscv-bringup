@@ -31,8 +31,8 @@ There is a companion article available on https://medium.com/@carlosedp/docker-c
     * [nats-queue-worker (https://github.com/openfaas/nats-queue-worker)](#nats-queue-worker-httpsgithubcomopenfaasnats-queue-worker)
     * [faas-swarm (https://github.com/openfaas/faas-swarm)](#faas-swarm-httpsgithubcomopenfaasfaas-swarm)
     * [Sample Functions](#sample-functions)
-  * [bbolt (https://github.com/etcd-io/bbolt)](#bbolt-httpsgithubcometcd-iobbolt)
-  * [Pty (https://github.com/kr/pty)](#pty-httpsgithubcomkrpty)
+  * [BBOLT (https://github.com/etcd-io/bbolt)](#bbolt-httpsgithubcometcd-iobbolt)
+  * [PTY (https://github.com/kr/pty)](#pty-httpsgithubcomkrpty)
   * [ETCD](#etcd)
   * [Kubernetes](#kubernetes)
   * [Prometheus](#prometheus)
@@ -221,16 +221,18 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ## Base Container Images
 
-* [ ] Debian (sid) -> `carlosedp/debian:sid-riscv64`
+* [ ] Debian (sid) -> [`carlosedp/debian:sid-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/debian)
 * [ ] Alpine -> No MUSL available
 * [ ] Busybox (1.31.0) -> ``
-* [ ] Go (1.13 dev) -> `carlosedp/golang:1.13-riscv64`
+* [ ] Go (1.13 dev) -> [`carlosedp/golang:1.13-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/golang)
 
 --------------------------------------------------------------------------------
 
 ## Additional projects / libraries
 
 ### OpenFaaS
+
+OpenFaaS is still not upstreamed but the images have been built for Risc-V. Here are the instructions on [deploying it](https://gist.github.com/carlosedp/f07403da2a89f396aa4a05663f77a2d3).
 
 #### faas-cli (https://github.com/openfaas/faas-cli/)
 
@@ -275,14 +277,14 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 #### Sample Functions
 
-* [x] Sample Function - Figlet - carlosedp/faas-figlet:riscv64
+* [x] Figlet - carlosedp/faas-figlet:riscv64
 
-### bbolt (https://github.com/etcd-io/bbolt)
+### BBOLT (https://github.com/etcd-io/bbolt)
 
 * [x] Upstreamed / Works
 * [x] PR - https://github.com/etcd-io/bbolt/pull/159
 
-### Pty (https://github.com/kr/pty)
+### PTY (https://github.com/kr/pty)
 
 * [x] Upstreamed / Works
 * [x] `kr/pty` (https://github.com/kr/pty/pull/81)
@@ -309,7 +311,7 @@ Dependencies for **kubelet**:
 
 ### Prometheus
 
-Already builds successfully
+Already builds successfully.
 
 * [ ] Upstreamed / Works
 * [ ] PR https://github.com/prometheus/prometheus/pull/5621
@@ -318,7 +320,7 @@ Already builds successfully
 
 ### Promu
 
-Already builds successfully
+Already builds successfully.
 
 * [x] Upstreamed / Works
 * [x] PR https://github.com/prometheus/promu/pull/146
