@@ -5,8 +5,8 @@ The objective of this repository is to track the progress and pre-requisites to 
 There is a companion article available on https://medium.com/@carlosedp/docker-containers-on-risc-v-architecture-5bc45725624b.
 
 ## Contents <!-- omit in toc -->
-
-* [Virtual machine, pre-built Go and Docker](#virtual-machine-pre-built-go-and-docker)
+!
+* [Risc-V Virtual Machine, pre-built Go and Docker](#risc-v-virtual-machine-pre-built-go-and-docker)
 * [Building Go on your Risc-V VM or SBC](#building-go-on-your-risc-v-vm-or-sbc)
 * [Go Dependencies](#go-dependencies)
   * [Pending upstream](#pending-upstream)
@@ -49,13 +49,17 @@ There is a companion article available on https://medium.com/@carlosedp/docker-c
 * [References](#references)
 
 
-## Virtual machine, pre-built Go and Docker
+## Risc-V Virtual Machine, pre-built Go and Docker
 
-To make the development easier, there is a Qemu virtual machine based on Debian with some developer tools already installed.
+To make the development easier, there is a Qemu virtual machine based on Debian with developer tools already installed.
 
-The VM pack can be downloaded [here](https://drive.google.com/open?id=1O3dQouOqygnBtP5cZZ3uOghQO7hlrFhD) and there is a [readme for it](Qemu-VM.md).
+The VM pack can be downloaded [here](https://drive.google.com/open?id=1O3dQouOqygnBtP5cZZ3uOghQO7hlrFhD). For more information, check [the readme](Qemu-VM.md).
 
-To run Go on this VM, download the tarball from here and install with the commands:
+The prebuilt Go 1.13 tarball can be [downloaded here](https://drive.google.com/open?id=1jG23DjOkVpFxF00HPuAN8SmGEpaf8iAr).
+
+To run Go on this VM, download both files and install with:
+
+<details><summary><u>Instructions</u></summary></u>
 
 ```bash
 # Copy the tarball to the VM
@@ -75,6 +79,8 @@ export PATH="/usr/local/go/bin:$PATH"
 echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 ```
 
+</details><br/>
+
 To run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script.
 
 To test it out after install, just run `docker run -d -p 8080:8080 carlosedp/echo_on_riscv` and then `curl http://localhost:8080`.
@@ -83,9 +89,12 @@ There is also a [Podman](https://podman.io) package. Check more info on [build-p
 
 ## Building Go on your Risc-V VM or SBC
 
-First checkout and bootstrap Go Risc-V tree into a host that has Go installed (could be Mac, Linux):
+Golang is still not upstreamed so to build it from source, you will need a machine to do the initial bootstrap, copy this bootstraped tree to your Risc-V host or VM and then build the complete Go distribution. This bootstrap host can be a Windows, Mac or Linux.
+
+<details><summary><u>Instructions</u></summary>
 
 ```bash
+# On bootstrap Host
 git clone https://github.com/4a6f656c/riscv-go
 cd riscv-go/src
 GOOS=linux GOARCH=riscv64 ./bootstrap.bash
@@ -96,6 +105,7 @@ scp -P 22222 ../../go-linux-riscv64-bootstrap.tbz root@localhost: # In case you 
 Now on your Risc-V VM/SBC, clone the repository, export the path and bootstrap path you unpacked and build/test:
 
 ```bash
+# On Risc-V Host
 tar vxf go-linux-riscv64-bootstrap.tbz
 git clone https://github.com/4a6f656c/riscv-go
 cd riscv-go
@@ -105,6 +115,8 @@ cd src
 GOGC=off ./make.bash                            # Builds go on $HOME/riscv-go/bin that can be added to your path
 GOGC=off  GO_TEST_TIMEOUT_SCALE=10 ./run.bash   # Tests the build
 ```
+
+</details><br/>
 
 Now you can use this go build for testing/developing other projects.
 
@@ -232,7 +244,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ### OpenFaaS
 
-OpenFaaS is still not upstreamed but the images have been built for Risc-V. Here are the instructions on [deploying it](https://gist.github.com/carlosedp/f07403da2a89f396aa4a05663f77a2d3).
+OpenFaaS is still not upstreamed but the images have been built for Risc-V. Here are the instructions on [deploying it](OpenFaas/Readme.md).
 
 #### faas-cli (https://github.com/openfaas/faas-cli/)
 
