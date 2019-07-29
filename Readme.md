@@ -126,9 +126,11 @@ Now you can use this go build for testing/developing other projects.
 
 ### Pending upstream
 
-* [ ] Go (https://github.com/golang/go/issues/27532 / https://github.com/4a6f656c/riscv-go)
+* [ ] Go
+  * Tracker Issue:https://github.com/golang/go/issues/27532
+  * Risc-V Fork: https://github.com/4a6f656c/riscv-go
 * [ ] CGO implementation - Draft on https://github.com/carlosedp/riscv-go but far from complete/funtcional.
-* [ ] Go Builder - https://go-review.googlesource.com/c/build/+/177918
+* [ ] Go Builder - https://github.com/golang/build/pull/22. Based on https://go-review.googlesource.com/c/build/+/177918
 * [ ] Qemu CAS bug - Patch works - http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html
 
 ### Upstreamed
@@ -275,8 +277,8 @@ No changes required.
 
 #### nats-streaming-server (https://github.com/nats-io/nats-streaming-server)
 
-* [ ] Update `x/sys`, `etcd/bbolt`.
-* [ ] PR - https://github.com/nats-io/nats-streaming-server/pull/891
+* [x] Update `x/sys`, `etcd/bbolt`.
+* [x] PR - https://github.com/nats-io/nats-streaming-server/pull/891
 
 #### nats-queue-worker (https://github.com/openfaas/nats-queue-worker)
 
@@ -318,11 +320,11 @@ Dependencies for **kubelet**:
 
 ### Prometheus
 
-Already builds successfully.
+Already builds successfully with `make build` after updating modules.
 
 * [ ] Upstreamed / Works
 * [ ] PR https://github.com/prometheus/prometheus/pull/5621
-* [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
+* [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get -u golang.org/x/sys && go mod tidy`
 * [x] Apply patch from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
 
 ### Promu
