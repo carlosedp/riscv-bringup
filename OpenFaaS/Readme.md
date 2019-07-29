@@ -1,10 +1,10 @@
 # Deploying OpenFaaS on Risc-V
 
-I've built the pushed to my [DockerHub account](https://hub.docker.com/) the required images to run OpenFaaS on Risc-V architecture.
+I've built and pushed to my [DockerHub account](https://hub.docker.com/r/carlosedo) the required images to run OpenFaaS on Risc-V architecture.
 
 ## Requirements
 
-You will need a Risc-V box that can be either the SiFive Unleashed SBC or a Qemu VM. You also need Docker installed into it.
+You will need a Risc-V host that can be either the SiFive Unleashed SBC or a Qemu VM. You also need Docker installed into it.
 
 For both, you can check the links and download on the [Risc-V tracker page](https://github.com/carlosedp/riscv-bringup#virtual-machine-pre-built-go-and-docker).
 
@@ -12,7 +12,7 @@ For both, you can check the links and download on the [Risc-V tracker page](http
 
 Enable Swarm mode on Docker with `docker swarm init`.
 
-Get the faas-cli built for Risc-V from [here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/faas-cli-riscv64.gz).
+Get the faas-cli pre-built for Risc-V from [here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/faas-cli-riscv64.gz).
 
 Download both files below (`deploy_stack.sh` and `docker-compose.riscv64.yml`). They will deploy the OpenFaaS stack into your local Docker.
 

@@ -5,7 +5,7 @@ The objective of this repository is to track the progress and pre-requisites to 
 There is a companion article available on https://medium.com/@carlosedp/docker-containers-on-risc-v-architecture-5bc45725624b.
 
 ## Contents <!-- omit in toc -->
-!
+
 * [Risc-V Virtual Machine, pre-built Go and Docker](#risc-v-virtual-machine-pre-built-go-and-docker)
 * [Building Go on your Risc-V VM or SBC](#building-go-on-your-risc-v-vm-or-sbc)
 * [Go Dependencies](#go-dependencies)
@@ -26,13 +26,13 @@ There is a companion article available on https://medium.com/@carlosedp/docker-c
 * [Additional projects / libraries](#additional-projects--libraries)
   * [OpenFaaS](#openfaas)
     * [faas-cli (https://github.com/openfaas/faas-cli/)](#faas-cli-httpsgithubcomopenfaasfaas-cli)
+    * [faas-swarm (https://github.com/openfaas/faas-swarm)](#faas-swarm-httpsgithubcomopenfaasfaas-swarm)
     * [FaaS (https://github.com/openfaas/faas/)](#faas-httpsgithubcomopenfaasfaas)
     * [nats-streaming-server (https://github.com/nats-io/nats-streaming-server)](#nats-streaming-server-httpsgithubcomnats-ionats-streaming-server)
     * [nats-queue-worker (https://github.com/openfaas/nats-queue-worker)](#nats-queue-worker-httpsgithubcomopenfaasnats-queue-worker)
-    * [faas-swarm (https://github.com/openfaas/faas-swarm)](#faas-swarm-httpsgithubcomopenfaasfaas-swarm)
     * [Sample Functions](#sample-functions)
-  * [BBOLT (https://github.com/etcd-io/bbolt)](#bbolt-httpsgithubcometcd-iobbolt)
-  * [PTY (https://github.com/kr/pty)](#pty-httpsgithubcomkrpty)
+  * [Bbolt (https://github.com/etcd-io/bbolt)](#bbolt-httpsgithubcometcd-iobbolt)
+  * [Pty (https://github.com/kr/pty)](#pty-httpsgithubcomkrpty)
   * [ETCD](#etcd)
   * [Kubernetes](#kubernetes)
   * [Prometheus](#prometheus)
@@ -59,7 +59,7 @@ The prebuilt Go 1.13 tarball can be [downloaded here](https://drive.google.com/o
 
 To run Go on this VM, download both files and install with:
 
-<details><summary><u>Instructions</u></summary></u>
+<details><summary>Instructions</summary></u>
 
 ```bash
 # Copy the tarball to the VM
@@ -79,7 +79,7 @@ export PATH="/usr/local/go/bin:$PATH"
 echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 ```
 
-</details><br/>
+</details>
 
 To run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script.
 
@@ -91,7 +91,7 @@ There is also a [Podman](https://podman.io) package. Check more info on [build-p
 
 Golang is still not upstreamed so to build it from source, you will need a machine to do the initial bootstrap, copy this bootstraped tree to your Risc-V host or VM and then build the complete Go distribution. This bootstrap host can be a Windows, Mac or Linux.
 
-<details><summary><u>Instructions</u></summary>
+<details><summary>Instructions</summary>
 
 ```bash
 # On bootstrap Host
@@ -116,7 +116,7 @@ GOGC=off ./make.bash                            # Builds go on $HOME/riscv-go/bi
 GOGC=off  GO_TEST_TIMEOUT_SCALE=10 ./run.bash   # Tests the build
 ```
 
-</details><br/>
+</details>
 
 Now you can use this go build for testing/developing other projects.
 
@@ -244,59 +244,54 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ### OpenFaaS
 
-OpenFaaS is still not upstreamed but the images have been built for Risc-V. Here are the instructions on [deploying it](OpenFaas/Readme.md).
+OpenFaaS is still not upstreamed but the images have been built for Risc-V. Here are the instructions on [deploying it](https://github.com/carlosedp/riscv-bringup/blob/master/OpenFaaS/Readme.md) in your Risc-V host or VM.
 
-#### faas-cli (https://github.com/openfaas/faas-cli/)
-
-* [ ] Migrate to go modules
-* [ ] Update `x/sys`
-* [ ] PR -
-
-#### FaaS (https://github.com/openfaas/faas/)
-
-* [ ] Migrate to go modules
-* [ ] Update `x/sys`
-* [ ] PR -
+The PRs do not add functionality to cross-build the images for Risc-V since the base images still don't support the architecture. Check the [`build_images.sh`](OpenFaaS/build_images.sh) script to build the images manually.
 
 **Images:**
 
-* [x] gateway - carlosedp/faas-gateway:riscv64
-* [x] faas-basic-auth-plugin - carlosedp/faas-basic-auth-plugin:riscv64
-* [x] faas-swarm - carlosedp/faas-swarm:riscv64
-* [x] nats-streaming - carlosedp/faas-nats-streaming:riscv64
-* [x] queue-worker - carlosedp/faas-queue-worker:riscv64
-* [x] watchdog - carlosedp/faas-watchdog:riscv64
-* [x] Function base - carlosedp/faas-debianfunction:riscv64
+* [x] gateway - [`carlosedp/faas-gateway:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-gateway)
+* [x] faas-basic-auth-plugin - [`carlosedp/faas-basic-auth-plugin:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-basic-auth-plugin)
+* [x] faas-swarm - [`carlosedp/faas-swarm:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-swarm)
+* [x] nats-streaming - [`carlosedp/faas-nats-streaming:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-nats-streaming)
+* [x] queue-worker - [`carlosedp/faas-queue-worker:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-queue-worker)
+* [x] watchdog - [`carlosedp/faas-watchdog:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-watchdog)
+* [x] Function base - [`carlosedp/faas-debianfunction:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-debianfunction)
 
-#### nats-streaming-server (https://github.com/nats-io/nats-streaming-server)
+#### faas-cli (https://github.com/openfaas/faas-cli/)
 
-* [ ] Migrate to go modules
 * [ ] Update `x/sys`
-* [ ] PR -
-
-#### nats-queue-worker (https://github.com/openfaas/nats-queue-worker)
-
-* [ ] Migrate to go modules
-* [ ] Update `x/sys`
-* [ ] PR -
+* [ ] PR - https://github.com/openfaas/faas-cli/pull/667
 
 #### faas-swarm (https://github.com/openfaas/faas-swarm)
 
 * [x] Depends on `x/sys` PR https://github.com/golang/sys/pull/38
-* [ ] Migrate to go modules
-* [ ] Update `x/sys`
-* [ ] PR - 
+* [ ] Update `x/sys`, `x/net`
+* [ ] PR - https://github.com/openfaas/faas-swarm/pull/52
+
+#### FaaS (https://github.com/openfaas/faas/)
+
+No changes required.
+
+#### nats-streaming-server (https://github.com/nats-io/nats-streaming-server)
+
+* [ ] Update `x/sys`, `etcd/bbolt`.
+* [ ] PR - https://github.com/nats-io/nats-streaming-server/pull/891
+
+#### nats-queue-worker (https://github.com/openfaas/nats-queue-worker)
+
+No changes required.
 
 #### Sample Functions
 
-* [x] Figlet - carlosedp/faas-figlet:riscv64
+* [x] Figlet - [`carlosedp/faas-figlet:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-figlet)
 
-### BBOLT (https://github.com/etcd-io/bbolt)
+### Bbolt (https://github.com/etcd-io/bbolt)
 
 * [x] Upstreamed / Works
 * [x] PR - https://github.com/etcd-io/bbolt/pull/159
 
-### PTY (https://github.com/kr/pty)
+### Pty (https://github.com/kr/pty)
 
 * [x] Upstreamed / Works
 * [x] `kr/pty` (https://github.com/kr/pty/pull/81)
@@ -385,7 +380,7 @@ Repository mirror: https://github.com/CanonicalLtd/sqlite
 ### Inlets (https://github.com/alexellis/inlets)
 
 * [ ] Upstreamed / Works
-* [ ] PR https://github.com/alexellis/inlets/pull/70
+* [ ] PR https://github.com/alexellis/inlets/pull/78
 
 --------------------------------------------------------------------------------
 
