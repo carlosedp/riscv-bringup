@@ -25,11 +25,11 @@ There is a companion article available on https://medium.com/@carlosedp/docker-c
 * [Base Container Images](#base-container-images)
 * [Additional projects / libraries](#additional-projects--libraries)
   * [OpenFaaS](#openfaas)
-    * [faas-cli (https://github.com/openfaas/faas-cli/)](#faas-cli-httpsgithubcomopenfaasfaas-cli)
-    * [faas-swarm (https://github.com/openfaas/faas-swarm)](#faas-swarm-httpsgithubcomopenfaasfaas-swarm)
+    * [Faas-cli (https://github.com/openfaas/faas-cli/)](#faas-cli-httpsgithubcomopenfaasfaas-cli)
+    * [Faas-swarm (https://github.com/openfaas/faas-swarm)](#faas-swarm-httpsgithubcomopenfaasfaas-swarm)
     * [FaaS (https://github.com/openfaas/faas/)](#faas-httpsgithubcomopenfaasfaas)
-    * [nats-streaming-server (https://github.com/nats-io/nats-streaming-server)](#nats-streaming-server-httpsgithubcomnats-ionats-streaming-server)
-    * [nats-queue-worker (https://github.com/openfaas/nats-queue-worker)](#nats-queue-worker-httpsgithubcomopenfaasnats-queue-worker)
+    * [Nats-streaming-server (https://github.com/nats-io/nats-streaming-server)](#nats-streaming-server-httpsgithubcomnats-ionats-streaming-server)
+    * [Nats-queue-worker (https://github.com/openfaas/nats-queue-worker)](#nats-queue-worker-httpsgithubcomopenfaasnats-queue-worker)
     * [Sample Functions](#sample-functions)
   * [Bbolt (https://github.com/etcd-io/bbolt)](#bbolt-httpsgithubcometcd-iobbolt)
   * [Pty (https://github.com/kr/pty)](#pty-httpsgithubcomkrpty)
@@ -246,9 +246,9 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ### OpenFaaS
 
-OpenFaaS is still not upstreamed but the images have been built for Risc-V. Here are the instructions on [deploying it](https://github.com/carlosedp/riscv-bringup/blob/master/OpenFaaS/Readme.md) in your Risc-V host or VM.
+OpenFaaS is already upstreamed but still does not build images for Risc-V so I've built them and pushed to [my DockerHub](https://cloud.docker.com/u/carlosedp) as links below. Here are the instructions to [deploy OpenFaaS](https://github.com/carlosedp/riscv-bringup/blob/master/OpenFaaS/Readme.md) on your Risc-V host or VM.
 
-The PRs do not add functionality to cross-build the images for Risc-V since the base images still don't support the architecture. Check the [`build_images.sh`](OpenFaaS/build_images.sh) script to build the images manually.
+The PRs do not add functionality to cross-build the images for Risc-V yet since the base images still don't support the architecture. Check the [`build_images.sh`](OpenFaaS/build_images.sh) script to build the images manually.
 
 **Images:**
 
@@ -260,33 +260,34 @@ The PRs do not add functionality to cross-build the images for Risc-V since the 
 * [x] watchdog - [`carlosedp/faas-watchdog:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-watchdog)
 * [x] Function base - [`carlosedp/faas-debianfunction:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-debianfunction)
 
-#### faas-cli (https://github.com/openfaas/faas-cli/)
+#### Faas-cli (https://github.com/openfaas/faas-cli/)
 
-* [ ] Update `x/sys`
-* [ ] PR - https://github.com/openfaas/faas-cli/pull/667
+* [x] Update `x/sys`
+* [x] PR - https://github.com/openfaas/faas-cli/pull/667
 
-#### faas-swarm (https://github.com/openfaas/faas-swarm)
+#### Faas-swarm (https://github.com/openfaas/faas-swarm)
 
 * [x] Depends on `x/sys` PR https://github.com/golang/sys/pull/38
-* [ ] Update `x/sys`, `x/net`
-* [ ] PR - https://github.com/openfaas/faas-swarm/pull/52
+* [x] Update `x/sys`, `x/net`
+* [x] PR - https://github.com/openfaas/faas-swarm/pull/52
 
 #### FaaS (https://github.com/openfaas/faas/)
 
 No changes required.
 
-#### nats-streaming-server (https://github.com/nats-io/nats-streaming-server)
+#### Nats-streaming-server (https://github.com/nats-io/nats-streaming-server)
 
 * [x] Update `x/sys`, `etcd/bbolt`.
 * [x] PR - https://github.com/nats-io/nats-streaming-server/pull/891
 
-#### nats-queue-worker (https://github.com/openfaas/nats-queue-worker)
+#### Nats-queue-worker (https://github.com/openfaas/nats-queue-worker)
 
 No changes required.
 
 #### Sample Functions
 
-* [x] Figlet - [`carlosedp/faas-figlet:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-figlet)
+* [x] Figlet - [`carlosedp/faas-figlet:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-figlet)
+* [x] MarkdownRender - [`carlosedp/faas-markdownrender:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-markdownrender)
 
 ### Bbolt (https://github.com/etcd-io/bbolt)
 
