@@ -21,7 +21,9 @@ There is a companion article available on https://medium.com/@carlosedp/docker-c
     * [Docker daemon](#docker-daemon)
     * [docker-init (https://github.com/krallin/tini)](#docker-init-httpsgithubcomkrallintini)
     * [docker-proxy](#docker-proxy)
+  * [Issues](#issues)
 * [Podman - libpod (https://github.com/containers/libpod)](#podman---libpod-httpsgithubcomcontainerslibpod)
+  * [Issues](#issues-1)
 * [Base Container Images](#base-container-images)
 * [Additional projects / libraries](#additional-projects--libraries)
   * [OpenFaaS](#openfaas)
@@ -218,7 +220,7 @@ No changes required. https://github.com/docker/libnetwork/cmd/proxy
 
 Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
-**Issues:**
+### Issues
 
 * [ ] https://github.com/moby/moby/issues/39461 - Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
 * [ ] https://github.com/containerd/containerd/issues/3389 - Containerd CPU 100% Issue
@@ -229,7 +231,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 * [x] PR for containers/storage - https://github.com/containers/storage/pull/375
 * [x] PR for containers/psgo - https://github.com/containers/psgo/pull/53
 
-**Issues:**
+### Issues
 
 * [ ] CNI Issue - https://github.com/containers/libpod/issues/3462
 
@@ -288,6 +290,7 @@ No changes required.
 
 * [x] Figlet - [`carlosedp/faas-figlet:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-figlet)
 * [x] MarkdownRender - [`carlosedp/faas-markdownrender:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-markdownrender)
+* [x] QRCode - [`carlosedp/faas-qrcode:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-qrcode)
 
 ### Bbolt (https://github.com/etcd-io/bbolt)
 

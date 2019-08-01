@@ -17,8 +17,15 @@ Get the faas-cli pre-built for Risc-V from [here](https://github.com/carlosedp/r
 Download both files below (`deploy_stack.sh` and `docker-compose.riscv64.yml`). They will deploy the OpenFaaS stack into your local Docker.
 
 ```bash
+# Install faas-cli
+curl -O https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/faas-cli-riscv64.gz
+gzip -d faas-cli-riscv64.gz
+sudo cp faas-cli-riscv64 /usr/local/bin/faas-cli
+sudo chmod +x /usr/local/bin/faas-cli
+# Deploy OpenFaaS
 curl -O https://gist.githubusercontent.com/carlosedp/f07403da2a89f396aa4a05663f77a2d3/raw/85f3d5441ba7d8f159b85274f50e9c08f6b71f3d/docker-compose.riscv64.yml
 curl -O https://gist.githubusercontent.com/carlosedp/f07403da2a89f396aa4a05663f77a2d3/raw/85f3d5441ba7d8f159b85274f50e9c08f6b71f3d/deploy_stack.sh
+chmod +x deploy_stack.sh
 ./deploy_stack.sh
 ```
 
