@@ -135,8 +135,14 @@ Now you can use this go build for testing/developing other projects.
   * Tracker Issue:https://github.com/golang/go/issues/27532
   * Risc-V Fork: https://github.com/4a6f656c/riscv-go
 * [ ] CGO implementation - Draft on https://github.com/carlosedp/riscv-go but far from complete/funtcional.
-* [ ] Go Builder - https://github.com/golang/build/pull/22. Based on https://go-review.googlesource.com/c/build/+/177918
-* [ ] Qemu CAS bug - Patch works - http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html
+* [ ] Go Builder
+  * https://go-review.googlesource.com/c/build/+/188501
+  * https://github.com/golang/build/pull/22
+  * Based on https://go-review.googlesource.com/c/build/+/177918
+* [ ] Qemu atomic bug
+  * Qemu patch - http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html
+  * Fix for Qemu in 4.1 - https://wiki.qemu.org/ChangeLog/4.1#RISC-V
+  * Kernel Patch - https://patchwork.kernel.org/patch/10997887/
 
 ### Upstreamed
 
@@ -359,7 +365,7 @@ Already builds successfully.
 
 ### AlertManager (https://github.com/prometheus/alertmanager/)
 
-Already builds successfully.
+Already builds successfully with `make build`.
 
 * [ ] Upstreamed / Works
 * [ ] PR https://github.com/prometheus/alertmanager/pull/1984
