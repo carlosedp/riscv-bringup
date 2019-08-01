@@ -4,6 +4,8 @@ The objective of this repository is to track the progress and pre-requisites to 
 
 There is a companion article available on https://medium.com/@carlosedp/docker-containers-on-risc-v-architecture-5bc45725624b.
 
+This page is also linked from [http://bit.ly/riscvtracker](http://bit.ly/riscvtracker).
+
 ## Contents <!-- omit in toc -->
 
 * [Risc-V Virtual Machine, pre-built Go and Docker](#risc-v-virtual-machine-pre-built-go-and-docker)
@@ -37,8 +39,9 @@ There is a companion article available on https://medium.com/@carlosedp/docker-c
   * [Pty (https://github.com/kr/pty)](#pty-httpsgithubcomkrpty)
   * [ETCD](#etcd)
   * [Kubernetes](#kubernetes)
-  * [Prometheus](#prometheus)
-  * [Promu](#promu)
+  * [Prometheus (https://github.com/prometheus/prometheus/)](#prometheus-httpsgithubcomprometheusprometheus)
+  * [Promu (https://github.com/prometheus/promu/)](#promu-httpsgithubcomprometheuspromu)
+  * [AlertManager (https://github.com/prometheus/alertmanager/)](#alertmanager-httpsgithubcomprometheusalertmanager)
   * [SQlite](#sqlite)
   * [LXD](#lxd)
   * [Go-Jsonnet (https://github.com/google/go-jsonnet)](#go-jsonnet-httpsgithubcomgooglego-jsonnet)
@@ -167,6 +170,7 @@ Builds fine with PR 134 even without Kernel support.
 * [ ] After upstreaming, update `x/sys` and `x/net` modules
 * [ ] libseccomp-dev
 * [ ] apparmor - (`$ sudo aa-status -> apparmor module is not loaded.`)
+* [ ] Add to CI
 
 ### Crun (https://github.com/giuseppe/crun)
 
@@ -174,11 +178,13 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 
 * [x] Upstreamed / Works
 * [ ] libseccomp
+* [ ] Add to CI
 
 ### Containerd (https://github.com/containerd/containerd/)
 
 * [x] Upstreamed / Works
 * [x] PR https://github.com/containerd/containerd/pull/3328
+* [ ] Add to CI
 
 ### Docker
 
@@ -186,6 +192,7 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 
 * [x] Upstreamed / Works
 * [x] Update `x/sys` and `x/net` modules in `vendor`. [PR](https://github.com/docker/cli/pull/1926)
+* [ ] Add to CI
 
 #### Docker daemon
 
@@ -198,6 +205,7 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 * [x] Update `github.com/vishvananda/netlink` in `vendor`
 * [x] Update `github.com/ishidawataru/sctp` in `vendor`
 * [x] Update `github.com/docker/libnetwork` in `vendor`
+* [ ] Add to CI
 
 Dependency lib PRs:
 
@@ -230,6 +238,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 * [x] PR to remove CGO dependency https://github.com/containers/libpod/pull/3437
 * [x] PR for containers/storage - https://github.com/containers/storage/pull/375
 * [x] PR for containers/psgo - https://github.com/containers/psgo/pull/53
+* [ ] Add to CI
 
 ### Issues
 
@@ -266,25 +275,32 @@ The PRs do not add functionality to cross-build the images for Risc-V yet since 
 
 * [x] Update `x/sys`
 * [x] PR - https://github.com/openfaas/faas-cli/pull/667
+* [ ] Add to CI
 
 #### Faas-swarm (https://github.com/openfaas/faas-swarm)
 
 * [x] Depends on `x/sys` PR https://github.com/golang/sys/pull/38
 * [x] Update `x/sys`, `x/net`
 * [x] PR - https://github.com/openfaas/faas-swarm/pull/52
+* [ ] Add to CI
 
 #### FaaS (https://github.com/openfaas/faas/)
 
 No changes required.
 
+* [ ] Add to CI
+
 #### Nats-streaming-server (https://github.com/nats-io/nats-streaming-server)
 
 * [x] Update `x/sys`, `etcd/bbolt`.
 * [x] PR - https://github.com/nats-io/nats-streaming-server/pull/891
+* [ ] Add to CI
 
 #### Nats-queue-worker (https://github.com/openfaas/nats-queue-worker)
 
 No changes required.
+
+* [ ] Add to CI
 
 #### Sample Functions
 
@@ -322,7 +338,7 @@ Dependencies for **kubelet**:
 * [ ] cadvisor/accelerators/nvidia -> github.com/mindprince/gonvml depends on CGO
 * [ ] ???
 
-### Prometheus
+### Prometheus (https://github.com/prometheus/prometheus/)
 
 Already builds successfully with `make build` after updating modules.
 
@@ -330,14 +346,24 @@ Already builds successfully with `make build` after updating modules.
 * [ ] PR https://github.com/prometheus/prometheus/pull/5621
 * [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get -u golang.org/x/sys && go mod tidy`
 * [x] Apply patch from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
+* [ ] Add to CI
 
-### Promu
+### Promu (https://github.com/prometheus/promu/)
 
 Already builds successfully.
 
 * [x] Upstreamed / Works
 * [x] PR https://github.com/prometheus/promu/pull/146
 * [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
+* [ ] Add to CI
+
+### AlertManager (https://github.com/prometheus/alertmanager/)
+
+Already builds successfully.
+
+* [ ] Upstreamed / Works
+* [ ] PR https://github.com/prometheus/alertmanager/pull/1984
+
 
 ### SQlite
 
@@ -387,6 +413,7 @@ Repository mirror: https://github.com/CanonicalLtd/sqlite
 
 * [ ] Upstreamed / Works
 * [ ] PR https://github.com/alexellis/inlets/pull/78
+* [ ] Add to CI
 
 --------------------------------------------------------------------------------
 
