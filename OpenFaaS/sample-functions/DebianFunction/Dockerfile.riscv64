@@ -1,0 +1,17 @@
+FROM carlosedp/faas-watchdog:riscv64 as watchdog
+
+FROM carlosedp/debian:sid-riscv64
+
+COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
+RUN chmod +x /usr/bin/fwatchdog
+
+# Populate example here
+# ENV fprocess="wc -l"
+
+RUN addgroup --system app \
+    && adduser --system --ingroup app app
+
+USER app
+
+HEALTHCHECK --interval=5s CMD [ -e /tmp/.lock ] || exit 1
+CMD ["fwatchdog"]

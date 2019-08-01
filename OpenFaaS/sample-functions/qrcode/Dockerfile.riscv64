@@ -1,0 +1,21 @@
+FROM carlosedp/golang:1.13-riscv64 as builder
+
+MAINTAINER alex@openfaas.com
+ENTRYPOINT []
+
+WORKDIR /go/src/github.com/faas-and-furious/qrcode
+
+COPY . /go/src/github.com/faas-and-furious/qrcode
+
+RUN go build -mod vendor .
+
+FROM carlosedp/faas-debianfunction:riscv64
+
+USER root
+COPY --from=builder /go/src/github.com/faas-and-furious/qrcode/qrcode /usr/bin/qrcode
+RUN chmod +x /usr/bin/qrcode
+USER app
+
+ENV fprocess "/usr/bin/qrcode"
+
+CMD ["/usr/bin/fwatchdog"]

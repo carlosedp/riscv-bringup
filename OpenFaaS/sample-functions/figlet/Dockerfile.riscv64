@@ -1,0 +1,11 @@
+FROM carlosedp/faas-debianfunction:riscv64
+
+USER root
+RUN apt-get update && apt-get install -y figlet
+
+USER app
+
+ENV fprocess="figlet"
+
+HEALTHCHECK --interval=5s CMD [ -e /tmp/.lock ] || exit 1
+CMD ["fwatchdog"]

@@ -1,0 +1,21 @@
+FROM carlosedp/golang:1.13-riscv64 as builder
+
+MAINTAINER alex@openfaas.com
+ENTRYPOINT []
+
+WORKDIR /go/src/github.com/openfaas/faas/sample-functions/MarkdownRender
+
+COPY . /go/src/github.com/openfaas/faas/sample-functions/MarkdownRender
+
+RUN go build -mod vendor .
+
+FROM carlosedp/faas-debianfunction:riscv64
+USER root
+RUN chmod 777 /tmp
+# Needed to reach the hub
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /go/src/github.com/openfaas/faas/sample-functions/MarkdownRender/MarkdownRender  /usr/bin/MarkdownRender
+ENV fprocess "/usr/bin/MarkdownRender"
+
+CMD ["/usr/bin/fwatchdog"]

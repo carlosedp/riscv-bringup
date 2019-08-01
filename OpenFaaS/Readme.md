@@ -55,7 +55,7 @@ o1dxdbfmkoaw        func_queue-worker        replicated          0/1            
 
 Now you can open the Gateway GUI by browsing to [http://[your_box_IP]:8080/ui/](http://[your_box_IP]:8080/ui/).
 
-![image](portal.png)
+![image](images/portal.png)
 
 To deploy a sample function, Figlet in this case, do:
 
@@ -65,7 +65,7 @@ $ faas-cli deploy --image carlosedp/faas-figlet:riscv64 --name figlet-riscv
 
 Check if available and test the function in the GUI or in CLI with:
 
-![image](func.png)
+![image](images/func.png)
 
 ```
 $ faas-cli ls
