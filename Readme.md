@@ -11,8 +11,9 @@ This page is also linked from [http://bit.ly/riscvtracker](http://bit.ly/riscvtr
 * [Risc-V Virtual Machine, pre-built Go and Docker](#risc-v-virtual-machine-pre-built-go-and-docker)
 * [Building Go on your Risc-V VM or SBC](#building-go-on-your-risc-v-vm-or-sbc)
 * [Go Dependencies](#go-dependencies)
-  * [Pending upstream](#pending-upstream)
-  * [Upstreamed](#upstreamed)
+  * [Core Golang](#core-golang)
+  * [Go Libraries](#go-libraries)
+  * [External deps](#external-deps)
 * [Docker and pre-reqs](#docker-and-pre-reqs)
   * [Libseccomp (https://github.com/seccomp/libseccomp)](#libseccomp-httpsgithubcomseccomplibseccomp)
   * [Runc (https://github.com/opencontainers/runc)](#runc-httpsgithubcomopencontainersrunc)
@@ -129,9 +130,9 @@ Now you can use this go build for testing/developing other projects.
 
 ## Go Dependencies
 
-### Pending upstream
+### Core Golang
 
-* [ ] Go
+* [ ] Golang
   * Tracker Issue:https://github.com/golang/go/issues/27532
   * Risc-V Fork: https://github.com/4a6f656c/riscv-go
 * [ ] CGO implementation - Draft on https://github.com/carlosedp/riscv-go but far from complete/funtcional.
@@ -139,16 +140,20 @@ Now you can use this go build for testing/developing other projects.
   * https://go-review.googlesource.com/c/build/+/188501
   * https://github.com/golang/build/pull/22
   * Based on https://go-review.googlesource.com/c/build/+/177918
-* [ ] Qemu atomic bug
-  * Qemu patch - http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html
-  * Fix for Qemu in 4.1 - https://wiki.qemu.org/ChangeLog/4.1#RISC-V
-  * Kernel Patch - https://patchwork.kernel.org/patch/10997887/
 
-### Upstreamed
+### Go Libraries
 
 * [x] `golang.org/x/sys` (https://go-review.googlesource.com/c/sys/+/177799)
 * [x] `golang.org/x/net` (https://go-review.googlesource.com/c/net/+/177997)
 * [x] `golang.org/x/sys` - Add riscv64 to `endian_little.go` (https://github.com/golang/sys/pull/38)
+* [ ] `golang.org/x/text` - Bump `x/tools` (https://github.com/golang/text/pull/8)
+
+### External deps
+
+* [ ] Qemu atomic bug
+  * Qemu patch - http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html
+  * Fix for Qemu in 4.1 - https://wiki.qemu.org/ChangeLog/4.1#RISC-V
+  * Kernel Patch - https://patchwork.kernel.org/patch/10997887/
 
 --------------------------------------------------------------------------------
 
@@ -417,8 +422,8 @@ Repository mirror: https://github.com/CanonicalLtd/sqlite
 
 ### Inlets (https://github.com/alexellis/inlets)
 
-* [ ] Upstreamed / Works
-* [ ] PR https://github.com/alexellis/inlets/pull/78
+* [x] Upstreamed / Works
+* [x] PR https://github.com/alexellis/inlets/pull/78
 * [ ] Add to CI
 
 --------------------------------------------------------------------------------
