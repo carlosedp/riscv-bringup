@@ -6,6 +6,8 @@ There is a companion article available on https://medium.com/@carlosedp/docker-c
 
 This page is also linked from [http://bit.ly/riscvtracker](http://bit.ly/riscvtracker).
 
+If you like this project and others I've been contributing and would like to support me, please check-out my [Patreon page](https://patreon.com/carlosedp)!
+
 ## Contents <!-- omit in toc -->
 
 * [Risc-V Virtual Machine, pre-built Go and Docker](#risc-v-virtual-machine-pre-built-go-and-docker)
@@ -120,6 +122,9 @@ export PATH="$(pwd)/misc/riscv:$(pwd)/bin:$PATH"
 cd src
 GOGC=off ./make.bash                            # Builds go on $HOME/riscv-go/bin that can be added to your path
 GOGC=off  GO_TEST_TIMEOUT_SCALE=10 ./run.bash   # Tests the build
+# Pack built Golang into a tarball
+cd ..
+sudo tar -cvf go-1.13dev-riscv.tar --transform s/^riscv-go/go/ --exclude=pkg/obj --exclude .git riscv-go
 ```
 
 </details>
@@ -146,7 +151,6 @@ Now you can use this go build for testing/developing other projects.
 * [x] `golang.org/x/sys` (https://go-review.googlesource.com/c/sys/+/177799)
 * [x] `golang.org/x/net` (https://go-review.googlesource.com/c/net/+/177997)
 * [x] `golang.org/x/sys` - Add riscv64 to `endian_little.go` (https://github.com/golang/sys/pull/38)
-* [ ] `golang.org/x/text` - Bump `x/tools` (https://github.com/golang/text/pull/8)
 
 ### External deps
 
@@ -242,7 +246,11 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 ### Issues
 
 * [ ] https://github.com/moby/moby/issues/39461 - Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
-* [ ] https://github.com/containerd/containerd/issues/3389 - Containerd CPU 100% Issue
+  * Interactive console and logs fixed by https://github.com/golang/sys/pull/40 thru PR https://github.com/moby/moby/pull/39726 and https://github.com/docker/cli/pull/2042
+* [x] https://github.com/containerd/containerd/issues/3389 - Containerd CPU 100% Issue
+  * Fixed by https://github.com/golang/sys/pull/40 thru PR https://github.com/containerd/containerd/pull/3526/
+
+--------------------------------------------------------------------------------
 
 ## Podman - libpod (https://github.com/containers/libpod)
 
@@ -254,6 +262,8 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 ### Issues
 
 * [ ] CNI Issue - https://github.com/containers/libpod/issues/3462
+
+--------------------------------------------------------------------------------
 
 ## Base Container Images
 
