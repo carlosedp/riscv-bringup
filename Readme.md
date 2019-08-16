@@ -53,6 +53,8 @@ If you like this project and others I've been contributing and would like to sup
     * [Labstack Gommon (https://github.com/labstack/gommon)](#labstack-gommon-httpsgithubcomlabstackgommon)
   * [VNDR (https://github.com/LK4D4/vndr)](#vndr-httpsgithubcomlk4d4vndr)
   * [Inlets (https://github.com/alexellis/inlets)](#inlets-httpsgithubcomalexellisinlets)
+  * [Gin web framework (https://github.com/gin-gonic/gin)](#gin-web-framework-httpsgithubcomgin-gonicgin)
+  * [go-isatty (https://github.com/mattn/go-isatty)](#go-isatty-httpsgithubcommattngo-isatty)
 * [Community](#community)
 * [References](#references)
 
@@ -341,6 +343,8 @@ No changes required.
 
 ### ETCD
 
+Build with `go build .`, run with `ETCD_UNSUPPORTED_ARCH=riscv64 ./etcd`.
+
 * [ ] Upstreamed / Works
 * [ ] PR https://github.com/etcd-io/etcd/pull/10834
 * [x] `x/net`
@@ -435,6 +439,19 @@ Repository mirror: https://github.com/CanonicalLtd/sqlite
 * [x] Upstreamed / Works
 * [x] PR https://github.com/alexellis/inlets/pull/78
 * [ ] Add to CI
+
+### Gin web framework (https://github.com/gin-gonic/gin)
+
+* Depends on `github.com/mattn/go-isatty`.
+
+* [x] Upstreamed / Works
+* [x] PR https://github.com/gin-gonic/gin/pull/2019
+
+### go-isatty (https://github.com/mattn/go-isatty)
+
+Dependency for Gin Framework
+
+* [x] PR https://github.com/mattn/go-isatty/pull/39
 
 --------------------------------------------------------------------------------
 
