@@ -93,7 +93,7 @@ echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 
 To run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script.
 
-To test it out after install, just run `docker run -d -p 8080:8080 carlosedp/echo_on_riscv` and then `curl http://localhost:8080`.
+To test it out after install, just run `docker run -d -p 8080:8080 carlosedp/echo-riscv` and then `curl http://localhost:8080`.
 
 There is also a [Podman](https://podman.io) package. Check more info on [build-podman-env.md](build-podman-env.md).
 

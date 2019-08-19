@@ -1,8 +1,0 @@
-FROM tonistiigi/debian
-
-COPY echo-riscv /
-
-EXPOSE 8080
-
-ENTRYPOINT ["/echo-riscv"]
-
