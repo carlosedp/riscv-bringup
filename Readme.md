@@ -95,7 +95,7 @@ echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 
 To run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script.
 
-Install Docker-compose with:
+<details><summary>Docker-compose instructions</summary></u>
 
 ```bash
 # In Debian image
@@ -106,6 +106,8 @@ sudo dnf install python3-devel
 
 sudo pip install docker-compose
 ```
+
+</details>
 
 To test it out after install, just run `docker run -d -p 8080:8080 carlosedp/echo-riscv` and then `curl http://localhost:8080`.
 
