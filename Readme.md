@@ -30,6 +30,7 @@ If you like this project and others I've been contributing and would like to sup
 * [Podman - libpod (https://github.com/containers/libpod)](#podman---libpod-httpsgithubcomcontainerslibpod)
   * [Issues](#issues-1)
 * [Base Container Images](#base-container-images)
+* [Docker images for projects](#docker-images-for-projects)
 * [Additional projects / libraries](#additional-projects--libraries)
   * [OpenFaaS](#openfaas)
     * [Faas-cli (https://github.com/openfaas/faas-cli/)](#faas-cli-httpsgithubcomopenfaasfaas-cli)
@@ -45,6 +46,7 @@ If you like this project and others I've been contributing and would like to sup
   * [Prometheus (https://github.com/prometheus/prometheus/)](#prometheus-httpsgithubcomprometheusprometheus)
   * [Promu (https://github.com/prometheus/promu/)](#promu-httpsgithubcomprometheuspromu)
   * [AlertManager (https://github.com/prometheus/alertmanager/)](#alertmanager-httpsgithubcomprometheusalertmanager)
+  * [Traefik (https://github.com/containous/traefik)](#traefik-httpsgithubcomcontainoustraefik)
   * [SQlite](#sqlite)
   * [LXD](#lxd)
   * [Go-Jsonnet (https://github.com/google/go-jsonnet)](#go-jsonnet-httpsgithubcomgooglego-jsonnet)
@@ -61,11 +63,11 @@ If you like this project and others I've been contributing and would like to sup
 
 ## Risc-V Virtual Machine, pre-built Go and Docker
 
-To make the development easier, there is a Qemu virtual machine based on Debian with developer tools already installed.
+To make the development easier, there are Qemu virtual machines based on Debian and Fedora with some developer tools already installed.
 
-The VM pack can be downloaded [here](https://drive.google.com/open?id=1O3dQouOqygnBtP5cZZ3uOghQO7hlrFhD). For more information, check [the readme](Qemu-VM.md).
+Download the [Risc-V Debian VM](https://drive.google.com/open?id=1O3dQouOqygnBtP5cZZ3uOghQO7hlrFhD). or [Risc-V Fedora VM](https://drive.google.com/open?id=1N2ughbCAxaVTk5UT9tSucCFyoOnDlk4H). For more information, check [the readme](Qemu-VM.md).
 
-The prebuilt Go 1.13 tarball can be [downloaded here](https://drive.google.com/open?id=1jG23DjOkVpFxF00HPuAN8SmGEpaf8iAr).
+A prebuilt Go 1.13 tarball can be [downloaded here](https://drive.google.com/open?id=1jG23DjOkVpFxF00HPuAN8SmGEpaf8iAr).
 
 To run Go on this VM, download both files and install with:
 
@@ -93,7 +95,21 @@ echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 
 To run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script.
 
+Install Docker-compose with:
+
+```bash
+# In Debian image
+sudo apt-get install python3-dev
+
+# In Fedora image
+sudo dnf install python3-devel
+
+sudo pip install docker-compose
+```
+
 To test it out after install, just run `docker run -d -p 8080:8080 carlosedp/echo-riscv` and then `curl http://localhost:8080`.
+
+There are a couple of projects that build on Risc-V in my [go-playground](https://github.com/carlosedp/go-playground) repo.
 
 There is also a [Podman](https://podman.io) package. Check more info on [build-podman-env.md](build-podman-env.md).
 
@@ -171,10 +187,10 @@ To build a complete container environment, check the [build-docker-env.md](build
 
 Builds fine with PR 134 even without Kernel support.
 
-* [ ] Depends on upstreaming Kernel support
-  * [ ] https://patchwork.kernel.org/patch/10716119/
-  * [ ] https://patchwork.kernel.org/patch/10716121/)
-  * [ ] Also https://github.com/riscv/riscv-linux/commit/0712587b63964272397ed34864130912d2a87020
+* [ ] Kernel support - https://patchwork.kernel.org/project/linux-riscv/list/?series=164025
+  * Ref. https://patchwork.kernel.org/patch/10716119/
+  * Ref. https://patchwork.kernel.org/patch/10716121/
+  * Ref. https://github.com/riscv/riscv-linux/commit/0712587b63964272397ed34864130912d2a87020
 * [ ] PR - https://github.com/seccomp/libseccomp/pull/134
 * [ ] Issue - https://github.com/seccomp/libseccomp/issues/110
 
@@ -247,8 +263,9 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ### Issues
 
-* [ ] https://github.com/moby/moby/issues/39461 - Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
-  * Interactive console and logs fixed by https://github.com/golang/sys/pull/40 thru PR https://github.com/moby/moby/pull/39726 and https://github.com/docker/cli/pull/2042
+* [x] https://github.com/moby/moby/issues/39461 - Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
+  * [x] PR https://github.com/moby/moby/pull/39726
+  * [ ] PR https://github.com/docker/cli/pull/2042
 * [x] https://github.com/containerd/containerd/issues/3389 - Containerd CPU 100% Issue
   * Fixed by https://github.com/golang/sys/pull/40 thru PR https://github.com/containerd/containerd/pull/3526/
 
@@ -269,10 +286,32 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ## Base Container Images
 
-* [ ] Debian (sid) -> [`carlosedp/debian:sid-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/debian)
-* [ ] Alpine -> No MUSL available
-* [ ] Busybox (1.31.0) -> ``
-* [ ] Go (1.13 dev) -> [`carlosedp/golang:1.13-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/golang)
+* Debian (sid) -> [`carlosedp/debian:sid-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/debian)
+* Alpine -> No MUSL available
+* Busybox (1.31.0) -> ``
+* Go (1.13 dev) -> [`carlosedp/golang:1.13-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/golang)
+
+## Docker images for projects
+
+**OpenFaaS:**
+
+* gateway - [`carlosedp/faas-gateway:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-gateway)
+* faas-basic-auth-plugin - [`carlosedp/faas-basic-auth-plugin:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-basic-auth-plugin)
+* faas-swarm - [`carlosedp/faas-swarm:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-swarm)
+* nats-streaming - [`carlosedp/faas-nats-streaming:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-nats-streaming)
+* queue-worker - [`carlosedp/faas-queue-worker:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-queue-worker)
+* watchdog - [`carlosedp/faas-watchdog:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-watchdog)
+* Function base - [`carlosedp/faas-debianfunction:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-debianfunction)
+
+**Prometheus:**
+
+* Prometheus - [`carlosedp/prometheus:v2.11.1-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/prometheus)
+* AlertManager - [`carlosedp/alertmanager:v0.18.0-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/alertmanager)
+
+**Traefik:**
+
+* traefik v2 - [`carlosedp/traefik:v2.0-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/traefik)
+* whoami - [`carlosedp/whoami:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/whoami)
 
 --------------------------------------------------------------------------------
 
@@ -283,16 +322,6 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 OpenFaaS is already upstreamed but still does not build images for Risc-V so I've built them and pushed to [my DockerHub](https://cloud.docker.com/u/carlosedp) as links below. Here are the instructions to [deploy OpenFaaS](https://github.com/carlosedp/riscv-bringup/blob/master/OpenFaaS/Readme.md) on your Risc-V host or VM.
 
 The PRs do not add functionality to cross-build the images for Risc-V yet since the base images still don't support the architecture. Check the [`build_images.sh`](OpenFaaS/build_images.sh) script to build the images manually.
-
-**Images:**
-
-* [x] gateway - [`carlosedp/faas-gateway:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-gateway)
-* [x] faas-basic-auth-plugin - [`carlosedp/faas-basic-auth-plugin:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-basic-auth-plugin)
-* [x] faas-swarm - [`carlosedp/faas-swarm:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-swarm)
-* [x] nats-streaming - [`carlosedp/faas-nats-streaming:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-nats-streaming)
-* [x] queue-worker - [`carlosedp/faas-queue-worker:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-queue-worker)
-* [x] watchdog - [`carlosedp/faas-watchdog:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-watchdog)
-* [x] Function base - [`carlosedp/faas-debianfunction:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-debianfunction)
 
 #### Faas-cli (https://github.com/openfaas/faas-cli/)
 
@@ -389,6 +418,40 @@ Already builds successfully with `make build`.
 * [ ] Upstreamed / Works
 * [ ] PR https://github.com/prometheus/alertmanager/pull/1984
 
+### Traefik (https://github.com/containous/traefik)
+
+* [x] Upstreamed / Works
+* [x] PR https://github.com/containous/traefik/pull/5245
+
+To run an example stack with Docker Compose, create the file below and start it with `docker-compose up -d`. To test, you can open the address `http://[IP]:8080/dashboard` or `curl http://localhost:8080/api/rawdata`. Prometheus metrics are exposed on `http://localhost:8080/metrics`.
+
+<details><summary>docker-compose.yml</summary>
+
+```yaml
+version: '3'
+
+services:
+  reverse-proxy:
+    # The official v2.0 Traefik docker image
+    image: carlosedp/traefik:v2.0-riscv64
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api --providers.docker --metrics.prometheus=true
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+  whoami:
+    # A container that exposes an API to show its IP address
+    image: carlosedp/whoami:riscv64
+    labels:
+      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
+```
+
+</details>
 
 ### SQlite
 
