@@ -267,7 +267,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 * [x] https://github.com/moby/moby/issues/39461 - Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
   * [x] PR https://github.com/moby/moby/pull/39726
-  * [ ] PR https://github.com/docker/cli/pull/2042
+  * [x] PR https://github.com/docker/cli/pull/2042
 * [x] https://github.com/containerd/containerd/issues/3389 - Containerd CPU 100% Issue
   * Fixed by https://github.com/golang/sys/pull/40 thru PR https://github.com/containerd/containerd/pull/3526/
 
