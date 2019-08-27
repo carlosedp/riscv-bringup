@@ -359,7 +359,7 @@ No changes required.
 #### Sample Functions
 
 * [x] Figlet - [`carlosedp/faas-figlet:riscv64`](https://hub.docker.com/r/carlosedp/faas-figlet)
-* [x] MarkdownRender - [`carlosedp/faas-markdownrender:riscv64`](https://cloud.docker.com/r/carlosedp/faas-markdownrender)
+* [x] MarkdownRender - [`carlosedp/faas-markdownrender:riscv64`](https://hub.docker.com/r/carlosedp/faas-markdownrender)
 * [x] QRCode - [`carlosedp/faas-qrcode:riscv64`](https://hub.docker.com/r/carlosedp/faas-qrcode)
 
 ### Bbolt (https://github.com/etcd-io/bbolt)
