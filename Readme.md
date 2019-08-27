@@ -288,32 +288,32 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ## Base Container Images
 
-* Debian (sid) -> [`carlosedp/debian:sid-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/debian)
+* Debian (sid) -> [`carlosedp/debian:sid-riscv64`](https://hub.docker.com/r/carlosedp/debian)
 * Alpine -> No MUSL available
 * Busybox (1.31.0) -> ``
-* Go (1.13 dev) -> [`carlosedp/golang:1.13-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/golang)
+* Go (1.13 dev) -> [`carlosedp/golang:1.13-riscv64`](https://hub.docker.com/r/carlosedp/golang)
 
 ## Docker images for projects
 
 **OpenFaaS:**
 
-* gateway - [`carlosedp/faas-gateway:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-gateway)
-* faas-basic-auth-plugin - [`carlosedp/faas-basic-auth-plugin:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-basic-auth-plugin)
-* faas-swarm - [`carlosedp/faas-swarm:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-swarm)
-* nats-streaming - [`carlosedp/faas-nats-streaming:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-nats-streaming)
-* queue-worker - [`carlosedp/faas-queue-worker:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-queue-worker)
-* watchdog - [`carlosedp/faas-watchdog:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-watchdog)
-* Function base - [`carlosedp/faas-debianfunction:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/carlosedp/faas-debianfunction)
+* gateway - [`carlosedp/faas-gateway:riscv64`](https://hub.docker.com/r/carlosedp/faas-gateway)
+* faas-basic-auth-plugin - [`carlosedp/faas-basic-auth-plugin:riscv64`](https://hub.docker.com/r/carlosedp/faas-basic-auth-plugin)
+* faas-swarm - [`carlosedp/faas-swarm:riscv64`](https://hub.docker.com/r/carlosedp/faas-swarm)
+* nats-streaming - [`carlosedp/faas-nats-streaming:riscv64`](https://hub.docker.com/r/carlosedp/faas-nats-streaming)
+* queue-worker - [`carlosedp/faas-queue-worker:riscv64`](https://hub.docker.com/r/carlosedp/faas-queue-worker)
+* watchdog - [`carlosedp/faas-watchdog:riscv64`](https://hub.docker.com/r/carlosedp/faas-watchdog)
+* Function base - [`carlosedp/faas-debianfunction:riscv64`](https://hub.docker.com/r/carlosedp/faas-debianfunction)
 
 **Prometheus:**
 
-* Prometheus - [`carlosedp/prometheus:v2.11.1-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/prometheus)
-* AlertManager - [`carlosedp/alertmanager:v0.18.0-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/alertmanager)
+* Prometheus - [`carlosedp/prometheus:v2.11.1-riscv64`](https://hub.docker.com/r/carlosedp/prometheus)
+* AlertManager - [`carlosedp/alertmanager:v0.18.0-riscv64`](https://hub.docker.com/r/carlosedp/alertmanager)
 
 **Traefik:**
 
-* traefik v2 - [`carlosedp/traefik:v2.0-riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/traefik)
-* whoami - [`carlosedp/whoami:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/whoami)
+* traefik v2 - [`carlosedp/traefik:v2.0-riscv64`](https://hub.docker.com/r/carlosedp/traefik)
+* whoami - [`carlosedp/whoami:riscv64`](https://hub.docker.com/r/carlosedp/whoami)
 
 --------------------------------------------------------------------------------
 
@@ -321,7 +321,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ### OpenFaaS
 
-OpenFaaS is already upstreamed but still does not build images for Risc-V so I've built them and pushed to [my DockerHub](https://cloud.docker.com/u/carlosedp) as links below. Here are the instructions to [deploy OpenFaaS](https://github.com/carlosedp/riscv-bringup/blob/master/OpenFaaS/Readme.md) on your Risc-V host or VM.
+OpenFaaS is already upstreamed but still does not build images for Risc-V so I've built them and pushed to [my DockerHub](https://hub.docker.com/u/carlosedp) as links below. Here are the instructions to [deploy OpenFaaS](https://github.com/carlosedp/riscv-bringup/blob/master/OpenFaaS/Readme.md) on your Risc-V host or VM.
 
 The PRs do not add functionality to cross-build the images for Risc-V yet since the base images still don't support the architecture. Check the [`build_images.sh`](OpenFaaS/build_images.sh) script to build the images manually.
 
@@ -358,9 +358,9 @@ No changes required.
 
 #### Sample Functions
 
-* [x] Figlet - [`carlosedp/faas-figlet:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-figlet)
-* [x] MarkdownRender - [`carlosedp/faas-markdownrender:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-markdownrender)
-* [x] QRCode - [`carlosedp/faas-qrcode:riscv64`](https://cloud.docker.com/u/carlosedp/repository/docker/carlosedp/faas-qrcode)
+* [x] Figlet - [`carlosedp/faas-figlet:riscv64`](https://hub.docker.com/r/carlosedp/faas-figlet)
+* [x] MarkdownRender - [`carlosedp/faas-markdownrender:riscv64`](https://cloud.docker.com/r/carlosedp/faas-markdownrender)
+* [x] QRCode - [`carlosedp/faas-qrcode:riscv64`](https://hub.docker.com/r/carlosedp/faas-qrcode)
 
 ### Bbolt (https://github.com/etcd-io/bbolt)
 
