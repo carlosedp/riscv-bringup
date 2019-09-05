@@ -7,8 +7,12 @@ pushd $GOPATH/src/github.com/openfaas
 
 git clone https://github.com/openfaas/faas-cli
 git clone https://github.com/openfaas/faas-swarm
+git clone https://github.com/openfaas/faas-netes
 git clone https://github.com/openfaas/faas
 git clone https://github.com/openfaas/nats-queue-worker/
+git clone https://github.com/openfaas-incubator/faas-idler
+
+
 
 # Build faas-cli
 pushd faas-cli
@@ -16,6 +20,7 @@ CGO_ENABLED=0 GOOS=linux go build --ldflags "-s -w" -a -installsuffix cgo -o faa
 sudo cp faas-cli /usr/local/bin
 popd
 
+# Build faas-gateway
 pushd faas/gateway
 CGO_ENABLED=0 GOOS=linux go build --ldflags "-s -w" -a -installsuffix cgo -o gateway
 
@@ -160,6 +165,42 @@ CMD ["./faas-swarm"]
 EOF
 docker build -t $REPO/faas-swarm:riscv64 -f Dockerfile.riscv64 .
 docker push $REPO/faas-swarm:riscv64
+popd
+
+# Build Faas-netes
+pushd faas-netes
+CGO_ENABLED=0 GOOS=linux go build --ldflags "-s -w" -a -installsuffix cgo -o faas-netes
+
+cat <<EOF >>Dockerfile.riscv64
+FROM carlosedp/debian:sid-riscv64
+
+LABEL org.label-schema.license="MIT" \
+      org.label-schema.vcs-url="https://github.com/openfaas/faas-netes" \
+      org.label-schema.vcs-type="Git" \
+      org.label-schema.name="openfaas/faas-netes" \
+      org.label-schema.vendor="openfaas" \
+      org.label-schema.docker.schema-version="1.0"
+
+RUN addgroup --system app && \
+    adduser --system app --ingroup app && \
+    apt-get update && \
+    apt-get install -y ca-certificates
+
+WORKDIR /home/app
+
+ADD faas-netes .
+RUN chown -R app:app ./
+
+EXPOSE 8080
+
+ENV http_proxy      ""
+ENV https_proxy     ""
+
+USER app
+CMD ["./faas-netes"]
+EOF
+docker build -t $REPO/faas-netes:riscv64 -f Dockerfile.riscv64 .
+docker push $REPO/faas-netes:riscv64
 popd
 
 # Nats Streaming Server

@@ -1,6 +1,6 @@
 # Deploying OpenFaaS on Risc-V
 
-I've built and pushed to my [DockerHub account](https://hub.docker.com/r/carlosedo) the required images to run OpenFaaS on Risc-V architecture.
+I've built and pushed to my [DockerHub account](https://hub.docker.com/r/carlosedp) the required images to run OpenFaaS on Risc-V architecture.
 
 ## Requirements
 

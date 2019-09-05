@@ -2,7 +2,7 @@
 
 The objective of this repository is to track the progress and pre-requisites to allow containers and Go applications on Risc-V.
 
-There is a companion article available on https://medium.com/@carlosedp/docker-containers-on-risc-v-architecture-5bc45725624b.
+There is a companion article available on <https://medium.com/@carlosedp/docker-containers-on-risc-v-architecture-5bc45725624b>.
 
 This page is also linked from [http://bit.ly/riscvtracker](http://bit.ly/riscvtracker).
 
@@ -17,46 +17,48 @@ If you like this project and others I've been contributing and would like to sup
   * [Go Libraries](#go-libraries)
   * [External deps](#external-deps)
 * [Docker and pre-reqs](#docker-and-pre-reqs)
-  * [Libseccomp (https://github.com/seccomp/libseccomp)](#libseccomp-httpsgithubcomseccomplibseccomp)
-  * [Runc (https://github.com/opencontainers/runc)](#runc-httpsgithubcomopencontainersrunc)
-  * [Crun (https://github.com/giuseppe/crun)](#crun-httpsgithubcomgiuseppecrun)
-  * [Containerd (https://github.com/containerd/containerd/)](#containerd-httpsgithubcomcontainerdcontainerd)
+  * [Libseccomp](#libseccomp)
+  * [Runc](#runc)
+  * [Crun](#crun)
+  * [Containerd](#containerd)
   * [Docker](#docker)
-    * [Docker cli (github.com/docker/cli)](#docker-cli-githubcomdockercli)
+    * [Docker cli](#docker-cli)
     * [Docker daemon](#docker-daemon)
-    * [docker-init (https://github.com/krallin/tini)](#docker-init-httpsgithubcomkrallintini)
+    * [docker-init](#docker-init)
     * [docker-proxy](#docker-proxy)
   * [Issues](#issues)
-* [Podman - libpod (https://github.com/containers/libpod)](#podman---libpod-httpsgithubcomcontainerslibpod)
-* [CNI Plugins - https://github.com/containernetworking/plugins](#cni-plugins---httpsgithubcomcontainernetworkingplugins)
+* [Podman - libpod](#podman---libpod)
+* [CNI Plugins](#cni-plugins)
   * [Issues](#issues-1)
 * [Base Container Images](#base-container-images)
 * [Docker images for projects](#docker-images-for-projects)
 * [Additional projects / libraries](#additional-projects--libraries)
-  * [OpenFaaS](#openfaas)
-    * [Faas-cli (https://github.com/openfaas/faas-cli/)](#faas-cli-httpsgithubcomopenfaasfaas-cli)
-    * [Faas-swarm (https://github.com/openfaas/faas-swarm)](#faas-swarm-httpsgithubcomopenfaasfaas-swarm)
-    * [FaaS (https://github.com/openfaas/faas/)](#faas-httpsgithubcomopenfaasfaas)
-    * [Nats-streaming-server (https://github.com/nats-io/nats-streaming-server)](#nats-streaming-server-httpsgithubcomnats-ionats-streaming-server)
-    * [Nats-queue-worker (https://github.com/openfaas/nats-queue-worker)](#nats-queue-worker-httpsgithubcomopenfaasnats-queue-worker)
-  * [Bbolt (https://github.com/etcd-io/bbolt)](#bbolt-httpsgithubcometcd-iobbolt)
-  * [Pty (https://github.com/kr/pty)](#pty-httpsgithubcomkrpty)
+  * [Kubernetes / K3s](#kubernetes--k3s)
+    * [Kubernetes](#kubernetes)
+    * [K3s](#k3s)
   * [ETCD](#etcd)
-  * [Kubernetes](#kubernetes)
-  * [Prometheus (https://github.com/prometheus/prometheus/)](#prometheus-httpsgithubcomprometheusprometheus)
-  * [Promu (https://github.com/prometheus/promu/)](#promu-httpsgithubcomprometheuspromu)
-  * [AlertManager (https://github.com/prometheus/alertmanager/)](#alertmanager-httpsgithubcomprometheusalertmanager)
-  * [Traefik (https://github.com/containous/traefik)](#traefik-httpsgithubcomcontainoustraefik)
+  * [OpenFaaS](#openfaas)
+    * [Faas-cli](#faas-cli)
+    * [Faas-swarm](#faas-swarm)
+    * [Nats-streaming-server](#nats-streaming-server)
+    * [Nats-streaming-server](#nats-streaming-server-1)
+    * [No changes required](#no-changes-required)
+  * [Bbolt](#bbolt)
+  * [Pty](#pty)
+  * [Prometheus](#prometheus)
+  * [Promu](#promu)
+  * [AlertManager](#alertmanager)
+  * [Traefik](#traefik)
   * [SQlite](#sqlite)
   * [LXD](#lxd)
-  * [Go-Jsonnet (https://github.com/google/go-jsonnet)](#go-jsonnet-httpsgithubcomgooglego-jsonnet)
-  * [Github Hub tool (https://github.com/github/hub)](#github-hub-tool-httpsgithubcomgithubhub)
-  * [Labstack Echo Framework (https://github.com/labstack/echo)](#labstack-echo-framework-httpsgithubcomlabstackecho)
-    * [Labstack Gommon (https://github.com/labstack/gommon)](#labstack-gommon-httpsgithubcomlabstackgommon)
-  * [VNDR (https://github.com/LK4D4/vndr)](#vndr-httpsgithubcomlk4d4vndr)
-  * [Inlets (https://github.com/alexellis/inlets)](#inlets-httpsgithubcomalexellisinlets)
-  * [Gin web framework (https://github.com/gin-gonic/gin)](#gin-web-framework-httpsgithubcomgin-gonicgin)
-  * [go-isatty (https://github.com/mattn/go-isatty)](#go-isatty-httpsgithubcommattngo-isatty)
+  * [Go-Jsonnet](#go-jsonnet)
+  * [Github Hub tool](#github-hub-tool)
+  * [Labstack Echo Framework](#labstack-echo-framework)
+    * [Labstack Gommon](#labstack-gommon)
+  * [VNDR](#vndr)
+  * [Inlets](#inlets)
+  * [Gin web framework](#gin-web-framework)
+  * [go-isatty](#go-isatty)
 * [Community](#community)
 * [References](#references)
 
@@ -65,7 +67,7 @@ If you like this project and others I've been contributing and would like to sup
 
 To make the development easier, there are Qemu virtual machines based on Debian and Fedora with some developer tools already installed.
 
-Download the [Risc-V Debian VM](https://drive.google.com/open?id=1O3dQouOqygnBtP5cZZ3uOghQO7hlrFhD). or [Risc-V Fedora VM](https://drive.google.com/open?id=1N2ughbCAxaVTk5UT9tSucCFyoOnDlk4H). For more information, check [the readme](Qemu-VM.md).
+Download the [Risc-V Debian VM](https://drive.google.com/open?id=1O3dQouOqygnBtP5cZZ3uOghQO7hlrFhD). or [Risc-V Fedora VM](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla). For more information, check [the readme](Qemu-VM.md).
 
 A prebuilt Go 1.13 tarball can be [downloaded here](https://drive.google.com/open?id=1jG23DjOkVpFxF00HPuAN8SmGEpaf8iAr).
 
@@ -93,7 +95,7 @@ echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 
 </details>
 
-To run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script.
+To run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script. If the docker service doesn't start on install script, re-run `systemctl start docker`.
 
 <details><summary>Docker-compose instructions</summary></u>
 
@@ -158,26 +160,26 @@ Now you can use this go build for testing/developing other projects.
 ### Core Golang
 
 * [ ] Golang
-  * Tracker Issue:https://github.com/golang/go/issues/27532
-  * Risc-V Fork: https://github.com/4a6f656c/riscv-go
-* [ ] CGO implementation - Draft on https://github.com/carlosedp/riscv-go but far from complete/funtcional.
+  * Tracker Issue: <https://github.com/golang/go/issues/27532>
+  * Risc-V Fork: <https://github.com/4a6f656c/riscv-go>
+* [ ] CGO implementation - Draft on <https://github.com/carlosedp/riscv-go> but far from complete/funtcional.
 * [ ] Go Builder
-  * https://go-review.googlesource.com/c/build/+/188501
-  * https://github.com/golang/build/pull/22
-  * Based on https://go-review.googlesource.com/c/build/+/177918
+  * <https://go-review.googlesource.com/c/build/+/188501>
+  * <https://github.com/golang/build/pull/22>
+  * Based on <https://go-review.googlesource.com/c/build/+/177918>
 
 ### Go Libraries
 
-* [x] `golang.org/x/sys` (https://go-review.googlesource.com/c/sys/+/177799)
-* [x] `golang.org/x/net` (https://go-review.googlesource.com/c/net/+/177997)
-* [x] `golang.org/x/sys` - Add riscv64 to `endian_little.go` (https://github.com/golang/sys/pull/38)
+* [x] `golang.org/x/sys` - <https://go-review.googlesource.com/c/sys/+/177799>
+* [x] `golang.org/x/net` - <https://go-review.googlesource.com/c/net/+/177997>
+* [x] `golang.org/x/sys` - Add riscv64 to `endian_little.go` - <https://github.com/golang/sys/pull/38>
 
 ### External deps
 
 * [ ] Qemu atomic bug
-  * Qemu patch - http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html
-  * Fix for Qemu in 4.1 - https://wiki.qemu.org/ChangeLog/4.1#RISC-V
-  * Kernel Patch - https://patchwork.kernel.org/patch/10997887/
+  * Qemu patch - <http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html>
+  * Fix for Qemu in 4.1 - <https://wiki.qemu.org/ChangeLog/4.1#RISC-V>
+  * Kernel Patch - <https://patchwork.kernel.org/patch/10997887/>
 
 --------------------------------------------------------------------------------
 
@@ -185,18 +187,22 @@ Now you can use this go build for testing/developing other projects.
 
 To build a complete container environment, check the [build-docker-env.md](build-docker-env.md) document.
 
-### Libseccomp (https://github.com/seccomp/libseccomp)
+### Libseccomp
+
+<https://github.com/seccomp/libseccomp>
 
 Builds fine with PR 134 even without Kernel support.
 
-* [ ] Kernel support - https://patchwork.kernel.org/project/linux-riscv/list/?series=164025
-  * Ref. https://patchwork.kernel.org/patch/10716119/
-  * Ref. https://patchwork.kernel.org/patch/10716121/
-  * Ref. https://github.com/riscv/riscv-linux/commit/0712587b63964272397ed34864130912d2a87020
-* [ ] PR - https://github.com/seccomp/libseccomp/pull/134
-* [ ] Issue - https://github.com/seccomp/libseccomp/issues/110
+* [ ] Kernel support - <https://patchwork.kernel.org/project/linux-riscv/list/?series=164025>
+  * Ref. <https://patchwork.kernel.org/patch/10716119/>
+  * Ref. <https://patchwork.kernel.org/patch/10716121/>
+  * Ref. <https://github.com/riscv/riscv-linux/commit/0712587b63964272397ed34864130912d2a87020>
+* [ ] PR - <https://github.com/seccomp/libseccomp/pull/134>
+* [ ] Issue - <https://github.com/seccomp/libseccomp/issues/110>
 
-### Runc (https://github.com/opencontainers/runc)
+### Runc
+
+<https://github.com/opencontainers/runc>
 
 * [ ] Upstreamed / Works
 * [ ] **CGO** (to build nsenter)
@@ -207,23 +213,29 @@ Builds fine with PR 134 even without Kernel support.
 * [ ] apparmor - (`$ sudo aa-status -> apparmor module is not loaded.`)
 * [ ] Add to CI
 
-### Crun (https://github.com/giuseppe/crun)
+### Crun
+
+<https://github.com/giuseppe/crun>
 
 No changes required, builds fine even without Kernel support for seccomp. Depends on libseccomp.
 
 * [x] Upstreamed / Works
-* [ ] libseccomp
+* [ ] Rebuild with libseccomp
 * [ ] Add to CI
 
-### Containerd (https://github.com/containerd/containerd/)
+### Containerd
+
+<https://github.com/containerd/containerd/>
 
 * [x] Upstreamed / Works
-* [x] PR https://github.com/containerd/containerd/pull/3328
+* [x] PR <https://github.com/containerd/containerd/pull/3328>
 * [ ] Add to CI
 
 ### Docker
 
-#### Docker cli (github.com/docker/cli)
+#### Docker cli
+
+<https://github.com/docker/cli>
 
 * [x] Upstreamed / Works
 * [x] Update `x/sys` and `x/net` modules in `vendor`. [PR](https://github.com/docker/cli/pull/1926)
@@ -231,9 +243,11 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 
 #### Docker daemon
 
+<https://github.com/moby/moby>
+
 * [x] Upstreamed / Works
-* [x] PR https://github.com/moby/moby/pull/39423 - Update dependencies
-* [x] PR https://github.com/moby/moby/pull/39327 - Remove CGO dependency
+* [x] PR <https://github.com/moby/moby/pull/39423> - Update dependencies
+* [x] PR <https://github.com/moby/moby/pull/39327> - Remove CGO dependency
 * [x] Update `x/sys` and `x/net` modules in `vendor`.
 * [x] Update `etcd-io/bbolt` in `vendor`.
 * [x] Update `github.com/vishvananda/netns` in `vendor`
@@ -245,11 +259,13 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 Dependency lib PRs:
 
 * [x] Upstreamed / Works
-* [x] netns PR - https://github.com/vishvananda/netns/pull/34 or fork into moby as https://github.com/moby/moby/issues/39404
-* [x] libnetwork PR - https://github.com/docker/libnetwork/pull/2389
-* [x] libnetwork PR netns - https://github.com/docker/libnetwork/pull/2412
+* [x] netns PR - <https://github.com/vishvananda/netns/pull/34> or fork into moby as <https://github.com/moby/moby/issues/39404>
+* [x] libnetwork PR - <https://github.com/docker/libnetwork/pull/2389>
+* [x] libnetwork PR netns - <https://github.com/docker/libnetwork/pull/2412>
 
-#### docker-init (https://github.com/krallin/tini)
+#### docker-init
+
+<https://github.com/krallin/tini>
 
 No changes required. Just build and copy tini-static to /usr/local/bin/docker-init
 
@@ -257,7 +273,7 @@ No changes required. Just build and copy tini-static to /usr/local/bin/docker-in
 
 #### docker-proxy
 
-No changes required. https://github.com/docker/libnetwork/cmd/proxy
+No changes required. <https://github.com/docker/libnetwork/cmd/proxy>
 
 * [x] Upstreamed / Works
 
@@ -265,28 +281,32 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ### Issues
 
-* [x] https://github.com/moby/moby/issues/39461 - Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
-  * [x] PR https://github.com/moby/moby/pull/39726
-  * [x] PR https://github.com/docker/cli/pull/2042
-* [x] https://github.com/containerd/containerd/issues/3389 - Containerd CPU 100% Issue
-  * Fixed by https://github.com/golang/sys/pull/40 thru PR https://github.com/containerd/containerd/pull/3526/
+* [x] <https://github.com/moby/moby/issues/39461> - Error on interactive terminal and log tail. When launching a container with `-it` the console is not presented. After killing the container, the inputs given are shown. Also log tailing with `logs -f` does not tail.
+  * [x] PR <https://github.com/moby/moby/pull/39726>
+  * [x] PR <https://github.com/docker/cli/pull/2042>
+* [x] <https://github.com/containerd/containerd/issues/3389> - Containerd CPU 100% Issue
+  * Fixed by <https://github.com/golang/sys/pull/40> thru PR <https://github.com/containerd/containerd/pull/3526/>
 
 --------------------------------------------------------------------------------
 
-## Podman - libpod (https://github.com/containers/libpod)
+## Podman - libpod
 
-* [x] PR to remove CGO dependency https://github.com/containers/libpod/pull/3437
-* [x] PR for containers/storage - https://github.com/containers/storage/pull/375
-* [x] PR for containers/psgo - https://github.com/containers/psgo/pull/53
+<https://github.com/containers/libpod>
+
+* [x] PR to remove CGO dependency <https://github.com/containers/libpod/pull/3437>
+* [x] PR for containers/storage - <https://github.com/containers/storage/pull/375>
+* [x] PR for containers/psgo - <https://github.com/containers/psgo/pull/53>
 * [ ] Add to CI
 
-## CNI Plugins - https://github.com/containernetworking/plugins
+## CNI Plugins
+
+<https://github.com/containernetworking/plugins>
 
 * [x] Builds and runs.
 
 ### Issues
 
-* [x] CNI Issue - https://github.com/containers/libpod/issues/3462
+* [x] Podman CNI Issue - <https://github.com/containers/libpod/issues/3462>
 
 --------------------------------------------------------------------------------
 
@@ -304,6 +324,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 * gateway - [`carlosedp/faas-gateway:riscv64`](https://hub.docker.com/r/carlosedp/faas-gateway)
 * faas-basic-auth-plugin - [`carlosedp/faas-basic-auth-plugin:riscv64`](https://hub.docker.com/r/carlosedp/faas-basic-auth-plugin)
 * faas-swarm - [`carlosedp/faas-swarm:riscv64`](https://hub.docker.com/r/carlosedp/faas-swarm)
+* faas-netes - [`carlosedp/faas-netes:riscv64`](https://hub.docker.com/r/carlosedp/faas-netes)
 * nats-streaming - [`carlosedp/faas-nats-streaming:riscv64`](https://hub.docker.com/r/carlosedp/faas-nats-streaming)
 * queue-worker - [`carlosedp/faas-queue-worker:riscv64`](https://hub.docker.com/r/carlosedp/faas-queue-worker)
 * watchdog - [`carlosedp/faas-watchdog:riscv64`](https://hub.docker.com/r/carlosedp/faas-watchdog)
@@ -322,13 +343,122 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 * traefik v2 - [`carlosedp/traefik:v2.0-riscv64`](https://hub.docker.com/r/carlosedp/traefik)
 * whoami - [`carlosedp/whoami:riscv64`](https://hub.docker.com/r/carlosedp/whoami)
 
-** Misc Images:**
+**Misc Images:**
 
-* Echo demo - [`carlosedp/echo-riscv`]()
+* Echo demo - [`carlosedp/echo-riscv`](https://hub.docker.com/r/carlosedp/echo-riscv)
+* Whoami (Traefik demo) - [`carlosedp/whoami:riscv64`](https://hub.docker.com/r/carlosedp/echo-riscv)
+* Kubernetes Pause - [`carlosedp/k8s-pause:riscv64`](https://hub.docker.com/r/carlosedp/k8s-pause)
+* CoreDNS v1.3.0 - [`carlosedp/coredns:v1.3.0-riscv64`](https://hub.docker.com/r/carlosedp/coredns)
 
 --------------------------------------------------------------------------------
 
 ## Additional projects / libraries
+
+### Kubernetes / K3s
+
+Binaries/containers:
+
+* kubelet
+* kubeadm
+* kubectl
+* etcd - [`carlosedp/etcd:3.5.0-pre-riscv64`](https://hub.docker.com/r/carlosedp/etcd)
+* CoreDNS v1.3.0 - [`carlosedp/coredns:v1.3.0-riscv64`](https://hub.docker.com/r/carlosedp/coredns)
+* pause - [`carlosedp/k8s-pause:riscv64`](https://hub.docker.com/r/carlosedp/k8s-pause)
+* kube-apiserver
+* kube-controller-manager
+* kube-scheduler
+* kube-proxy
+
+#### Kubernetes
+
+<https://github.com/kubernetes/kubernetes/>
+
+* [x] `github.com/mindprince/gonvml` - PR <https://github.com/mindprince/gonvml/pull/13> - Stub nocgo functions
+* [ ] `github.com/opencontainers/runc` - PR <https://github.com/opencontainers/runc/pull/2123> - Bump x/sys and support syscall.
+* [ ] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82342> - Bump `mindprince/gonvml` and change directives on `pkg/kubelet/cadvisor` files
+* [ ] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82349> - Bump `opencontainers/runc` and `x/sys` to support Risc-V
+
+#### K3s
+
+<https://github.com/rancher/k3s/>
+
+* [ ] `github.com/ibuildthecloud/kvsql` - - Add stubs with no SQLite
+* [ ] `github.com/rancher/kine` - - Add stubs with no SQLite
+
+<details><summary>WIP</summary>
+
+* [ ] Update imports on `pkg/server/context.go`
+  * "k8s.io/kubernetes/staging/src/k8s.io/client-go/kubernetes" to "k8s.io/client-go/kubernetes"
+  * "k8s.io/kubernetes/staging/src/k8s.io/client-go/tools/clientcmd" to "k8s.io/client-go/tools/clientcmd"
+* [ ] Update imports on `pkg/cli/server/server.go` to load sqlite stubs
+* [ ] Bump `github.com/google/cadvisor` after merge
+* [ ] Bump `github.com/ibuildthecloud/kvsql` after merge
+* [ ] Bump `github.com/mindprince/gonvml`
+* [ ] Bump `github.com/opencontainers/runc` after merge
+* [ ] Bump `github.com/rancher/kine` after merge
+* [ ] Bump `k8s.io/kubernetes` after merge
+* [ ] Bump `golang.org/x/sys`
+* [ ] Add `k8s.io/utils/inotify/`
+
+Files
+
+Change `pkg/server/context.go` to build with Go 1.13:
+
+```diff
+diff --git a/pkg/server/context.go b/pkg/server/context.go
+index 4f33b9aaca..9c65f19e36 100644
+--- a/pkg/server/context.go
++++ b/pkg/server/context.go
+@@ -12,9 +12,9 @@ import (
+        "github.com/rancher/wrangler/pkg/apply"
+        "github.com/rancher/wrangler/pkg/crd"
+        "github.com/rancher/wrangler/pkg/start"
++       "k8s.io/client-go/kubernetes"
+        "k8s.io/client-go/rest"
+-       "k8s.io/kubernetes/staging/src/k8s.io/client-go/kubernetes"
+-       "k8s.io/kubernetes/staging/src/k8s.io/client-go/tools/clientcmd"
++       "k8s.io/client-go/tools/clientcmd"
+ )
+```
+
+
+File `vendor/github.com/google/cadvisor/container/containerd/client.go`:
+
+Change import to `"github.com/containerd/containerd/pkg/dialer"`.
+
+Files:
+
+`vendor/k8s.io/kubernetes/pkg/kubelet/cadvisor/cadvisor_linux.go`
+`vendor/k8s.io/kubernetes/pkg/kubelet/cadvisor/cadvisor_unsupported.go`
+`vendor/k8s.io/kubernetes/pkg/kubelet/cadvisor/helpers_linux.go`
+`vendor/k8s.io/kubernetes/pkg/kubelet/cadvisor/helpers_unsupported.go`
+
+Change build directives (cgo).
+
+
+Create sqlite stubs:
+
+pkg/cli/server/server.go
+
+vendor/github.com/ibuildthecloud/kvsql/clientv3/driver/sqlite/sqlite.go
+vendor/github.com/ibuildthecloud/kvsql/clientv3/kv.go
+
+vendor/github.com/rancher/kine/pkg/drivers/sqlite/sqlite.go
+vendor/github.com/rancher/kine/pkg/endpoint/endpoint.go
+
+</details>
+
+### ETCD
+
+<https://github.com/etcd-io/etcd>
+
+Build with `go build .`, run with `ETCD_UNSUPPORTED_ARCH=riscv64 ./etcd`.
+
+* [x] Upstreamed / Works
+* [x] PR <https://github.com/etcd-io/etcd/pull/10834>
+* [x] Bump `golang.org/x/net`
+* [x] Bump `golang.org/x/sys`
+* [ ] Backport changes to release 3.2.x for Kubernetes?
 
 ### OpenFaaS
 
@@ -336,110 +466,96 @@ OpenFaaS is already upstreamed but still does not build images for Risc-V so I'v
 
 The PRs do not add functionality to cross-build the images for Risc-V yet since the base images still don't support the architecture. Check the [`build_images.sh`](OpenFaaS/build_images.sh) script to build the images manually.
 
-#### Faas-cli (https://github.com/openfaas/faas-cli/)
+#### Faas-cli
+
+<https://github.com/openfaas/faas-cli/>
 
 * [x] Update `x/sys`
-* [x] PR - https://github.com/openfaas/faas-cli/pull/667
+* [x] PR - <https://github.com/openfaas/faas-cli/pull/667>
 * [ ] Add to CI
 
-#### Faas-swarm (https://github.com/openfaas/faas-swarm)
+#### Faas-swarm
 
-* [x] Depends on `x/sys` PR https://github.com/golang/sys/pull/38
+<https://github.com/openfaas/faas-swarm>
+
+* [x] Depends on `x/sys` PR <https://github.com/golang/sys/pull/38>
 * [x] Update `x/sys`, `x/net`
-* [x] PR - https://github.com/openfaas/faas-swarm/pull/52
+* [x] PR - <https://github.com/openfaas/faas-swarm/pull/52>
 * [ ] Add to CI
 
-#### FaaS (https://github.com/openfaas/faas/)
+#### Nats-streaming-server
 
-No changes required.
+<https://github.com/nats-io/nats-streaming-server>
 
+* [x] Bump `x/sys`, `etcd/bbolt`.
+* [x] PR - <https://github.com/nats-io/nats-streaming-server/pull/891>
 * [ ] Add to CI
 
-#### Nats-streaming-server (https://github.com/nats-io/nats-streaming-server)
+#### Nats-streaming-server
+
+<https://github.com/nats-io/nats-streaming-server>
 
 * [x] Update `x/sys`, `etcd/bbolt`.
-* [x] PR - https://github.com/nats-io/nats-streaming-server/pull/891
+* [x] PR - <https://github.com/nats-io/nats-streaming-server/pull/891>
 * [ ] Add to CI
 
-#### Nats-queue-worker (https://github.com/openfaas/nats-queue-worker)
+#### No changes required
 
-No changes required.
+* FaaS - <https://github.com/openfaas/faas/>
+* Nats-queue-worker - <https://github.com/openfaas/nats-queue-worker>
+* Faas-netes - <https://github.com/openfaas/faas-netes>
+* Faas-idler - <https://github.com/openfaas-incubator/faas-idler>
 
-* [ ] Add to CI
+### Bbolt
 
-### Bbolt (https://github.com/etcd-io/bbolt)
+<https://github.com/etcd-io/bbolt>
 
 * [x] Upstreamed / Works
-* [x] PR - https://github.com/etcd-io/bbolt/pull/159
+* [x] PR - <https://github.com/etcd-io/bbolt/pull/159>
 
-### Pty (https://github.com/kr/pty)
+### Pty
 
-* [x] Upstreamed / Works
-* [x] `kr/pty` (https://github.com/kr/pty/pull/81)
-
-### ETCD
-
-Build with `go build .`, run with `ETCD_UNSUPPORTED_ARCH=riscv64 ./etcd`.
-
-* [ ] Upstreamed / Works
-* [ ] PR https://github.com/etcd-io/etcd/pull/10834
-* [x] `x/net`
-* [x] `x/sys`
-* [ ] Backport changes to release 3.2.x for Kubernetes?
-
-### Kubernetes
-
-Dependencies for **kubelet**:
-
-Binaries/containers:
-
-* kubelet
-* etcd - `carlosedp/etcd:3.5.0-pre-riscv64`
-* kubeadm
-* kubectl
-* pause
-
-* [ ] Upstreamed / Works
-* [ ] Update `x/sys`
-* [ ] Update `github.com/opencontainers/runc` to have changes from `github.com/carlosedp/runc`
-* [ ] Fix `cadvisor/accelerators/nvidia` -> `github.com/mindprince/gonvml`
-  * [ ] https://github.com/mindprince/gonvml/pull/11
-* [ ] Remove cgo constraints from:
-  * pkg/kubelet/cadvisor/cadvisor_linux.go
-  * pkg/kubelet/cadvisor/cadvisor_unsupported.go
-  * pkg/kubelet/cadvisor/helpers_linux.go
-  * pkg/kubelet/cadvisor/helpers_unsupported.go
-
-### Prometheus (https://github.com/prometheus/prometheus/)
-
-Already builds successfully with `make build` after updating modules.
-
-* [ ] Upstreamed / Works
-* [ ] PR https://github.com/prometheus/prometheus/pull/5621
-* [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get -u golang.org/x/sys && go mod tidy`
-* [x] Apply patch from https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2
-* [ ] Add to CI
-
-### Promu (https://github.com/prometheus/promu/)
-
-Already builds successfully.
+<https://github.com/kr/pty>
 
 * [x] Upstreamed / Works
-* [x] PR https://github.com/prometheus/promu/pull/146
-* [x] After upstreaming, update `x/sys` and `x/net` modules - `GO111MODULE=on go get -u golang.org/x/net && go get golang.org/x/sys && go mod tidy`
+* [x] `kr/pty` (<https://github.com/kr/pty/pull/81)>
+
+### Prometheus
+
+<https://github.com/prometheus/prometheus>
+
+Builds successfully with `make build`.
+
+* [x] Upstreamed / Works
+* [x] PR ~~<https://github.com/prometheus/prometheus/pull/5621>~~ -> <https://github.com/prometheus/prometheus/pull/5883>
+* [x] Bump `x/sys` and `x/net` modules
+* [x] Apply patch from <https://github.com/carlosedp/prometheus/commit/19e7ec54724240cde9768384736ff6ab88b1ace2>
 * [ ] Add to CI
 
-### AlertManager (https://github.com/prometheus/alertmanager/)
+### Promu
+
+<https://github.com/prometheus/promu>
+
+* [x] Upstreamed / Works
+* [x] PR <https://github.com/prometheus/promu/pull/146>
+* [x] Bump `x/sys` and `x/net` modules
+* [ ] Add to CI
+
+### AlertManager
+
+<https://github.com/prometheus/alertmanager>
 
 Already builds successfully with `make build`.
 
-* [ ] Upstreamed / Works
-* [ ] PR https://github.com/prometheus/alertmanager/pull/1984
+* [x] Upstreamed / Works
+* [x] PR <https://github.com/prometheus/alertmanager/pull/1984>
 
-### Traefik (https://github.com/containous/traefik)
+### Traefik
+
+<https://github.com/containous/traefik>
 
 * [x] Upstreamed / Works
-* [x] PR https://github.com/containous/traefik/pull/5245
+* [x] PR <https://github.com/containous/traefik/pull/5245>
 
 <details><summary>Building</summary>
 
@@ -485,7 +601,7 @@ services:
 
 ### SQlite
 
-Repository mirror: https://github.com/CanonicalLtd/sqlite
+Repository mirror: <https://github.com/CanonicalLtd/sqlite>
 
 * [ ] Upstreamed / Works
 * [ ] Update `config.guess` and `config.sub` to newer version. Posted to [mailing list](https://www.mail-archive.com/sqlite-users@mailinglists.sqlite.org/msg115489.html).
@@ -497,60 +613,76 @@ Repository mirror: https://github.com/CanonicalLtd/sqlite
 * [ ] SQLite `config` update to build successfully
 * [ ] CGO to build storage backends
 
-### Go-Jsonnet (https://github.com/google/go-jsonnet)
+### Go-Jsonnet
+
+<https://github.com/google/go-jsonnet>
 
 * [x] Upstreamed / Works
 * [x] Update `x/sys`
-* [x] PR https://github.com/google/go-jsonnet/pull/284
+* [x] PR <https://github.com/google/go-jsonnet/pull/284>
 
-### Github Hub tool (https://github.com/github/hub)
+### Github Hub tool
+
+<https://github.com/github/hub>
 
 * [x] Upstreamed / Works
 * [x] Update `x/sys`
-* [x] PR https://github.com/github/hub/pull/2153
+* [x] PR <https://github.com/github/hub/pull/2153>
 
-### Labstack Echo Framework (https://github.com/labstack/echo)
+### Labstack Echo Framework
+
+<https://github.com/labstack/echo>
 
 * [x] Upstreamed / Works
 * [x] Update `x/sys`
 * [x] Update `x/net`
-* [x] PR https://github.com/labstack/echo/pull/1344
+* [x] PR <https://github.com/labstack/echo/pull/1344>
 
-#### Labstack Gommon (https://github.com/labstack/gommon)
+#### Labstack Gommon
+
+<https://github.com/labstack/gommon>
 
 * [x] Upstreamed / Works
 * [x] Update `x/sys`
-* [x] PR https://github.com/labstack/gommon/pull/32
+* [x] PR <https://github.com/labstack/gommon/pull/32>
 
-### VNDR (https://github.com/LK4D4/vndr)
+### VNDR
 
-* [x] Upstreamed / Works
-* [x] PR https://github.com/LK4D4/vndr/pull/80
-
-### Inlets (https://github.com/alexellis/inlets)
+<https://github.com/LK4D4/vndr>
 
 * [x] Upstreamed / Works
-* [x] PR https://github.com/alexellis/inlets/pull/78
+* [x] PR <https://github.com/LK4D4/vndr/pull/80>
+
+### Inlets
+
+<https://github.com/alexellis/inlets>
+
+* [x] Upstreamed / Works
+* [x] PR <https://github.com/alexellis/inlets/pull/78>
 * [ ] Add to CI
 
-### Gin web framework (https://github.com/gin-gonic/gin)
+### Gin web framework
+
+<https://github.com/gin-gonic/gin>
 
 * Depends on `github.com/mattn/go-isatty`.
 
 * [x] Upstreamed / Works
-* [x] PR https://github.com/gin-gonic/gin/pull/2019
+* [x] PR <https://github.com/gin-gonic/gin/pull/2019>
 
-### go-isatty (https://github.com/mattn/go-isatty)
+### go-isatty
+
+<https://github.com/mattn/go-isatty>
 
 Dependency for Gin Framework
 
-* [x] PR https://github.com/mattn/go-isatty/pull/39
+* [x] PR <https://github.com/mattn/go-isatty/pull/39>
 
 --------------------------------------------------------------------------------
 
 ## Community
 
-* Slack channel #risc-v on https://invite.slack.golangbridge.org
+* Slack channel #risc-v on <https://invite.slack.golangbridge.org>
 
 ## References
 
