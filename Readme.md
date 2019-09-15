@@ -239,6 +239,7 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 
 * [x] Upstreamed / Works
 * [x] Update `x/sys` and `x/net` modules in `vendor`. [PR](https://github.com/docker/cli/pull/1926)
+* [x] Add riscv64 to manifest annotation. [PR#2084](https://github.com/docker/cli/pull/2084)
 * [ ] Add to CI
 
 #### Docker daemon
@@ -312,10 +313,11 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ## Base Container Images
 
-* Debian (sid) -> [`carlosedp/debian:sid-riscv64`](https://hub.docker.com/r/carlosedp/debian)
-* Alpine -> No MUSL available
-* Busybox (1.31.0) -> ``
-* Go (1.13 dev) -> [`carlosedp/golang:1.13-riscv64`](https://hub.docker.com/r/carlosedp/golang)
+* Debian Sid (Multiarch) -> [`carlosedp/debian:sid`](https://hub.docker.com/r/carlosedp/debian)
+* Debian Sid Slim (Multiarch) -> [`carlosedp/debian:sid-slim`](https://hub.docker.com/r/carlosedp/debian)
+* Alpine -> No MUSL available yet
+* Busybox (1.31.0) -> [`carlosedp/busybox:1.31`](https://hub.docker.com/r/carlosedp/busybox)
+* Go 1.13 (Multiarch) -> [`carlosedp/golang:1.13`](https://hub.docker.com/r/carlosedp/golang)
 
 ## Docker images for projects
 
@@ -374,9 +376,25 @@ Binaries/containers:
 <https://github.com/kubernetes/kubernetes/>
 
 * [x] `github.com/mindprince/gonvml` - PR <https://github.com/mindprince/gonvml/pull/13> - Stub nocgo functions
-* [ ] `github.com/opencontainers/runc` - PR <https://github.com/opencontainers/runc/pull/2123> - Bump x/sys and support syscall.
+* [x] `github.com/opencontainers/runc` - PR <https://github.com/opencontainers/runc/pull/2123> - Bump x/sys and support syscall.
 * [ ] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82342> - Bump `mindprince/gonvml` and change directives on `pkg/kubelet/cadvisor` files
 * [ ] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82349> - Bump `opencontainers/runc` and `x/sys` to support Risc-V
+
+<details><summary>Update process:</summary>
+
+```bash
+# Update dependency
+./hack/pin-dependency.sh github.com/mindprince/gonvml
+# Update vendor dir
+./hack/update-vendor
+
+# Generate API files
+make generated_files
+
+GOOS=linux GOARCH=riscv64 go build ./cmd/kube-apiserver
+```
+
+</details>
 
 #### K3s
 

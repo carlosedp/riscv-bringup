@@ -1,4 +1,4 @@
-FROM carlosedp/golang:1.13-riscv64 as builder
+FROM carlosedp/golang:1.13 as builder
 
 MAINTAINER alex@openfaas.com
 ENTRYPOINT []
