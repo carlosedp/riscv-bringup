@@ -95,7 +95,7 @@ echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 
 </details>
 
-To run Docker on your Risc-V environment, get the pack [here](https://drive.google.com/open?id=1Op8l6yq6H_C_zpZUpvO-zHxwbtcrAGcQ) and use the `install.sh` script. If the docker service doesn't start on install script, re-run `systemctl start docker`.
+To run Docker on your Risc-V Debian environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.5-dev_riscv64.deb) or for other distros get the [tarball here](https://drive.google.com/open?id=1x1ndaLTsUq6P5yHdOM4fzH4NO2xqOZlP) and use the `install.sh` script. If the docker service doesn't start on install script, re-run `systemctl start docker`.
 
 <details><summary>Docker-compose instructions</summary></u>
 
@@ -315,6 +315,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 * Debian Sid (Multiarch) -> [`carlosedp/debian:sid`](https://hub.docker.com/r/carlosedp/debian)
 * Debian Sid Slim (Multiarch) -> [`carlosedp/debian:sid-slim`](https://hub.docker.com/r/carlosedp/debian)
+* Debian Sid iptables Slim (Multiarch) -> [`carlosedp/debian-iptables:sid-slim`](https://hub.docker.com/r/carlosedp/debian-iptables)
 * Alpine -> No MUSL available yet
 * Busybox (1.31.0) -> [`carlosedp/busybox:1.31`](https://hub.docker.com/r/carlosedp/busybox)
 * Go 1.13 (Multiarch) -> [`carlosedp/golang:1.13`](https://hub.docker.com/r/carlosedp/golang)
@@ -345,6 +346,19 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 * traefik v2 - [`carlosedp/traefik:v2.0-riscv64`](https://hub.docker.com/r/carlosedp/traefik)
 * whoami - [`carlosedp/whoami:riscv64`](https://hub.docker.com/r/carlosedp/whoami)
 
+**Kubernetes:**
+* kube-apiserver - [`carlosedp/kube-apiserver:1.16.0`](https://hub.docker.com/r/carlosedp/kube-apiserver)
+* kube-scheduler - [`carlosedp/kube-scheduler:1.16.0`](https://hub.docker.com/r/carlosedp/kube-scheduler)
+* kube-controller-manager - [`carlosedp/kube-controller-manager:1.16.0`](https://hub.docker.com/r/carlosedp/kube-controller-manager)
+* kube-proxy - [`carlosedp/kube-proxy:1.16.0`](https://hub.docker.com/r/carlosedp/kube-proxy)
+* pause - [`carlosedp/pause:3.1`](https://hub.docker.com/r/carlosedp/pause)
+* flannel - [`carlosedp/flannel:v0.11.0`](https://hub.docker.com/r/carlosedp/flannel)
+* etcd (v3.5.0) - [`carlosedp/etcd:3.3.10`](https://hub.docker.com/r/carlosedp/etcd)
+* CoreDNS (v1.6.3) - [`carlosedp/coredns:v1.6.2`](https://hub.docker.com/r/carlosedp/coredns)
+
+Kubernetes images are multi-arch with manifests to `arm`, `arm64`, `amd64`, `riscv64` and `ppc64le`.
+Some version mismatches due to Kubernetes hard-coded version check for CoreDNS and etcd.
+
 **Misc Images:**
 
 * Echo demo - [`carlosedp/echo-riscv`](https://hub.docker.com/r/carlosedp/echo-riscv)
@@ -358,18 +372,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 ### Kubernetes / K3s
 
-Binaries/containers:
-
-* kubelet
-* kubeadm
-* kubectl
-* etcd - [`carlosedp/etcd:3.5.0-pre-riscv64`](https://hub.docker.com/r/carlosedp/etcd)
-* CoreDNS v1.3.0 - [`carlosedp/coredns:v1.3.0-riscv64`](https://hub.docker.com/r/carlosedp/coredns)
-* pause - [`carlosedp/k8s-pause:riscv64`](https://hub.docker.com/r/carlosedp/k8s-pause)
-* kube-apiserver
-* kube-controller-manager
-* kube-scheduler
-* kube-proxy
+Building and deploying Kubernetes or K3s on Risc-V is detailed on a [dedicated readme](https://github.com/carlosedp/riscv-bringup/blob/master/kubernetes/Readme.md).
 
 #### Kubernetes
 
@@ -377,7 +380,7 @@ Binaries/containers:
 
 * [x] `github.com/mindprince/gonvml` - PR <https://github.com/mindprince/gonvml/pull/13> - Stub nocgo functions
 * [x] `github.com/opencontainers/runc` - PR <https://github.com/opencontainers/runc/pull/2123> - Bump x/sys and support syscall.
-* [ ] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82342> - Bump `mindprince/gonvml` and change directives on `pkg/kubelet/cadvisor` files
+* [x] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82342> - Bump `mindprince/gonvml` and change directives on `pkg/kubelet/cadvisor` files
 * [ ] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82349> - Bump `opencontainers/runc` and `x/sys` to support Risc-V
 
 <details><summary>Update process:</summary>
@@ -581,8 +584,9 @@ Already builds successfully with `make build`.
 rm -rf static/ autogen/
 make generate-webui
 go generate
-GOARCH=riscv64 GOOS=linux go build ./cmd/traefik -o ./dist/traefik
-docker build -t carlosedp/traefik:v2.0-riscv64 .
+mkdir dist
+GOARCH=riscv64 GOOS=linux go build -o dist/traefik ./cmd/traefik
+docker build -t carlosedp/traefik:v2.1-riscv64 .
 ```
 
 </details>

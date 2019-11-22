@@ -1,0 +1,16 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: traefik-ingress-lb
+  namespace: kube-system
+spec:
+  rules:
+  - host: traefik.192.168.15.16.nip.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: traefik-ingress-service
+          servicePort: metrics
+

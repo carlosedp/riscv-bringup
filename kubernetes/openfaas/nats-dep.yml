@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: openfaas
+    component: nats
+  name: nats
+  namespace: "openfaas"
+spec:
+  selector:
+    matchLabels:
+      app: nats
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+        prometheus.io.scrape: "false"
+      labels:
+        app: nats
+    spec:
+      containers:
+      - name:  nats
+        resources:
+            requests:
+              memory: 120Mi
+            
+        image: carlosedp/faas-nats-streaming:riscv64
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4222
+          protocol: TCP
+        command: ["/nats-streaming-server"]
+        args:
+          - --store
+          - memory
+          - --cluster_id
+          - faas-cluster

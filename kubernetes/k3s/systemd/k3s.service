@@ -1,0 +1,30 @@
+[Unit]
+Description=K3s Lightweight Kubernetes
+Documentation=https://k3s.io
+After=network-online.target etcd.service
+
+[Service]
+Type=notify
+EnvironmentFile=/etc/systemd/system/k3s.service.env
+ExecStart=/usr/local/bin/k3s server \
+    --docker \
+    --storage-endpoint https://127.0.0.1:2379 \
+    --storage-cafile /etc/etcd/ca.pem \
+    --storage-certfile /etc/etcd/kubernetes.pem \
+    --storage-keyfile /etc/etcd/kubernetes-key.pem \
+    --kubelet-arg pod-infra-container-image=carlosedp/k8s-pause:riscv64
+ExecStartPost=/bin/sleep 30
+ExecStartPost=/usr/local/bin/kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":{"containers":[{"name":"coredns","image":"carlosedp/coredns:v1.3.0-riscv64"}]}}}}'
+ExecStartPost=/usr/local/bin/kubectl delete job -n kube-system helm-install-traefik
+KillMode=process
+Delegate=yes
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+TimeoutStartSec=0
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

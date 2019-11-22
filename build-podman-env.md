@@ -2,7 +2,9 @@
 
 Here is a quick guide on how to use and build [podman](https://podman.io/) for Risc-V architecture.
 
-To install the prebuilt pack, download the [tarball here](https://drive.google.com/file/d/1rUoCbtMCkQjVtwz0S4uq-WGZjikB1gSA/view?usp=sharing) with all the requirements and run the `install.sh` script to quickly have it ready.
+To install the prebuilt pack on Debian, download the [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/podman-1.6.4-dev_riscv64.deb) and install with `sudo apt install podman-1.6.4-dev_riscv64.deb`.
+
+For other distros, download a [tarball here](https://drive.google.com/file/d/1rUoCbtMCkQjVtwz0S4uq-WGZjikB1gSA/view?usp=sharing) with all the requirements and run the `install.sh` script to quickly have it ready.
 
 Use this pack in the [Qemu Risc-V virtual machine](Qemu-VM.md).
 
@@ -33,6 +35,7 @@ Building podman and it's pre-reqs.
 ```bash
 git clone https://github.com/containers/conmon $GOPATH/src/github.com/containers/conmon
 dnf install -y make glib2-devel git gcc rpm-build golang
+sudo apt install libglib2.0-dev make
 pushd $GOPATH/src/github.com/containers/conmon
 make
 sudo cp bin/conmon /usr/local/bin
@@ -62,8 +65,8 @@ popd
 git clone https://github.com/containernetworking/plugins.git $GOPATH/src/github.com/containernetworking/plugins
 pushd $GOPATH/src/github.com/containernetworking/plugins
 ./build_linux.sh
-sudo mkdir -p /usr/libexec/cni
-sudo cp bin/* /usr/libexec/cni
+sudo mkdir -p /opt/cni/bin
+sudo cp bin/* /opt/cni/bin
 popd
 ```
 
@@ -72,8 +75,6 @@ popd
 ```bash
 git clone https://github.com/containers/libpod $GOPATH/src/github.com/containers/libpod
 pushd $GOPATH/src/github.com/containers/libpod
-git fetch origin pull/3437/head:fix-nocgo
-git checkout fix-nocgo
 make BUILDTAGS="containers_image_openpgp containers_image_ostree_stub exclude_graphdriver_btrfs exclude_graphdriver_devicemapper exclude_disk_quota"
 sudo make install
 popd

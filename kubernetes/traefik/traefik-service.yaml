@@ -1,0 +1,26 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: traefik-ingress-service
+  namespace: kube-system
+  labels:
+    app: traefik
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+  externalTrafficPolicy: Local
+  ports:
+    - protocol: TCP
+      port: 80
+      nodePort: 30080
+      name: web
+    - protocol: TCP
+      port: 443
+      nodePort: 30443
+      name: https
+    - protocol: TCP
+      port: 8080
+      nodePort: 32080
+      name: metrics
+  type: NodePort
