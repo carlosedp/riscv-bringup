@@ -1,0 +1,70 @@
+FROM debian:buster AS builder
+MAINTAINER golang-dev <golang-dev@googlegroups.com>
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update && apt-get install -y \
+    gcc-riscv64-linux-gnu \
+    libc6-dev-riscv64-cross \
+    ca-certificates \
+    curl \
+    git-core \
+    gcc \
+    libc6-dev \
+    procps \
+    lsof \
+    psmisc \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /go1.4-amd64 \
+    && ( \
+        curl --silent https://storage.googleapis.com/golang/go1.4.3.linux-amd64.tar.gz | tar -C /go1.4-amd64 -zxv \
+    ) \
+    && mv /go1.4-amd64/go /go1.4 \
+    && rm -rf /go1.4-amd64 \
+    && rm -rf /go1.4/pkg/linux_amd64_race \
+        /go1.4/api \
+        /go1.4/blog \
+        /go1.4/doc \
+        /go1.4/misc \
+        /go1.4/test \
+    && find /go1.4 -type d -name testdata | xargs rm -rf
+
+ENV GOROOT_BOOTSTRAP=/go1.4 GOOS=linux GOARCH=riscv64 CC_FOR_TARGET=riscv64-linux-gnu-gcc
+
+WORKDIR /
+RUN git clone https://github.com/4a6f656c/riscv-go go --depth=1 \
+    && cd go/src \
+    && ./make.bash
+
+FROM debian:buster
+
+ENV GOLANG_VERSION 1.13beta1
+
+RUN apt-get update && apt-get install -y \
+    gcc-riscv64-linux-gnu \
+    libc6-dev-riscv64-cross \
+    ca-certificates \
+    curl \
+    make \
+    git-core \
+    gcc \
+    libc6-dev \
+    procps \
+    lsof \
+    psmisc \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /go /usr/local/
+
+RUN export PATH="/usr/local/go/bin:$PATH"; \
+    go version
+
+ENV GOPATH /go
+ENV GOCACHE /tmp
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
+WORKDIR $GOPATH
