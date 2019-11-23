@@ -5,7 +5,7 @@ import (
     "fmt"
     "runtime"
 
-    "github.com/labstack/echo"
+    "github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -18,6 +18,3 @@ func main() {
     })
     e.Logger.Fatal(e.Start(":8080"))
 }
-
-
-
