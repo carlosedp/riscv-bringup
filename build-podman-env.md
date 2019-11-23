@@ -2,7 +2,7 @@
 
 Here is a quick guide on how to use and build [podman](https://podman.io/) for Risc-V architecture.
 
-To install the prebuilt pack on Debian, download the [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/podman-1.6.4-dev_riscv64.deb) and install with `sudo apt install podman-1.6.4-dev_riscv64.deb`.
+To install the prebuilt pack on Debian, download the [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/podman-1.6.4-dev_riscv64.deb) and install with `sudo apt install ./podman-1.6.4-dev_riscv64.deb`.
 
 For other distros, download a [tarball here](https://drive.google.com/file/d/1rUoCbtMCkQjVtwz0S4uq-WGZjikB1gSA/view?usp=sharing) with all the requirements and run the `install.sh` script to quickly have it ready.
 

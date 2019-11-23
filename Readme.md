@@ -12,7 +12,7 @@ If you like this project and others I've been contributing and would like to sup
 
 * [Risc-V Virtual Machine, pre-built Go and Docker](#risc-v-virtual-machine-pre-built-go-and-docker)
 * [Building Go on your Risc-V VM or SBC](#building-go-on-your-risc-v-vm-or-sbc)
-* [Go Dependencies](#go-dependencies)
+* [Golang](#golang)
   * [Core Golang](#core-golang)
   * [Go Libraries](#go-libraries)
   * [External deps](#external-deps)
@@ -67,24 +67,23 @@ If you like this project and others I've been contributing and would like to sup
 
 To make the development easier, there are Qemu virtual machines based on Debian and Fedora with some developer tools already installed.
 
-Download the [Risc-V Debian VM](https://drive.google.com/open?id=1O3dQouOqygnBtP5cZZ3uOghQO7hlrFhD). or [Risc-V Fedora VM](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla). For more information, check [the readme](Qemu-VM.md).
+Download the [Risc-V Debian VM](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-20181123.tar.bz2). or [Risc-V Fedora VM](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla). For more information, check [the readme](Qemu-VM.md).
 
-A prebuilt Go 1.13 tarball can be [downloaded here](https://drive.google.com/open?id=1jG23DjOkVpFxF00HPuAN8SmGEpaf8iAr).
+A prebuilt Go 1.13 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.13dev-riscv64.tar.gz).
 
 To run Go on this VM, download both files and install with:
 
 <details><summary>Instructions</summary></u>
 
 ```bash
-# Copy the tarball to the VM
-scp -P 22222 go-1.13dev-riscv.tar.gz root@localhost:
+# Start the VM
+./run_debian.sh
+
+# Download Golang tarball
+wget https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.13dev-riscv64.tar.gz
 
 # In the VM, unpack (in root dir for example)
-tar vxf go-1.13dev-riscv.tar.gz
-
-# Link the files
-rmdir /usr/local/go
-ln -sf /root/riscv-go/ /usr/local/go
+tar vxf go-1.13dev-riscv64.tar.gz -C /usr/local/
 
 # Add to your PATH
 export PATH="/usr/local/go/bin:$PATH"
@@ -95,18 +94,20 @@ echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 
 </details>
 
-To run Docker on your Risc-V Debian environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.5-dev_riscv64.deb) or for other distros get the [tarball here](https://drive.google.com/open?id=1x1ndaLTsUq6P5yHdOM4fzH4NO2xqOZlP) and use the `install.sh` script. If the docker service doesn't start on install script, re-run `systemctl start docker`.
+To run Docker on your Risc-V Debian environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.5-dev_riscv64.deb) and install with `sudo apt install ./docker-19.03.5-dev_riscv64.deb`.
 
-<details><summary>Docker-compose instructions</summary></u>
+For other distros get the [tarball here](https://drive.google.com/open?id=1x1ndaLTsUq6P5yHdOM4fzH4NO2xqOZlP) and use the `install.sh` script. If the docker service doesn't start on install script, re-run `systemctl start docker`.
+
+<details><summary>Docker-compose install instructions</summary></u>
 
 ```bash
 # In Debian image
-sudo apt-get install python3-dev
+sudo apt-get install python3 python3-dev python3-pip
 
 # In Fedora image
 sudo dnf install python3-devel
 
-sudo pip install docker-compose
+sudo pip3 install docker-compose
 ```
 
 </details>
@@ -155,11 +156,11 @@ Now you can use this go build for testing/developing other projects.
 
 --------------------------------------------------------------------------------
 
-## Go Dependencies
+## Golang
 
 ### Core Golang
 
-* [ ] Golang
+* [ ] Golang upstreaming
   * Tracker Issue: <https://github.com/golang/go/issues/27532>
   * Risc-V Fork: <https://github.com/4a6f656c/riscv-go>
 * [ ] CGO implementation - Draft on <https://github.com/carlosedp/riscv-go> but far from complete/funtcional.
@@ -176,7 +177,7 @@ Now you can use this go build for testing/developing other projects.
 
 ### External deps
 
-* [ ] Qemu atomic bug
+* [x] Qemu atomic bug
   * Qemu patch - <http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html>
   * Fix for Qemu in 4.1 - <https://wiki.qemu.org/ChangeLog/4.1#RISC-V>
   * Kernel Patch - <https://patchwork.kernel.org/patch/10997887/>
@@ -205,7 +206,7 @@ Builds fine with PR 134 even without Kernel support.
 <https://github.com/opencontainers/runc>
 
 * [ ] Upstreamed / Works
-* [ ] **CGO** (to build nsenter)
+* [ ] Depends on **CGO** (to build nsenter)
 * [ ] Support `buildmode=pie`
 * [ ] Add `riscv64` to `libcontainer/system/syscall_linux_64.go`
 * [ ] After upstreaming, update `x/sys` and `x/net` modules
@@ -237,7 +238,7 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 
 <https://github.com/docker/cli>
 
-* [x] Upstreamed / Works
+* [x] Upstreamed / Works (must be built from `master`)
 * [x] Update `x/sys` and `x/net` modules in `vendor`. [PR](https://github.com/docker/cli/pull/1926)
 * [x] Add riscv64 to manifest annotation. [PR#2084](https://github.com/docker/cli/pull/2084)
 * [ ] Add to CI
@@ -343,7 +344,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 **Traefik:**
 
-* traefik v2 - [`carlosedp/traefik:v2.0-riscv64`](https://hub.docker.com/r/carlosedp/traefik)
+* traefik v2 - [`carlosedp/traefik:v2.1-riscv64`](https://hub.docker.com/r/carlosedp/traefik)
 * whoami - [`carlosedp/whoami:riscv64`](https://hub.docker.com/r/carlosedp/whoami)
 
 **Kubernetes:**
@@ -455,7 +456,6 @@ Files:
 `vendor/k8s.io/kubernetes/pkg/kubelet/cadvisor/helpers_unsupported.go`
 
 Change build directives (cgo).
-
 
 Create sqlite stubs:
 
