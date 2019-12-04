@@ -63,6 +63,8 @@ sudo ETCDCTL_API=3 etcdctl member list \
 
 ## Deploy the K3s cluster
 
+Install Docker as a pre-requisite.
+
 ```bash
 sudo cp k3s kubectl /usr/local/bin
 
@@ -129,6 +131,51 @@ kubectl -n openfaas create secret generic basic-auth \
 kubectl apply -f  ./openfaas/
 ```
 
-## Generate deb install package
+## Hacks
+
+Running kubelet on Qemu throws an error where clockspeed could not be found. Apply patch belor:
+
+```diff
+diff --git a/vendor/github.com/google/cadvisor/machine/machine.go b/vendor/github.com/google/cadvisor/machine/machine.go
+index d85e38f1939..2fcbc2625db 100644
+--- a/vendor/github.com/google/cadvisor/machine/machine.go
++++ b/vendor/github.com/google/cadvisor/machine/machine.go
+@@ -23,6 +23,7 @@ import (
+        "regexp"
+        "strconv"
+        "strings"
++
+        // s390/s390x changes
+        "runtime"
+
+@@ -53,7 +54,7 @@ const cpuBusPath = "/sys/bus/cpu/devices/"
+ // GetClockSpeed returns the CPU clock speed, given a []byte formatted as the /proc/cpuinfo file.
+ func GetClockSpeed(procInfo []byte) (uint64, error) {
+        // s390/s390x, aarch64 and arm32 changes
+-       if isSystemZ() || isAArch64() || isArm32() {
++       if isSystemZ() || isAArch64() || isArm32() || isRiscv64() {
+                return 0, nil
+        }
+
+@@ -396,6 +397,15 @@ func isSystemZ() bool {
+        return false
+ }
+
++// riscv64 changes
++func isRiscv64() bool {
++       arch, err := getMachineArch()
++       if err == nil {
++               return strings.Contains(arch, "riscv64")
++       }
++       return false
++}
++
+ // s390/s390x changes
+ func getNumCores() int {
+        maxProcs := runtime.GOMAXPROCS(0)
+```
+
+
+
 
 

@@ -2,7 +2,7 @@
 
 ARCHITECTURES="amd64 arm64 arm ppc64le riscv64"
 BASEIMAGE=carlosedp/debian:sid-slim
-VERSION=v1.16.0
+VERSION=`git describe | sed -E 's/(v[0-9]\.[0-9]*\.[0-9]*-[a-zA-Z0-9]*\.[0-9]*).*/\1/'`
 REPO=carlosedp
 
 export DOCKER_CLI_EXPERIMENTAL=enabled
@@ -10,13 +10,57 @@ export DOCKER_CLI_EXPERIMENTAL=enabled
 # force Go 1.13
 export PATH=/home/carlosedp/riscv-go/bin:$PATH
 
-Build Kubernetes binaries
+# Build Kubernetes binaries
 pushd kubernetes
+
+patch --dry-run --ignore-whitespace << 'EOF'
+diff --git a/hack/lib/golang.sh b/hack/lib/golang.sh
+index ce7de73301..211580051e 100755
+--- a/hack/lib/golang.sh
++++ b/hack/lib/golang.sh
+@@ -27,6 +27,7 @@ readonly KUBE_SUPPORTED_SERVER_PLATFORMS=(
+   linux/arm64
+   linux/s390x
+   linux/ppc64le
++  linux/riscv64
+ )
+
+ # The node platforms we build for
+@@ -36,6 +37,7 @@ readonly KUBE_SUPPORTED_NODE_PLATFORMS=(
+   linux/arm64
+   linux/s390x
+   linux/ppc64le
++  linux/riscv64
+   windows/amd64
+ )
+
+@@ -48,6 +50,7 @@ readonly KUBE_SUPPORTED_CLIENT_PLATFORMS=(
+   linux/arm64
+   linux/s390x
+   linux/ppc64le
++  linux/riscv64
+   darwin/amd64
+   darwin/386
+   windows/amd64
+@@ -62,6 +65,7 @@ readonly KUBE_SUPPORTED_TEST_PLATFORMS=(
+   linux/arm64
+   linux/s390x
+   linux/ppc64le
++  linux/riscv64
+   darwin/amd64
+   windows/amd64
+ )
+EOF
+
+make KUBE_BUILD_PLATFORMS=linux/riscv64
+
+
+make generated_files
 for arch in $ARCHITECTURES; do
-	for i in kubelet kube-apiserver kube-proxy kube-scheduler kube-controller-manager;
+	for i in kubeadm kubelet kube-apiserver kube-proxy kube-scheduler kube-controller-manager kubemark;
 	do
     echo "Building $i for $arch"
-		CGO_ENABLED=0 GOOS=linux GOARCH=$arch go build -o $i-$arch ./cmd/$i
+        make WHAT=./cmd/$i KUBE_BUILD_PLATFORMS=linux/riscv64
 	done
 done
 popd
@@ -97,7 +141,6 @@ EXPOSE 53 53/udp
 ENTRYPOINT ["/coredns"]
 EOF
 docker buildx build -t ${REPO}/coredns:1.6.2 --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm,linux/riscv64 --push -f Dockerfile.custom .
-
 
 # Build Etcd
 
