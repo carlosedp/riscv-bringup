@@ -8,14 +8,11 @@ Type=notify
 EnvironmentFile=/etc/systemd/system/k3s.service.env
 ExecStart=/usr/local/bin/k3s server \
     --docker \
-    --storage-endpoint https://127.0.0.1:2379 \
-    --storage-cafile /etc/etcd/ca.pem \
-    --storage-certfile /etc/etcd/kubernetes.pem \
-    --storage-keyfile /etc/etcd/kubernetes-key.pem \
+    --datastore-endpoint https://127.0.0.1:2379 \
+    --datastore-cafile /etc/etcd/ca.pem \
+    --datastore-certfile /etc/etcd/kubernetes.pem \
+    --datastore-keyfile /etc/etcd/kubernetes-key.pem \
     --kubelet-arg pod-infra-container-image=carlosedp/k8s-pause:riscv64
-ExecStartPost=/bin/sleep 30
-ExecStartPost=/usr/local/bin/kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":{"containers":[{"name":"coredns","image":"carlosedp/coredns:v1.3.0-riscv64"}]}}}}'
-ExecStartPost=/usr/local/bin/kubectl delete job -n kube-system helm-install-traefik
 KillMode=process
 Delegate=yes
 LimitNOFILE=infinity
