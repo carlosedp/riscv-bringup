@@ -41,7 +41,6 @@ If you like this project and others I've been contributing and would like to sup
     * [Faas-cli](#faas-cli)
     * [Faas-swarm](#faas-swarm)
     * [Nats-streaming-server](#nats-streaming-server)
-    * [Nats-streaming-server](#nats-streaming-server-1)
     * [No changes required](#no-changes-required)
   * [Bbolt](#bbolt)
   * [Pty](#pty)
@@ -59,6 +58,7 @@ If you like this project and others I've been contributing and would like to sup
   * [Inlets](#inlets)
   * [Gin web framework](#gin-web-framework)
   * [go-isatty](#go-isatty)
+  * [ginkgo](#ginkgo)
 * [Community](#community)
 * [References](#references)
 
@@ -325,7 +325,7 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 
 **OpenFaaS:**
 
-* gateway - [`carlosedp/faas-gateway:riscv64`](https://hub.docker.com/r/carlosedp/faas-gateway)
+* faas-gateway - [`carlosedp/faas-gateway:riscv64`](https://hub.docker.com/r/carlosedp/faas-gateway)
 * faas-basic-auth-plugin - [`carlosedp/faas-basic-auth-plugin:riscv64`](https://hub.docker.com/r/carlosedp/faas-basic-auth-plugin)
 * faas-swarm - [`carlosedp/faas-swarm:riscv64`](https://hub.docker.com/r/carlosedp/faas-swarm)
 * faas-netes - [`carlosedp/faas-netes:riscv64`](https://hub.docker.com/r/carlosedp/faas-netes)
@@ -404,58 +404,36 @@ GOOS=linux GOARCH=riscv64 go build ./cmd/kube-apiserver
 
 <https://github.com/rancher/k3s/>
 
+
+Bump:
+    github.com/opencontainers/runc
+    github.com/rancher/kine
+
+
+
 * [ ] `github.com/ibuildthecloud/kvsql` - - Add stubs with no SQLite
 * [ ] `github.com/rancher/kine` - - Add stubs with no SQLite
 
 <details><summary>WIP</summary>
 
-* [ ] Update imports on `pkg/server/context.go`
+* [x] Update imports on `pkg/server/context.go`
   * "k8s.io/kubernetes/staging/src/k8s.io/client-go/kubernetes" to "k8s.io/client-go/kubernetes"
   * "k8s.io/kubernetes/staging/src/k8s.io/client-go/tools/clientcmd" to "k8s.io/client-go/tools/clientcmd"
 * [ ] Update imports on `pkg/cli/server/server.go` to load sqlite stubs
-* [ ] Bump `github.com/google/cadvisor` after merge
+* [x] Bump `github.com/google/cadvisor` after merge
 * [ ] Bump `github.com/ibuildthecloud/kvsql` after merge
-* [ ] Bump `github.com/mindprince/gonvml`
+* [x] Bump `github.com/mindprince/gonvml`
 * [ ] Bump `github.com/opencontainers/runc` after merge
 * [ ] Bump `github.com/rancher/kine` after merge
-* [ ] Bump `k8s.io/kubernetes` after merge
-* [ ] Bump `golang.org/x/sys`
+* [x] Bump `k8s.io/kubernetes` after merge
+* [x] Bump `golang.org/x/sys`
 * [ ] Add `k8s.io/utils/inotify/`
 
 Files
 
-Change `pkg/server/context.go` to build with Go 1.13:
-
-```diff
-diff --git a/pkg/server/context.go b/pkg/server/context.go
-index 4f33b9aaca..9c65f19e36 100644
---- a/pkg/server/context.go
-+++ b/pkg/server/context.go
-@@ -12,9 +12,9 @@ import (
-        "github.com/rancher/wrangler/pkg/apply"
-        "github.com/rancher/wrangler/pkg/crd"
-        "github.com/rancher/wrangler/pkg/start"
-+       "k8s.io/client-go/kubernetes"
-        "k8s.io/client-go/rest"
--       "k8s.io/kubernetes/staging/src/k8s.io/client-go/kubernetes"
--       "k8s.io/kubernetes/staging/src/k8s.io/client-go/tools/clientcmd"
-+       "k8s.io/client-go/tools/clientcmd"
- )
-```
-
-
 File `vendor/github.com/google/cadvisor/container/containerd/client.go`:
 
 Change import to `"github.com/containerd/containerd/pkg/dialer"`.
-
-Files:
-
-`vendor/k8s.io/kubernetes/pkg/kubelet/cadvisor/cadvisor_linux.go`
-`vendor/k8s.io/kubernetes/pkg/kubelet/cadvisor/cadvisor_unsupported.go`
-`vendor/k8s.io/kubernetes/pkg/kubelet/cadvisor/helpers_linux.go`
-`vendor/k8s.io/kubernetes/pkg/kubelet/cadvisor/helpers_unsupported.go`
-
-Change build directives (cgo).
 
 Create sqlite stubs:
 
@@ -509,14 +487,6 @@ The PRs do not add functionality to cross-build the images for Risc-V yet since 
 <https://github.com/nats-io/nats-streaming-server>
 
 * [x] Bump `x/sys`, `etcd/bbolt`.
-* [x] PR - <https://github.com/nats-io/nats-streaming-server/pull/891>
-* [ ] Add to CI
-
-#### Nats-streaming-server
-
-<https://github.com/nats-io/nats-streaming-server>
-
-* [x] Update `x/sys`, `etcd/bbolt`.
 * [x] PR - <https://github.com/nats-io/nats-streaming-server/pull/891>
 * [ ] Add to CI
 
@@ -699,6 +669,14 @@ Repository mirror: <https://github.com/CanonicalLtd/sqlite>
 Dependency for Gin Framework
 
 * [x] PR <https://github.com/mattn/go-isatty/pull/39>
+
+### ginkgo
+
+<https://github.com/onsi/ginkgo>
+
+Dependency for building Kubernetes complete binaries
+
+* [ ] PR <https://github.com/onsi/ginkgo/pull/632>
 
 --------------------------------------------------------------------------------
 
