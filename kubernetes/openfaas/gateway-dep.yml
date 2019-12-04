@@ -31,7 +31,6 @@ spec:
             requests:
               cpu: 50m
               memory: 120Mi
-            
         image: carlosedp/faas-gateway:riscv64
         imagePullPolicy: Always
         securityContext:
@@ -126,3 +125,5 @@ spec:
         ports:
         - containerPort: 8081
           protocol: TCP
+      nodeSelector:
+        beta.kubernetes.io/arch: riscv64

@@ -25,7 +25,6 @@ spec:
         resources:
             requests:
               memory: 120Mi
-            
         image: carlosedp/faas-nats-streaming:riscv64
         imagePullPolicy: Always
         ports:
@@ -37,3 +36,5 @@ spec:
           - memory
           - --cluster_id
           - faas-cluster
+      nodeSelector:
+        beta.kubernetes.io/arch: riscv64

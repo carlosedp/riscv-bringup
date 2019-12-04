@@ -25,7 +25,6 @@ spec:
           resources:
             requests:
               memory: 64Mi
-            
           image: carlosedp/faas-idler:riscv64
           imagePullPolicy: Always
           env:
@@ -50,3 +49,5 @@ spec:
         - name: auth
           secret:
             secretName: basic-auth
+      nodeSelector:
+        beta.kubernetes.io/arch: riscv64

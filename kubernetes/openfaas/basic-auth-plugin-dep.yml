@@ -1,5 +1,4 @@
 ---
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -58,3 +57,5 @@ spec:
         - name: http
           containerPort: 8080
           protocol: TCP
+      nodeSelector:
+        beta.kubernetes.io/arch: riscv64

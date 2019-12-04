@@ -27,7 +27,6 @@ spec:
         resources:
             requests:
               memory: 512Mi
-            
         image: carlosedp/prometheus:v2.11.1-riscv64
         command:
           - "prometheus"
@@ -68,3 +67,5 @@ spec:
                 mode: 0644
         - name: prom-data
           emptyDir: {}
+      nodeSelector:
+        beta.kubernetes.io/arch: riscv64
