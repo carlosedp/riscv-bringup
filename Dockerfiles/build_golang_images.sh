@@ -1,3 +1,9 @@
+#!/bin.bash
+
+# Build riscv64 image with
+# docker build -t carlosedp/golang:1.13-riscv64 -f Dockerfile.golang --push .
+#
+
 REPO=carlosedp
 IMAGE=$REPO/golang
 VERSION=1.13
@@ -22,10 +28,12 @@ docker push $IMAGE:$VERSION-amd64
 docker push $IMAGE:$VERSION-ppc64le
 docker push $IMAGE:$VERSION-riscv64
 
-docker manifest create --amend $IMAGE:$VERSION `echo $ALL_ARCH | sed -e "s~[^ ]*~$IMAGE:$VERSION\-&~g"`
+#docker manifest create --amend $IMAGE:$VERSION `echo $ALL_ARCH | sed -e "s~[^ ]*~$IMAGE:$VERSION\-&~g"`
 
-for arch in 'amd64 arm arm64 riscv64 ppc64le'; do docker manifest annotate --arch $arch $IMAGE:$VERSION $IMAGE:$VERSION-$arch; done
-docker manifest push --purge $IMAGE:$VERSION
+#for arch in 'amd64 arm arm64 riscv64 ppc64le'; do docker manifest annotate --arch $arch $IMAGE:$VERSION $IMAGE:$VERSION-$arch; done
+#docker manifest push --purge $IMAGE:$VERSION
+
+#manifest-tool push from-args --platforms linux/amd64,linux/arm,linux/arm64,linux/riscv64,linux/ppc64le --template "carlosedp/golang:1.13-ARCH" --target "carlosedp/golang:1.13"
 
 docker rmi $IMAGE:$VERSION-arm64
 docker rmi $IMAGE:$VERSION-arm

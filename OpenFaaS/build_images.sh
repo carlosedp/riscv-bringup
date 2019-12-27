@@ -12,8 +12,6 @@ git clone https://github.com/openfaas/faas
 git clone https://github.com/openfaas/nats-queue-worker/
 git clone https://github.com/openfaas-incubator/faas-idler
 
-
-
 # Build faas-cli
 pushd faas-cli
 CGO_ENABLED=0 GOOS=linux go build --ldflags "-s -w" -a -installsuffix cgo -o faas-cli
@@ -100,39 +98,54 @@ popd
 
 # Build Nats-Queue-Worker
 pushd nats-queue-worker
-CGO_ENABLED=0 GOOS=linux go build --ldflags "-s -w" -a -installsuffix cgo -o app
 
-cat <<EOF >>Dockerfile.riscv64
-FROM carlosedp/debian:sid-riscv64
-ARG ARCH="riscv64"
+mv Dockerfile Dockerfile-orig
+cat <<EOF >>Dockerfile
+FROM carlosedp/golang:1.13 as golang
+ENV CGO_ENABLED=0
 
-LABEL org.label-schema.license="MIT" \
-    org.label-schema.vcs-url="https://github.com/openfaas/faas" \
-    org.label-schema.vcs-type="Git" \
-    org.label-schema.name="openfaas/faas" \
-    org.label-schema.vendor="openfaas" \
-    org.label-schema.docker.schema-version="1.0"
+WORKDIR /go/src/github.com/openfaas/nats-queue-worker
 
-RUN addgroup --system app \
+COPY vendor     vendor
+COPY handler    handler
+COPY nats       nats
+COPY main.go  .
+COPY types.go .
+COPY readconfig.go .
+COPY readconfig_test.go .
+COPY auth.go .
+
+ARG go_opts
+
+RUN env $go_opts CGO_ENABLED=0 go build -a -installsuffix cgo -o app . \
+    && addgroup --system app \
     && adduser --system --ingroup app app \
     && apt-get update \
-    && apt-get install -y ca-certificates
+    && apt-get install -y ca-certificates \
+    && mkdir /scratch-tmp
 
-WORKDIR /home/app
+# we can't add user in next stage because it's from scratch
+# ca-certificates and tmp folder are also missing in scratch
+# so we add all of it here and copy files in next stage
+
+FROM scratch
 
 EXPOSE 8080
 ENV http_proxy      ""
 ENV https_proxy     ""
-
-COPY app  .
-
-RUN chown -R app:app ./
-
 USER app
 
-CMD ["./app]
+COPY --from=golang /etc/passwd /etc/group /etc/
+COPY --from=golang /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=golang --chown=app:app /scratch-tmp /tmp
+COPY --from=golang /go/src/github.com/openfaas/nats-queue-worker/app    .
+
+CMD ["./app"]
 EOF
-docker build -t $REPO/faas-queue-worker:riscv64 -f Dockerfile.riscv64 .
+
+make build-riscv64
+docker tag openfaas/queue-worker:latest-riscv64 $REPO/faas-queue-worker:riscv64
+docker rmi openfaas/queue-worker:latest-riscv64
 docker push $REPO/faas-queue-worker:riscv64
 popd
 

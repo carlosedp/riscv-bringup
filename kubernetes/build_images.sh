@@ -1,4 +1,5 @@
 #!/bin/bash
+# This script requires docker cli built from master since released version does not support riscv64 manifest annotation
 
 ARCHITECTURES="amd64 arm64 arm ppc64le riscv64"
 BASEIMAGE=carlosedp/debian:sid-slim
@@ -52,15 +53,12 @@ index ce7de73301..211580051e 100755
  )
 EOF
 
-make KUBE_BUILD_PLATFORMS=linux/riscv64
-
-
 make generated_files
 for arch in $ARCHITECTURES; do
-	for i in kubeadm kubelet kube-apiserver kube-proxy kube-scheduler kube-controller-manager kubemark;
+	for i in kubeadm kubelet kubectl kube-apiserver kube-proxy kube-scheduler kube-controller-manager kubemark;
 	do
     echo "Building $i for $arch"
-        make WHAT=./cmd/$i KUBE_BUILD_PLATFORMS=linux/riscv64
+        make WHAT=./cmd/$i KUBE_BUILD_PLATFORMS=linux/$arch
 	done
 done
 popd
@@ -91,7 +89,7 @@ for bin in kube-apiserver kube-scheduler kube-controller-manager; do
 		ARG TARGETARCH
 		ARG BIN
         ENV arch $TARGETARCH
-		COPY $BIN-$arch /usr/local/bin/$BIN
+		COPY _output/local/go/bin/linux_${arch}/$BIN /usr/local/bin/$BIN
 		EOF
     docker buildx build -t ${REPO}/${bin}:${VERSION} --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm,linux/riscv64 --build-arg=BASEIMAGE=$BASEIMAGE --build-arg=BIN=$bin --push .
 done
@@ -105,12 +103,20 @@ for bin in kube-proxy; do
 		ARG TARGETARCH
 		ARG BIN
 		ENV arch $TARGETARCH
-		ADD $BIN-$arch /usr/local/bin/$BIN
+		ADD _output/local/bin/linux/$arch/$BIN /usr/local/bin/$BIN
 		EOF
 	docker buildx build -t ${REPO}/${bin}:${VERSION} --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm,linux/riscv64 --build-arg=BASEIMAGE=$BASEIMAGE --build-arg=BIN=$bin --push .
 done
 
 # Build pause image
+pushd build/pause
+TAG=3.1
+REV=`git describe --contains --always --match='v*'`
+riscv64-buildroot-linux-gnu-gcc -Os -Wall -Werror -static -DVERSION=v${TAG}-${REV} -o bin/pause-riscv64 pause.c
+docker build -t ${REPO}/pause:${TAG} --build-arg=ARCH=riscv64 .
+docker push ${REPO}/pause:${TAG}
+popd
+
 ARCHITECTURES="amd64 arm64 arm ppc64le riscv64"
 ORIGINIMAGE=k8s.gcr.io/pause
 IMAGE=carlosedp/pause
@@ -127,7 +133,8 @@ docker manifest push --purge $IMAGE:$VERSION
 
 # Build CoreDNS
 cd coredns
-for arch in amd64 arm arm64 riscv64 ppc64le; do CGO_ENABLED=0 GOOS=linux GOARCH=$arch gob -o coredns-$arch .; done
+GITCOMMIT=`git describe --dirty --always`
+for arch in amd64 arm arm64 riscv64 ppc64le; do CGO_ENABLED=0 GOOS=linux GOARCH=$arch go build -v -ldflags="-s -w -X github.com/coredns/coredns/coremain.GitCommit=${GITCOMMIT}" -o coredns-$arch .; done
 
 cp -R /etc/ssl/certs .
 cat > Dockerfile.custom << 'EOF'

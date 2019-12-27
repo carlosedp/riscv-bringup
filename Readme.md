@@ -11,7 +11,6 @@ If you like this project and others I've been contributing and would like to sup
 ## Contents <!-- omit in toc -->
 
 * [Risc-V Virtual Machine, pre-built Go and Docker](#risc-v-virtual-machine-pre-built-go-and-docker)
-* [Building Go on your Risc-V VM or SBC](#building-go-on-your-risc-v-vm-or-sbc)
 * [Golang](#golang)
   * [Core Golang](#core-golang)
   * [Go Libraries](#go-libraries)
@@ -33,9 +32,8 @@ If you like this project and others I've been contributing and would like to sup
 * [Base Container Images](#base-container-images)
 * [Docker images for projects](#docker-images-for-projects)
 * [Additional projects / libraries](#additional-projects--libraries)
-  * [Kubernetes / K3s](#kubernetes--k3s)
-    * [Kubernetes](#kubernetes)
-    * [K3s](#k3s)
+  * [Kubernetes](#kubernetes)
+  * [K3s](#k3s)
   * [ETCD](#etcd)
   * [OpenFaaS](#openfaas)
     * [Faas-cli](#faas-cli)
@@ -59,6 +57,8 @@ If you like this project and others I've been contributing and would like to sup
   * [Gin web framework](#gin-web-framework)
   * [go-isatty](#go-isatty)
   * [ginkgo](#ginkgo)
+  * [genuinetools/netns](#genuinetoolsnetns)
+  * [alexellis/faas-containerd](#alexellisfaas-containerd)
 * [Community](#community)
 * [References](#references)
 
@@ -71,7 +71,7 @@ Download the [Risc-V Debian VM](https://github.com/carlosedp/riscv-bringup/relea
 
 A prebuilt Go 1.13 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.13dev-riscv64.tar.gz).
 
-To run Go on this VM, download both files and install with:
+To run Go on this VM, download the VM and install with:
 
 <details><summary>Instructions</summary></u>
 
@@ -118,47 +118,15 @@ There are a couple of projects that build on Risc-V in my [go-playground](https:
 
 There is also a [Podman](https://podman.io) package. Check more info on [build-podman-env.md](build-podman-env.md).
 
-## Building Go on your Risc-V VM or SBC
-
-Golang is still not upstreamed so to build it from source, you will need a machine to do the initial bootstrap, copy this bootstraped tree to your Risc-V host or VM and then build the complete Go distribution. This bootstrap host can be a Windows, Mac or Linux.
-
-<details><summary>Instructions</summary>
-
-```bash
-# On bootstrap Host
-git clone https://github.com/4a6f656c/riscv-go
-cd riscv-go/src
-GOOS=linux GOARCH=riscv64 ./bootstrap.bash
-# Copy the generated boostrap pack to the VM/SBC
-scp -P 22222 ../../go-linux-riscv64-bootstrap.tbz root@localhost: # In case you use the VM provided above
-```
-
-Now on your Risc-V VM/SBC, clone the repository, export the path and bootstrap path you unpacked and build/test:
-
-```bash
-# On Risc-V Host
-tar vxf go-linux-riscv64-bootstrap.tbz
-git clone https://github.com/4a6f656c/riscv-go
-cd riscv-go
-export GOROOT_BOOTSTRAP=$HOME/go-linux-riscv64-bootstrap
-export PATH="$(pwd)/misc/riscv:$(pwd)/bin:$PATH"
-cd src
-GOGC=off ./make.bash                            # Builds go on $HOME/riscv-go/bin that can be added to your path
-GOGC=off  GO_TEST_TIMEOUT_SCALE=10 ./run.bash   # Tests the build
-# Pack built Golang into a tarball
-cd ..
-sudo tar -cvf go-1.13dev-riscv.tar --transform s/^riscv-go/go/ --exclude=pkg/obj --exclude .git riscv-go
-```
-
-</details>
-
-Now you can use this go build for testing/developing other projects.
-
 --------------------------------------------------------------------------------
 
 ## Golang
 
 ### Core Golang
+
+Golang is in process of upstreaming, CLs can be followed on [Gerrit](https://go-review.googlesource.com/q/riscv).
+
+To build Go from source, check [build-golang.md](build-golang.md).
 
 * [ ] Golang upstreaming
   * Tracker Issue: <https://github.com/golang/go/issues/27532>
@@ -186,7 +154,9 @@ Now you can use this go build for testing/developing other projects.
 
 ## Docker and pre-reqs
 
-To build a complete container environment, check the [build-docker-env.md](build-docker-env.md) document.
+To build a complete Docker container stack, check the [build-docker-env.md](build-docker-env.md) document.
+
+Downloads for prebuilt packages are available on <https://github.com/carlosedp/riscv-bringup/releases>.
 
 ### Libseccomp
 
@@ -241,6 +211,7 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 * [x] Upstreamed / Works (must be built from `master`)
 * [x] Update `x/sys` and `x/net` modules in `vendor`. [PR](https://github.com/docker/cli/pull/1926)
 * [x] Add riscv64 to manifest annotation. [PR#2084](https://github.com/docker/cli/pull/2084)
+* [ ] Add support for riscv64 on binfmt. [PR#21](https://github.com/docker/binfmt/pull/21)
 * [ ] Add to CI
 
 #### Docker daemon
@@ -294,6 +265,8 @@ Alternative is run dockerd as: `sudo dockerd  --userland-proxy=false`
 ## Podman - libpod
 
 <https://github.com/containers/libpod>
+
+Podman is a library and tool for running OCI-based containers in Pods
 
 * [x] PR to remove CGO dependency <https://github.com/containers/libpod/pull/3437>
 * [x] PR for containers/storage - <https://github.com/containers/storage/pull/375>
@@ -371,79 +344,72 @@ Some version mismatches due to Kubernetes hard-coded version check for CoreDNS a
 
 ## Additional projects / libraries
 
-### Kubernetes / K3s
-
-Building and deploying Kubernetes or K3s on Risc-V is detailed on a [dedicated readme](https://github.com/carlosedp/riscv-bringup/blob/master/kubernetes/Readme.md).
-
-#### Kubernetes
+### Kubernetes
 
 <https://github.com/kubernetes/kubernetes/>
+
+Building and deploying Kubernetes or K3s on Risc-V is detailed on a [dedicated readme](https://github.com/carlosedp/riscv-bringup/blob/master/kubernetes/Readme.md). There is a build script(`build_images.sh`) for custom images in `kubernetes` dir.
 
 * [x] `github.com/mindprince/gonvml` - PR <https://github.com/mindprince/gonvml/pull/13> - Stub nocgo functions
 * [x] `github.com/opencontainers/runc` - PR <https://github.com/opencontainers/runc/pull/2123> - Bump x/sys and support syscall.
 * [x] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82342> - Bump `mindprince/gonvml` and change directives on `pkg/kubelet/cadvisor` files
-* [ ] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82349> - Bump `opencontainers/runc` and `x/sys` to support Risc-V
+* [x] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82349> - Bump `opencontainers/runc` and `x/sys` to support Risc-V
+* [x] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/86013> - Bump Ginkgo to support building on riscv64 arch
+* [ ] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/86011> - Add build support for riscv64 arch
+* [ ] `google/cadvisor` - PR <https://github.com/google/cadvisor/pull/2364> - Ignore CPU clock for riscv64
 
-<details><summary>Update process:</summary>
+To Do:
+
+* Cross-platform builder image. Update `kubernetes/build/build-image/cross` adding riscv64 toolchain. Depends on Ubuntu `crossbuild-essential-riscv64` be available.
+* Add riscv64 to ./build/pause Makefile. Depends on Go image with Risc-V support and cross-platform image.
+
+<details><summary>Updating dependencies</summary>
 
 ```bash
 # Update dependency
 ./hack/pin-dependency.sh github.com/mindprince/gonvml
 # Update vendor dir
-./hack/update-vendor
+./hack/update-vendor.sh
 
-# Generate API files
-make generated_files
+# Build main binaries
+for bin in kubeadm kubelet kubectl kube-apiserver kube-proxy kube-scheduler kube-controller-manager kubemark; do
+    make WHAT=./cmd/${bin} KUBE_BUILD_PLATFORMS=linux/riscv64
+done
 
-GOOS=linux GOARCH=riscv64 go build ./cmd/kube-apiserver
+# Binaries will be placed on _output/local/go/bin/linux_riscv64/
+
+# Build all (will print error on e2e test)
+make all KUBE_BUILD_PLATFORMS=linux/riscv64
+...
 ```
 
 </details>
 
-#### K3s
+### K3s
 
 <https://github.com/rancher/k3s/>
 
+K3s build depends on deploying external etcd database since sqlite embedded DB requires CGO. Another requirement is running k3s with Docker and crun as daemon (see Docker install) since runc, the default runtime for K3s requires CGO as well.
+
+For more info, check file [kubernetes/Readme.md#K3s]
 
 Bump:
-    github.com/opencontainers/runc
-    github.com/rancher/kine
 
+* [x] <github.com/opencontainers/runc>
+* [x] <github.com/rancher/kine>
 
-
-* [ ] `github.com/ibuildthecloud/kvsql` - - Add stubs with no SQLite
-* [ ] `github.com/rancher/kine` - - Add stubs with no SQLite
-
-<details><summary>WIP</summary>
-
-* [x] Update imports on `pkg/server/context.go`
-  * "k8s.io/kubernetes/staging/src/k8s.io/client-go/kubernetes" to "k8s.io/client-go/kubernetes"
-  * "k8s.io/kubernetes/staging/src/k8s.io/client-go/tools/clientcmd" to "k8s.io/client-go/tools/clientcmd"
-* [ ] Update imports on `pkg/cli/server/server.go` to load sqlite stubs
+* [x] `github.com/rancher/kine` - PR#14 - [Stub-out sqlite drivers to build Kine without CGO](https://github.com/rancher/kine/pull/14)
+* [ ] `github.com/rancher/kine` - PR#19 - [Update function signature on nocgo stub](https://github.com/rancher/kine/pull/19)
 * [x] Bump `github.com/google/cadvisor` after merge
-* [ ] Bump `github.com/ibuildthecloud/kvsql` after merge
 * [x] Bump `github.com/mindprince/gonvml`
-* [ ] Bump `github.com/opencontainers/runc` after merge
-* [ ] Bump `github.com/rancher/kine` after merge
+* [x] Bump `github.com/rancher/kine` after merge
 * [x] Bump `k8s.io/kubernetes` after merge
 * [x] Bump `golang.org/x/sys`
-* [ ] Add `k8s.io/utils/inotify/`
 
-Files
+<details><summary>Future</summary>
 
-File `vendor/github.com/google/cadvisor/container/containerd/client.go`:
-
-Change import to `"github.com/containerd/containerd/pkg/dialer"`.
-
-Create sqlite stubs:
-
-pkg/cli/server/server.go
-
-vendor/github.com/ibuildthecloud/kvsql/clientv3/driver/sqlite/sqlite.go
-vendor/github.com/ibuildthecloud/kvsql/clientv3/kv.go
-
-vendor/github.com/rancher/kine/pkg/drivers/sqlite/sqlite.go
-vendor/github.com/rancher/kine/pkg/endpoint/endpoint.go
+* Embed database
+* Embed runtime
 
 </details>
 
@@ -676,7 +642,21 @@ Dependency for Gin Framework
 
 Dependency for building Kubernetes complete binaries
 
-* [ ] PR <https://github.com/onsi/ginkgo/pull/632>
+* [x] PR <https://github.com/onsi/ginkgo/pull/632>
+
+### genuinetools/netns
+
+<https://github.com/genuinetools/netns>
+
+Dependency for <https://github.com/alexellis/faas-containerd>
+
+* [ ] PR <https://github.com/genuinetools/netns/pull/21>
+
+### alexellis/faas-containerd
+
+<https://github.com/alexellis/faas-containerd>
+
+* [ ] PR <https://github.com/alexellis/faas-containerd/pull/1>
 
 --------------------------------------------------------------------------------
 

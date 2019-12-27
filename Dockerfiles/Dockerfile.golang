@@ -5,7 +5,9 @@ FROM carlosedp/debian:sid-slim-riscv64
 
 ENV GOLANG_VERSION 1.13beta1
 
-ADD go-1.13dev-riscv64.tar /usr/local/
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
+ADD https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.13dev-riscv64.tar.gz /usr/local/
 
 RUN export PATH="/usr/local/go/bin:$PATH"; \
     go version

@@ -24,7 +24,13 @@ sudo kubeadm init --image-repository=carlosedp --kubernetes-version 1.16.0 --ign
 sudo cat /etc/kubernetes/manifests/kube-apiserver.yaml | sed -e 's/\(\s*initialDelaySeconds\).*/\1: 150/'
 sudo cat /etc/kubernetes/manifests/kube-apiserver.yaml | sed -e 's/\(\s*timeoutSeconds\).*/\1: 60/'
 
+# Deploy Flannel network
 kubectl apply -f https://gist.github.com/carlosedp/337b99a98cdcf5962f4a0e24a778994c/raw/kube-flannel.yml
+
+#Allow pod scheduling on master node
+
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
 ```
 
 ## Deploy Nginx as a reverse proxy in front of Traefik NodePorts
@@ -94,7 +100,6 @@ sudo cp k3s-nginx-revproxy.conf /etc/nginx/conf.d/
 sudo systemctl restart nginx
 ```
 
-
 ## Deploy Traefik Ingress
 
 ```bash
@@ -133,49 +138,38 @@ kubectl apply -f  ./openfaas/
 
 ## Hacks
 
-Running kubelet on Qemu throws an error where clockspeed could not be found. Apply patch belor:
+* Running kubelet on Qemu throws an error where clockspeed could not be found. Apply patch below:
+
+Opened PR <https://github.com/google/cadvisor/pull/2364>
+
+* Patch pause image Makefile
 
 ```diff
-diff --git a/vendor/github.com/google/cadvisor/machine/machine.go b/vendor/github.com/google/cadvisor/machine/machine.go
-index d85e38f1939..2fcbc2625db 100644
---- a/vendor/github.com/google/cadvisor/machine/machine.go
-+++ b/vendor/github.com/google/cadvisor/machine/machine.go
-@@ -23,6 +23,7 @@ import (
-        "regexp"
-        "strconv"
-        "strings"
+diff --git a/build/pause/Makefile b/build/pause/Makefile
+index 92b0f40b16..9094ffe335 100644
+--- a/build/pause/Makefile
++++ b/build/pause/Makefile
+@@ -23,10 +23,10 @@ IMAGE_WITH_ARCH = $(IMAGE)-$(ARCH)
+ TAG = 3.1
+ REV = $(shell git describe --contains --always --match='v*')
+
+-# Architectures supported: amd64, arm, arm64, ppc64le and s390x
++# Architectures supported: amd64, arm, arm64, ppc64le riscv64 and s390x
+ ARCH ?= amd64
+
+-ALL_ARCH = amd64 arm arm64 ppc64le s.-p390x
++ALL_ARCH = amd64 arm arm64 ppc64le riscv64 s390x
+
+ CFLAGS = -Os -Wall -Werror -static -DVERSION=v$(TAG)-$(REV)
+ KUBE_CROSS_IMAGE ?= k8s.gcr.io/kube-cross
+@@ -55,6 +55,10 @@ ifeq ($(ARCH),s390x)
+        TRIPLE ?= s390x-linux-gnu
+ endif
+
++ifeq ($(ARCH),riscv64)
++        TRIPLE ?= riscv64-buildroot-linux-gnu
++endif
 +
-        // s390/s390x changes
-        "runtime"
-
-@@ -53,7 +54,7 @@ const cpuBusPath = "/sys/bus/cpu/devices/"
- // GetClockSpeed returns the CPU clock speed, given a []byte formatted as the /proc/cpuinfo file.
- func GetClockSpeed(procInfo []byte) (uint64, error) {
-        // s390/s390x, aarch64 and arm32 changes
--       if isSystemZ() || isAArch64() || isArm32() {
-+       if isSystemZ() || isAArch64() || isArm32() || isRiscv64() {
-                return 0, nil
-        }
-
-@@ -396,6 +397,15 @@ func isSystemZ() bool {
-        return false
- }
-
-+// riscv64 changes
-+func isRiscv64() bool {
-+       arch, err := getMachineArch()
-+       if err == nil {
-+               return strings.Contains(arch, "riscv64")
-+       }
-+       return false
-+}
-+
- // s390/s390x changes
- func getNumCores() int {
-        maxProcs := runtime.GOMAXPROCS(0)
+ # If you want to build AND push all containers, see the 'all-push' rule.
+ all: all-container
 ```
-
-
-
-
-
