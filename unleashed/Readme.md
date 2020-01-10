@@ -1,16 +1,43 @@
-# Building the SiFive Unleashed Risc-V board boot requirements
+# Building the SiFive Unleashed RISC-V board boot requirements
 
-The objective of this guide is to provide an end-to-end solution on building the necessary packages to boot the SiFive Unleashed Risc-V board boot requirements.
+The objective of this guide is to provide an end-to-end solution on building the necessary packages to boot the SiFive Unleashed RISC-V board boot requirements.
 
 This is still a moving target so the process might change in the future. I confirm that with used versions everything works.
 
-The process is based on having OpenSBI (the second-stage boot loader) call U-boot and this load the boot config (from `extlinux.conf`) allowing one to add and change Kernel versions.
+The process is based on having OpenSBI (the second-stage boot loader) call U-Boot and this load the boot config (from `extlinux.conf`) allowing one to add and change Kernel versions.
+
+Below is a diagram of the process:
+
+```sh
+
+                                    +----------------------------------+      Extlinux.conf                Linux
+                                    |                                  |
+                                    |         SBL - FW_PAYLOAD         |    +----------------+    +--------------------+
+                                    |                                  |    |                |    |                    |
++--------------+   +----------+     |  +-----------+    +-----------+  |    | Unleashed Menu |    | Starting kernel ...|
+|              |   |          |     |  |           |    |           |  |    |                |    | [0.00] Linux versio|
+|  ROM - ZSBL  |   |  Loader  |     |  |           |    |           |  |    | 1. Kernel 5.5  |    | [0.00] Kernel comma|
+|  In the SoC  +-->+  FSBL    +---->+  |  OpenSBI  +--->+   U-Boot  |  +--->+ 2. Kernel 5.6  +--->+ ..                 |
+|              |   |          |     |  |           |    |   Payload |  |    |                |    | ...                |
++--------------+   +----------+     |  |           |    |           |  |    |                |    |                    |
+                                    |  |           |    |           |  |    |                |    |                    |
+                                    |  +-----------+    +-----------+  |    +----------------+    +--------------------+
+                                    |                                  |
+                                    +----------------------------------+
+
+```
+
+* **ZSBL** - Zero Stage Bootloader - Code in the ROM of the board. [Source](https://github.com/sifive/freedom-u540-c000-bootloader)
+* **FSBL** - First Stage Bootloader - Loader that is called from ROM. [Source](https://github.com/sifive/freedom-u540-c000-bootloader)
+* **SBL** -  Second Bootloader - OpenSBI - Supervisor Binary Interface. [Source](https://github.com/riscv/opensbi/)
+* **U-Boot** - Universal Boot Loader. [Docs](https://www.denx.de/wiki/U-Boot)
+* **Extlinux** - Syslinux compatible configuration to load Linux Kernel and DTB thru a configurable menu from a filesystem.
 
 ## Install Toolchain to build Kernel
 
 This process has been done in a amd64 VM running Ubuntu Xenial.
 
-First install the Risc-V toolchain. You can build from source by using the commands below or download a pre-built one from [Bootlin](https://toolchains.bootlin.com/releases_riscv64.html).
+First install the RISC-V toolchain. You can build from source by using the commands below or download a pre-built one from [Bootlin](https://toolchains.bootlin.com/releases_riscv64.html).
 
 ```sh
 git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
@@ -24,7 +51,7 @@ echo "export PATH=/opt/riscv/bin:$PATH" >> ~/.bashrc
 
 ## Clone repositories
 
-Then, clone the required repositories. You need the FSBL (First stage bootloader), OpenSBI (Second stage bootloader), U-boot and the Linux kernel. I keep all in one directory.
+Then, clone the required repositories. You need the FSBL (First stage bootloader), OpenSBI (Second stage bootloader), U-Boot and the Linux kernel. I keep all in one directory.
 
 ```sh
 mkdir unleashed
@@ -36,8 +63,8 @@ git clone https://github.com/sifive/freedom-u540-c000-bootloader
 # OpenSBI
 git clone https://github.com/riscv/opensbi
 
-# U-boot
-git clone https://github.com/u-boot/u-boot
+# U-Boot
+git clone https://github.com/U-Boot/U-Boot
 
 # Linux Kernel
 git clone https://github.com/torvalds/linux
@@ -61,14 +88,14 @@ make CROSSCOMPILE=riscv64-unknown-linux-gnu-
 
 This will generate a `fsbl.bin` file that will be flashed into the SDcard later.
 
-## Build u-boot
+## Build U-Boot
 
-U-boot is the bootloader used to load the Kernels from the filesystem. It has a menu that allows one to select which version of the Kernel to use (if needed).
+U-Boot is the bootloader used to load the Kernels from the filesystem. It has a menu that allows one to select which version of the Kernel to use (if needed).
 
 We use latest released version just replacing it's DTB with last one from the Linux Kernel. This is not extrictly necessary though.
 
 ```bash
-pushd u-boot
+pushd U-Boot
 git checkout v2020.01
 cp ../linux/arch/riscv/boot/dts/sifive/
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make sifive_fu540_defconfig
@@ -77,17 +104,17 @@ CROSS_COMPILE=riscv64-unknown-linux-gnu- make -j 6
 popd
 ```
 
-This will generate the file `u-boot.bin` to be used by OpenSBI.
+This will generate the file `U-Boot.bin` to be used by OpenSBI.
 
 ## Build OpenSBI
 
-OpenSBI is the secondary bootloader. It's the one that calls U-boot. The build process uses the U-boot as it's payload to have it embedded into the same binary.
+OpenSBI is the secondary bootloader. It's the one that calls U-Boot. The build process uses the U-Boot as it's payload to have it embedded into the same binary.
 
 ```sh
 pushd opensbi
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- \
      PLATFORM=sifive/fu540 \
-     FW_PAYLOAD_PATH=../u-boot/u-boot.bin
+     FW_PAYLOAD_PATH=../U-Boot/U-Boot.bin
 popd
 ```
 
@@ -95,7 +122,7 @@ This will generate the file `build/platform/sifive/fu540/firmware/fw_payload.bin
 
 ## Build Linux Kernel
 
-Not let's build the Linux kernel. First let's select the last mainline version that already supports Risc-V with no additional patches.
+Not let's build the Linux kernel. First let's select the last mainline version that already supports RISC-V with no additional patches.
 
 ```sh
 pushd linux

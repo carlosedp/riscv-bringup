@@ -1,8 +1,8 @@
-# Risc-V bring-up tracker <!-- omit in toc -->
+# RISC-V bring-up tracker <!-- omit in toc -->
 
-The objective of this repository is to track the progress and pre-requisites to allow containers and Go applications on Risc-V.
+The objective of this repository is to track the progress and pre-requisites to allow containers and Go applications on RISC-V.
 
-There is a companion article available on <https://medium.com/@carlosedp/docker-containers-on-risc-v-architecture-5bc45725624b>.
+There is a companion article available on <https://medium.com/@carlosedp/docker-containers-on-RISC-V-architecture-5bc45725624b>.
 
 This page is also linked from [http://bit.ly/riscvtracker](http://bit.ly/riscvtracker).
 
@@ -10,7 +10,7 @@ If you like this project and others I've been contributing and would like to sup
 
 ## Contents <!-- omit in toc -->
 
-* [Risc-V Virtual Machine, pre-built Go and Docker](#risc-v-virtual-machine-pre-built-go-and-docker)
+* [RISC-V Virtual Machine, pre-built Go and Docker](#risc-v-virtual-machine-pre-built-go-and-docker)
 * [Golang](#golang)
   * [Core Golang](#core-golang)
   * [Go Libraries](#go-libraries)
@@ -63,11 +63,11 @@ If you like this project and others I've been contributing and would like to sup
 * [References](#references)
 
 
-## Risc-V Virtual Machine, pre-built Go and Docker
+## RISC-V Virtual Machine, pre-built Go and Docker
 
 To make the development easier, there are Qemu virtual machines based on Debian and Fedora with some developer tools already installed.
 
-Download the [Risc-V Debian VM](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-20181123.tar.bz2). or [Risc-V Fedora VM](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla). For more information, check [the readme](Qemu-VM.md).
+Download the [RISC-V Debian VM](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-20181123.tar.bz2). or [RISC-V Fedora VM](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla). For more information, check [the readme](Qemu-VM.md).
 
 A prebuilt Go 1.13 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.13dev-riscv64.tar.gz).
 
@@ -94,7 +94,7 @@ echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 
 </details>
 
-To run Docker on your Risc-V Debian environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.5-dev_riscv64.deb) and install with `sudo apt install ./docker-19.03.5-dev_riscv64.deb`.
+To run Docker on your RISC-V Debian environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.5-dev_riscv64.deb) and install with `sudo apt install ./docker-19.03.5-dev_riscv64.deb`.
 
 For other distros get the [tarball here](https://drive.google.com/open?id=1x1ndaLTsUq6P5yHdOM4fzH4NO2xqOZlP) and use the `install.sh` script. If the docker service doesn't start on install script, re-run `systemctl start docker`.
 
@@ -114,7 +114,7 @@ sudo pip3 install docker-compose
 
 To test it out after install, just run `docker run -d -p 8080:8080 carlosedp/echo-riscv` and then `curl http://localhost:8080`.
 
-There are a couple of projects that build on Risc-V in my [go-playground](https://github.com/carlosedp/go-playground) repo.
+There are a couple of projects that build on RISC-V in my [go-playground](https://github.com/carlosedp/go-playground) repo.
 
 There is also a [Podman](https://podman.io) package. Check more info on [build-podman-env.md](build-podman-env.md).
 
@@ -130,7 +130,7 @@ To build Go from source, check [build-golang.md](build-golang.md).
 
 * [ ] Golang upstreaming
   * Tracker Issue: <https://github.com/golang/go/issues/27532>
-  * Risc-V Fork: <https://github.com/4a6f656c/riscv-go>
+  * RISC-V Fork: <https://github.com/4a6f656c/riscv-go>
 * [ ] CGO implementation - Draft on <https://github.com/carlosedp/riscv-go> but far from complete/funtcional.
 * [ ] Go Builder
   * <https://go-review.googlesource.com/c/build/+/188501>
@@ -348,12 +348,12 @@ Some version mismatches due to Kubernetes hard-coded version check for CoreDNS a
 
 <https://github.com/kubernetes/kubernetes/>
 
-Building and deploying Kubernetes or K3s on Risc-V is detailed on a [dedicated readme](https://github.com/carlosedp/riscv-bringup/blob/master/kubernetes/Readme.md). There is a build script(`build_images.sh`) for custom images in `kubernetes` dir.
+Building and deploying Kubernetes or K3s on RISC-V is detailed on a [dedicated readme](https://github.com/carlosedp/riscv-bringup/blob/master/kubernetes/Readme.md). There is a build script(`build_images.sh`) for custom images in `kubernetes` dir.
 
 * [x] `github.com/mindprince/gonvml` - PR <https://github.com/mindprince/gonvml/pull/13> - Stub nocgo functions
 * [x] `github.com/opencontainers/runc` - PR <https://github.com/opencontainers/runc/pull/2123> - Bump x/sys and support syscall.
 * [x] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82342> - Bump `mindprince/gonvml` and change directives on `pkg/kubelet/cadvisor` files
-* [x] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82349> - Bump `opencontainers/runc` and `x/sys` to support Risc-V
+* [x] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82349> - Bump `opencontainers/runc` and `x/sys` to support RISC-V
 * [x] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/86013> - Bump Ginkgo to support building on riscv64 arch
 * [ ] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/86011> - Add build support for riscv64 arch
 * [x] `google/cadvisor` - PR <https://github.com/google/cadvisor/pull/2364> - Ignore CPU clock for riscv64
@@ -361,7 +361,7 @@ Building and deploying Kubernetes or K3s on Risc-V is detailed on a [dedicated r
 To Do:
 
 * Cross-platform builder image. Update `kubernetes/build/build-image/cross` adding riscv64 toolchain. Depends on Ubuntu `crossbuild-essential-riscv64` be available.
-* Add riscv64 to ./build/pause Makefile. Depends on Go image with Risc-V support and cross-platform image.
+* Add riscv64 to ./build/pause Makefile. Depends on Go image with RISC-V support and cross-platform image.
 
 <details><summary>Updating dependencies</summary>
 
@@ -427,9 +427,9 @@ Build with `go build .`, run with `ETCD_UNSUPPORTED_ARCH=riscv64 ./etcd`.
 
 ### OpenFaaS
 
-OpenFaaS is already upstreamed but still does not build images for Risc-V so I've built them and pushed to [my DockerHub](https://hub.docker.com/u/carlosedp) as links below. Here are the instructions to [deploy OpenFaaS](https://github.com/carlosedp/riscv-bringup/blob/master/OpenFaaS/Readme.md) on your Risc-V host or VM.
+OpenFaaS is already upstreamed but still does not build images for RISC-V so I've built them and pushed to [my DockerHub](https://hub.docker.com/u/carlosedp) as links below. Here are the instructions to [deploy OpenFaaS](https://github.com/carlosedp/riscv-bringup/blob/master/OpenFaaS/Readme.md) on your RISC-V host or VM.
 
-The PRs do not add functionality to cross-build the images for Risc-V yet since the base images still don't support the architecture. Check the [`build_images.sh`](OpenFaaS/build_images.sh) script to build the images manually.
+The PRs do not add functionality to cross-build the images for RISC-V yet since the base images still don't support the architecture. Check the [`build_images.sh`](OpenFaaS/build_images.sh) script to build the images manually.
 
 #### Faas-cli
 
@@ -662,7 +662,7 @@ Dependency for <https://github.com/alexellis/faas-containerd>
 
 ## Community
 
-* Slack channel #risc-v on <https://invite.slack.golangbridge.org>
+* Slack channel #RISC-V on <https://invite.slack.golangbridge.org>
 
 ## References
 
