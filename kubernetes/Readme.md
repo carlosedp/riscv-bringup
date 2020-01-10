@@ -138,10 +138,6 @@ kubectl apply -f  ./openfaas/
 
 ## Hacks
 
-* Running kubelet on Qemu throws an error where clockspeed could not be found. Apply patch below:
-
-Opened PR <https://github.com/google/cadvisor/pull/2364>
-
 * Patch pause image Makefile
 
 ```diff

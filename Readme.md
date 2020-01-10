@@ -356,7 +356,7 @@ Building and deploying Kubernetes or K3s on Risc-V is detailed on a [dedicated r
 * [x] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/82349> - Bump `opencontainers/runc` and `x/sys` to support Risc-V
 * [x] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/86013> - Bump Ginkgo to support building on riscv64 arch
 * [ ] `k8s.io/kubernetes/` - PR <https://github.com/kubernetes/kubernetes/pull/86011> - Add build support for riscv64 arch
-* [ ] `google/cadvisor` - PR <https://github.com/google/cadvisor/pull/2364> - Ignore CPU clock for riscv64
+* [x] `google/cadvisor` - PR <https://github.com/google/cadvisor/pull/2364> - Ignore CPU clock for riscv64
 
 To Do:
 

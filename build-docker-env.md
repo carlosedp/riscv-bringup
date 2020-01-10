@@ -52,18 +52,9 @@ pushd $GOPATH/src/github.com/containerd/
 git clone https://github.com/containerd/containerd
 pushd containerd
 
-LASTVER=`git tag |grep -v beta |grep -v "\-rc" |tail -1`
-git checkout $LASTVER
+make BUILDTAGS="no_btrfs" GO_GCFLAGS="-buildmode=default"
 
-VERSION=`git describe --match 'v[0-9]*' --dirty='.m' --always`
-REVISION=`git rev-parse HEAD; if ! git diff --no-ext-diff --quiet --exit-code; then echo .m; fi`
-go build -ldflags "-X github.com/containerd/containerd/version.Version=$VERSION -X github.com/containerd/containerd/version.Revision=$REVISION -X github.com/containerd/containerd/version.Package=./cmd/ctr -s -w" ./cmd/ctr
-
-go build -tags no_btrfs -ldflags "-X github.com/containerd/containerd/version.Version=$VERSION -X github.com/containerd/containerd/version.Revision=$REVISION -X github.com/containerd/containerd/version.Package=./cmd/containerd -s -w" ./cmd/containerd
-
-go build -ldflags "-X github.com/containerd/containerd/version.Version=$VERSION -X github.com/containerd/containerd/version.Revision=$REVISION -X github.com/containerd/containerd/version.Package=./cmd/containerd-shim -extldflags "-static" -s -w" ./cmd/containerd-shim
-
-sudo cp ctr containerd-shim containerd /usr/local/bin/
+sudo ./bin/* /usr/local/bin/
 popd
 popd
 ```
