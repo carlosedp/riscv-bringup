@@ -1,0 +1,59 @@
+diff --git a/Makefile b/Makefile
+index b7204ed..c69639e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -8,7 +8,7 @@ CC=${CROSSCOMPILE}gcc
+ LD=${CROSSCOMPILE}ld
+ OBJCOPY=${CROSSCOMPILE}objcopy
+ OBJDUMP=${CROSSCOMPILE}objdump
+-CFLAGS=-I. -O2 -ggdb -march=rv64imafdc -mabi=lp64d -Wall -mcmodel=medany -mexplicit-relocs
++CFLAGS=-I. -O2 -ggdb -march=rv64imafdc -mabi=lp64d -Wall -mcmodel=medany -mexplicit-relocs -Wno-main -no-pie -fno-PIE
+ CCASFLAGS=-I. -mcmodel=medany -mexplicit-relocs
+ LDFLAGS=-nostdlib -nostartfiles
+ 
+@@ -52,7 +52,7 @@ asm: zsbl.asm fsbl.asm
+ 
+ lib/version.c: .git/HEAD .git/index
+ 	echo "const char *gitid = \"$(shell git describe --always --dirty)\";" > lib/version.c
+-	echo "const char *gitdate = \"$(shell git log -n 1 --date=short --format=format:"%ad.%h" HEAD)\";" >> lib/version.c
++	echo "const char *gitdate = \"$(shell git log -n 1 --date=short --format=format:"%ad.%h" --no-show-signature HEAD)\";" >> lib/version.c
+ 	echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" >> lib/version.c
+ #	echo "const char *gitstatus = \"$(shell git status -s )\";" >> lib/version.c
+ 
+@@ -73,7 +73,7 @@ fsbl/dtb.o: fsbl/ux00_fsbl.dtb
+ zsbl/start.o: zsbl/ux00_zsbl.dtb
+ 
+ %.bin: %.elf
+-	$(OBJCOPY) -O binary $^ $@
++	$(OBJCOPY) -S -R .comment -R .note.gnu.build-id -O binary $^ $@
+ 
+ %.asm: %.elf
+ 	$(OBJDUMP) -S $^ > $@
+diff --git a/lib/strlen.c b/lib/strlen.c
+index 565955f..3d6addf 100644
+--- a/lib/strlen.c
++++ b/lib/strlen.c
+@@ -17,6 +17,14 @@
+ #include <string.h>
+ #include <stdint.h>
+ 
++static __inline unsigned long detect_null(unsigned long w)
++{
++  unsigned long mask = 0x7f7f7f7f;
++  if (sizeof (long) == 8)
++    mask = ((mask << 16) << 16) | mask;
++  return ~(((w & mask) + mask) | w | mask);
++}
++
+ size_t strlen(const char *str)
+ {
+   const char *start = str;
+@@ -35,7 +43,7 @@ size_t strlen(const char *str)
+     } while ((uintptr_t)str & (sizeof (long) - 1));
+ 
+   unsigned long *ls = (unsigned long *)str;
+-  while (!__libc_detect_null (*ls++))
++  while (!detect_null (*ls++))
+     ;
+   asm volatile ("" : "+r"(ls)); /* prevent "optimization" */
+ 

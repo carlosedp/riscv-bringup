@@ -1,0 +1,78 @@
+From a3400db9e4800c98f9fb3aa3b5ffa57f0e93e165 Mon Sep 17 00:00:00 2001
+From: Vincent Chen <vincent.chen@sifive.com>
+Date: Wed, 20 Nov 2019 16:25:35 +0800
+Subject: [PATCH] Enable entire L2 cache
+
+At runtime, FSBL is located on the lastest way of L2 cache. Therefore,
+FSBL can only enable the first 15 L2 cache ways to avoid corrupt itself.
+To make FSBL enable entire 16 L2 cache ways, this patch creates a
+trampoline before entering the FSBL payload program. At runtime, this
+trampoline is located on DRAM. Therefore, FSBL able to enable the entire
+L2 cache at the trampoline.
+---
+ fsbl/main.c  | 13 ++++++++++---
+ fsbl/start.S | 14 ++++++++++++++
+ 2 files changed, 24 insertions(+), 3 deletions(-)
+
+diff --git a/fsbl/main.c b/fsbl/main.c
+index ed1321b..ce777cc 100644
+--- a/fsbl/main.c
++++ b/fsbl/main.c
+@@ -54,7 +54,9 @@
+ Barrier barrier = { {0, 0}, {0, 0}, 0}; // bss initialization is done by main core while others do wfi
+ 
+ extern const gpt_guid gpt_guid_sifive_bare_metal;
++extern uint64_t *_CCache_trampoline_start, *_CCache_trampoline_end;
+ volatile uint64_t dtb_target;
++void (* ccache_trampoline) (void);
+ unsigned int serial_to_burn = ~0;
+ 
+ uint32_t __attribute__((weak)) own_dtb = 42; // not 0xedfe0dd0 the DTB magic
+@@ -388,6 +390,11 @@ int main(int id, unsigned long dtb)
+   puts("Loading boot payload");
+   ux00boot_load_gpt_partition((void*) PAYLOAD_DEST, &gpt_guid_sifive_bare_metal, peripheral_input_khz);
+ 
++  // Create the CCache trampoline at DRAM.
++  ccache_trampoline = (void *)(dtb_target - 0x1000); // dtb_target - 4KB
++  memcpy((void *)ccache_trampoline, (void *)(&_CCache_trampoline_start),
++		(uint64_t)&_CCache_trampoline_end- (uint64_t)&_CCache_trampoline_start);
++
+   puts("\r\n\n");
+   slave_main(0, dtb);
+ 
+@@ -415,10 +422,10 @@ int slave_main(int id, unsigned long dtb)
+ #else
+   register unsigned long a1 asm("a1") = dtb_target;
+ #endif
+-  // These next two guys must get inlined and not spill a0+a1 or it is broken!
++  // The next one guy must get inlined and not spill a0+a1 or it is broken!
+   Barrier_Wait(&barrier, NUM_CORES);
+-  ccache_enable_ways(CCACHE_CTRL_ADDR,14);
+-  asm volatile ("unimp" : : "r"(a0), "r"(a1));
+ 
++  // Jump to the CCache trampoline
++  ccache_trampoline();
+   return 0;
+ }
+diff --git a/fsbl/start.S b/fsbl/start.S
+index 13d7f3b..2c8470a 100644
+--- a/fsbl/start.S
++++ b/fsbl/start.S
+@@ -218,3 +218,17 @@ trap_entry:
+   csrr  t0,mcause
+   add   a0,zero,t0
+   j     _fail
++
++/* All L2 cache ways will be enabled in the CCache trmpoline */
++  .global _CCache_trampoline_start
++_CCache_trampoline_start:
++1:
++  fence	rw, io
++  li	t0, CCACHE_CTRL_ADDR
++  addi	t0, t0,CCACHE_ENABLE
++  li	t1, 15
++  amoswap.w t1,t1,(t0)
++  fence io, rw
++  unimp
++  .global _CCache_trampoline_end
++_CCache_trampoline_end:
