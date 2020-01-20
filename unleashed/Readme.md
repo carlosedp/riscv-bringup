@@ -97,7 +97,7 @@ We use latest released version just replacing it's DTB with last one from the Li
 ```bash
 pushd U-Boot
 git checkout v2020.01
-cp ../linux/arch/riscv/boot/dts/sifive/
+cp -v ../linux/arch/riscv/boot/dts/sifive/{hifive-unleashed-a00.dts,fu540-c000.dtsi} arch/riscv/dts/
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make sifive_fu540_defconfig
 make menuconfig # if needed
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make -j 6
@@ -114,7 +114,7 @@ OpenSBI is the secondary bootloader. It's the one that calls U-Boot. The build p
 pushd opensbi
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- \
      PLATFORM=sifive/fu540 \
-     FW_PAYLOAD_PATH=../U-Boot/U-Boot.bin
+     FW_PAYLOAD_PATH=../U-Boot/u-boot-dtb.bin
 popd
 ```
 
