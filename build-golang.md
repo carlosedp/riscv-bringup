@@ -27,7 +27,7 @@ GOGC=off ./make.bash                            # Builds go on $HOME/riscv-go/bi
 GOGC=off  GO_TEST_TIMEOUT_SCALE=10 ./run.bash   # Tests the build
 # Pack built Golang into a tarball
 cd ..
-sudo tar -cvf go-1.13dev-riscv.tar --transform s/^riscv-go/go/ --exclude=pkg/obj --exclude .git riscv-go
+sudo tar -cvf go-1.13dev-riscv64.tar --transform s/^riscv-go/go/ --exclude=pkg/obj --exclude .git riscv-go
 ```
 
 </details>

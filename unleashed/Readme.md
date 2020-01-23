@@ -232,3 +232,11 @@ You can mount the `boot` partition by adding a line like `/dev/mmcblk0p1 /boot e
 Use this with all the board switches in off position (facing inside the board).
 
 Root password is *riscv*.
+
+## References
+
+* HiFive Unleashed OpenSBI - <https://github.com/riscv/opensbi/blob/master/docs/platform/sifive_fu540.md>
+* HiFive Unleashed U-Boot - <https://gitlab.denx.de/u-boot/u-boot/blob/master/doc/board/sifive/fu540.rst>
+* OpenSBI Deep Dive - <https://content.riscv.org/wp-content/uploads/2019/06/13.30-RISCV_OpenSBI_Deep_Dive_v5.pdf>
+* The future of Supervisor Binary Interface(SBI) - <https://www.youtube.com/watch?v=d50mzglm2jU>
+* <>

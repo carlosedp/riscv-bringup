@@ -69,7 +69,7 @@ To make the development easier, there are Qemu virtual machines based on Debian 
 
 Download the [RISC-V Debian VM](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-20181123.tar.bz2). or [RISC-V Fedora VM](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla). For more information, check [the readme](Qemu-VM.md).
 
-A prebuilt Go 1.13 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.13dev-riscv64.tar.gz).
+A prebuilt Go 1.13 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.13-riscv64.tar.gz).
 
 To run Go on this VM, download the VM and install with:
 
@@ -80,10 +80,10 @@ To run Go on this VM, download the VM and install with:
 ./run_debian.sh
 
 # Download Golang tarball
-wget https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.13dev-riscv64.tar.gz
+wget https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.13-riscv64.tar.gz
 
 # In the VM, unpack (in root dir for example)
-tar vxf go-1.13dev-riscv64.tar.gz -C /usr/local/
+tar vxf go-1.13-riscv64.tar.gz -C /usr/local/
 
 # Add to your PATH
 export PATH="/usr/local/go/bin:$PATH"
@@ -399,7 +399,7 @@ Bump:
 * [x] <github.com/rancher/kine>
 
 * [x] `github.com/rancher/kine` - PR#14 - [Stub-out sqlite drivers to build Kine without CGO](https://github.com/rancher/kine/pull/14)
-* [ ] `github.com/rancher/kine` - PR#19 - [Update function signature on nocgo stub](https://github.com/rancher/kine/pull/19)
+* [x] `github.com/rancher/kine` - PR#19 - [Update function signature on nocgo stub](https://github.com/rancher/kine/pull/19)
 * [x] Bump `github.com/google/cadvisor` after merge
 * [x] Bump `github.com/mindprince/gonvml`
 * [x] Bump `github.com/rancher/kine` after merge
