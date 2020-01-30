@@ -1,0 +1,132 @@
+From 474efecb65dceb15f793b6e2f2b226e952f0f8e9 Mon Sep 17 00:00:00 2001
+From: Paul Walmsley <paul.walmsley@sifive.com>
+Date: Fri, 13 Sep 2019 18:35:50 -0700
+Subject: [PATCH] riscv: modify the Image header to improve compatibility with
+ the ARM64 header
+
+Part of the intention during the definition of the RISC-V kernel image
+header was to lay the groundwork for a future merge with the ARM64
+image header.  One error during my original review was not noticing
+that the RISC-V header's "magic" field was at a different size and
+position than the ARM64's "magic" field.  If the existing ARM64 Image
+header parsing code were to attempt to parse an existing RISC-V kernel
+image header format, it would see a magic number 0.  This is
+undesirable, since it's our intention to align as closely as possible
+with the ARM64 header format.  Another problem was that the original
+"res3" field was not being initialized correctly to zero.
+
+Address these issues by creating a 32-bit "magic2" field in the RISC-V
+header which matches the ARM64 "magic" field.  RISC-V binaries will
+store "RSC\x05" in this field.  The intention is that the use of the
+existing 64-bit "magic" field in the RISC-V header will be deprecated
+over time.  Increment the minor version number of the file format to
+indicate this change, and update the documentation accordingly.  Fix
+the assembler directives in head.S to ensure that reserved fields are
+properly zero-initialized.
+
+Signed-off-by: Paul Walmsley <paul.walmsley@sifive.com>
+Reported-by: Palmer Dabbelt <palmer@sifive.com>
+Reviewed-by: Palmer Dabbelt <palmer@sifive.com>
+Cc: Atish Patra <atish.patra@wdc.com>
+Cc: Karsten Merker <merker@debian.org>
+Link: https://lore.kernel.org/linux-riscv/194c2f10c9806720623430dbf0cc59a965e50448.camel@wdc.com/T/#u
+Link: https://lore.kernel.org/linux-riscv/mhng-755b14c4-8f35-4079-a7ff-e421fd1b02bc@palmer-si-x1e/T/#t
+---
+ Documentation/riscv/boot-image-header.txt | 13 +++++++------
+ arch/riscv/include/asm/image.h            | 12 ++++++------
+ arch/riscv/kernel/head.S                  |  4 ++--
+ 3 files changed, 15 insertions(+), 14 deletions(-)
+
+diff --git a/Documentation/riscv/boot-image-header.txt b/Documentation/riscv/boot-image-header.txt
+index 1b73fea23b39f..14b1492f689bb 100644
+--- a/Documentation/riscv/boot-image-header.txt
++++ b/Documentation/riscv/boot-image-header.txt
+@@ -18,7 +18,7 @@ The following 64-byte header is present in decompressed Linux kernel image.
+ 	u32 res1  = 0;		  /* Reserved */
+ 	u64 res2  = 0;    	  /* Reserved */
+ 	u64 magic = 0x5643534952; /* Magic number, little endian, "RISCV" */
+-	u32 res3;		  /* Reserved for additional RISC-V specific header */
++	u32 magic2 = 0x56534905;  /* Magic number 2, little endian, "RSC\x05" */
+ 	u32 res4;		  /* Reserved for PE COFF offset */
+ 
+ This header format is compliant with PE/COFF header and largely inspired from
+@@ -37,13 +37,14 @@ Notes:
+ 	Bits 16:31 - Major version
+ 
+   This preserves compatibility across newer and older version of the header.
+-  The current version is defined as 0.1.
++  The current version is defined as 0.2.
+ 
+-- res3 is reserved for offset to any other additional fields. This makes the
+-  header extendible in future. One example would be to accommodate ISA
+-  extension for RISC-V in future. For current version, it is set to be zero.
++- The "magic" field is deprecated as of version 0.2.  In a future
++  release, it may be removed.  This originally should have matched up
++  with the ARM64 header "magic" field, but unfortunately does not.
++  The "magic2" field replaces it, matching up with the ARM64 header.
+ 
+-- In current header, the flag field has only one field.
++- In current header, the flags field has only one field.
+ 	Bit 0: Kernel endianness. 1 if BE, 0 if LE.
+ 
+ - Image size is mandatory for boot loader to load kernel image. Booting will
+diff --git a/arch/riscv/include/asm/image.h b/arch/riscv/include/asm/image.h
+index ef28e106f2472..344db5244547c 100644
+--- a/arch/riscv/include/asm/image.h
++++ b/arch/riscv/include/asm/image.h
+@@ -3,7 +3,8 @@
+ #ifndef __ASM_IMAGE_H
+ #define __ASM_IMAGE_H
+ 
+-#define RISCV_IMAGE_MAGIC	"RISCV"
++#define RISCV_IMAGE_MAGIC	"RISCV\0\0\0"
++#define RISCV_IMAGE_MAGIC2	"RSC\x05"
+ 
+ #define RISCV_IMAGE_FLAG_BE_SHIFT	0
+ #define RISCV_IMAGE_FLAG_BE_MASK	0x1
+@@ -23,7 +24,7 @@
+ #define __HEAD_FLAGS		(__HEAD_FLAG(BE))
+ 
+ #define RISCV_HEADER_VERSION_MAJOR 0
+-#define RISCV_HEADER_VERSION_MINOR 1
++#define RISCV_HEADER_VERSION_MINOR 2
+ 
+ #define RISCV_HEADER_VERSION (RISCV_HEADER_VERSION_MAJOR << 16 | \
+ 			      RISCV_HEADER_VERSION_MINOR)
+@@ -39,9 +40,8 @@
+  * @version:		version
+  * @res1:		reserved
+  * @res2:		reserved
+- * @magic:		Magic number
+- * @res3:		reserved (will be used for additional RISC-V specific
+- *			header)
++ * @magic:		Magic number (RISC-V specific; deprecated)
++ * @magic2:		Magic number 2 (to match the ARM64 'magic' field pos)
+  * @res4:		reserved (will be used for PE COFF offset)
+  *
+  * The intention is for this header format to be shared between multiple
+@@ -58,7 +58,7 @@ struct riscv_image_header {
+ 	u32 res1;
+ 	u64 res2;
+ 	u64 magic;
+-	u32 res3;
++	u32 magic2;
+ 	u32 res4;
+ };
+ #endif /* __ASSEMBLY__ */
+diff --git a/arch/riscv/kernel/head.S b/arch/riscv/kernel/head.S
+index 0f1ba17e476fd..52eec0c1bf30c 100644
+--- a/arch/riscv/kernel/head.S
++++ b/arch/riscv/kernel/head.S
+@@ -39,9 +39,9 @@ ENTRY(_start)
+ 	.word RISCV_HEADER_VERSION
+ 	.word 0
+ 	.dword 0
+-	.asciz RISCV_IMAGE_MAGIC
+-	.word 0
++	.ascii RISCV_IMAGE_MAGIC
+ 	.balign 4
++	.ascii RISCV_IMAGE_MAGIC2
+ 	.word 0
+ 
+ .global _start_kernel

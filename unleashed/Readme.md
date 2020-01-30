@@ -76,12 +76,12 @@ First the FSBL. It requires some temporary patches until they get merged into th
 
 ```sh
 pushd freedom-u540-c000-bootloader
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/drop-unneeded-sectiosn-fix-string.patch
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/enable-entire-l2-cache.patch
+wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/fsbl-drop-unneeded-sectiosn-fix-string.patch
+wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/fsbl-enable-entire-l2-cache.patch
 
 # Ignore error on one Makefile chunk
-patch -p1 < drop-unneeded-sectiosn-fix-string.patch
-patch -p1 < enable-entire-l2-cache.patch
+patch -p1 < fsbl-drop-unneeded-sectiosn-fix-string.patch
+patch -p1 < fsbl-enable-entire-l2-cache.patch
 
 make CROSSCOMPILE=riscv64-unknown-linux-gnu-
 ```
@@ -120,9 +120,42 @@ popd
 
 This will generate the file `build/platform/sifive/fu540/firmware/fw_payload.bin` that will be flashed into the SDcard later.
 
-## Build Linux Kernel
+## Linux Kernel
 
-Not let's build the Linux kernel. First let's select the last mainline version that already supports RISC-V with no additional patches.
+### Kernel 5.3-rc4 (working)
+
+There is currently an issue causing segfaults and preventing Golang from build on newer kernels. This is the last known version to work. I'm bisecting the versions to find the problematic commit.
+
+There are a few patches that add functionality or fixes issues:
+
+* SECCOMP support (later added to 5.5)
+* CPUFREQ allowing changing CPU clock to 1.4Ghz (1Ghz by default)
+* GMAC fix for the network interface ID
+* Fix magic number generation
+
+Checkout kernel:
+
+```sh
+pushd linux
+git checkout v5.3-rc4
+```
+
+Apply patches:
+
+```sh
+wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/gmac-fix.patch
+patch -p1 < gmac-fix.patch
+wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/magicnumber-5.3.patch
+patch -p1 < magicnumber-5.3.patch
+wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpufreq-5.3.patch
+patch -p1 < cpufreq-5.3.patch
+wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/seccomp-5.3.patch
+patch -p1 < seccomp-5.3.patch
+```
+
+### Kernel 5.5 (currently segfaults)
+
+Kernel 5.5 already supports RISC-V.
 
 ```sh
 pushd linux
@@ -143,6 +176,10 @@ By default the Unleashed board runs at 1Ghz but many can support 1.4Ghz. To test
 This need to be done after every reboot so you might want to add it to a script, systemd or cronjob. You board might not be stable or freeze so test after applying this before making the change permanent.
 
 Download config from the repo. This config has most requirements for containers and networking features built-in and is confirmed to work.
+
+### Building the Kernel
+
+Get currently working config with most features:
 
 ```sh
 wget -O .config https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/unleashed_config
@@ -166,6 +203,19 @@ popd
 ```
 
 Check if building produced the files `linux/arch/riscv/boot/Image` and `linux/arch/riscv/boot/dts/sifive/hifive-unleashed-a00.dtb`. This is the kernel file and the dtb that is the descriptor for the board hardware.
+
+### Generating Kernel modules
+
+```bash
+rm -rf modules_install
+mkdir -p modules_install
+CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv make modules_install INSTALL_MOD_PATH=./modules_install
+pushd ./modules_install/lib/modules
+tar -cf kernel-modules-${version}.tar .
+gzip kernel-modules-${version}.tar
+popd
+mv ./modules_install/lib/modules/kernel-modules-${version}.tar.gz .
+```
 
 ## Flashing to the SD Card
 
@@ -197,13 +247,13 @@ sudo mkdir -p /mnt/boot/extlinux
 
 cat << EOF | sudo tee /mnt/boot/extlinux/extlinux.conf
 menu title SiFive Unleashed Boot Options
-timeout 10
+timeout 100
 default unleashed-kernel-$version
 
 label unleashed-kernel-$version
         kernel /vmlinuz-$version
         fdt /dtb-$version
-        append earlyprintk rw root=/dev/mmcblk0p4 rhgb rootwait rootfstype=ext4 LANG=en_US.UTF-8
+        append earlyprintk rw root=/dev/mmcblk0p4 rhgb rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttySIF0
 EOF
 
 sudo cp ./linux/arch/riscv/boot/Image /mnt/vmlinuz-$version
@@ -220,11 +270,12 @@ sudo tar vxf debian-sid-riscv64-rootfs-20200108.tar.bz2 -C /mnt --strip-componen
 sudo umount /mnt
 
 # Install Kernel Modules
-pushd linux
+srcdir=$(pwd)
 sudo mount /dev/sdc4 /mnt
-sudo make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv modules_install INSTALL_MOD_PATH=/mnt
-sudo umount /mnt
+pushd /mnt/lib/modules
+sudo tar vxf $srcdir/linux/kernel-modules-$version.tar.gz
 popd
+sudo umount /mnt
 ```
 
 You can mount the `boot` partition by adding a line like `/dev/mmcblk0p1 /boot ext2 defaults 0 0` to `/etc/fstab`. This allow access to the available kernels, adding new ones to this filesystem and modifying `/boot/extlinux/extlinux.conf` file
