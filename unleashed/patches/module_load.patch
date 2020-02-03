@@ -1,0 +1,68 @@
+From 8a56d1c8e8e91c1bc3893946d52b9217c96e1589 Mon Sep 17 00:00:00 2001
+From: Shea Levy <shea@shealevy.com>
+Date: Mon, 9 Apr 2018 08:58:00 -0400
+Subject: [PATCH] RISC-V: Load modules within relative jump range of the kernel
+ text.
+
+Signed-off-by: Shea Levy <shea@shealevy.com>
+---
+ arch/riscv/include/asm/pgtable.h |  9 +++++++++
+ arch/riscv/kernel/module.c       | 11 +++++++++++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/arch/riscv/include/asm/pgtable.h b/arch/riscv/include/asm/pgtable.h
+index d3221017194dd..be043a2a902c7 100644
+--- a/arch/riscv/include/asm/pgtable.h
++++ b/arch/riscv/include/asm/pgtable.h
+@@ -18,6 +18,7 @@
+ #include <asm/page.h>
+ #include <asm/tlbflush.h>
+ #include <linux/mm_types.h>
++#include <linux/sizes.h>
+ 
+ #ifdef CONFIG_64BIT
+ #include <asm/pgtable-64.h>
+@@ -446,6 +447,14 @@ extern void paging_init(void);
+ #define TASK_SIZE FIXADDR_START
+ #endif
+ 
++/*
++ * The module space lives between the addresses given by TASK_SIZE
++ * and PAGE_OFFSET - it must be within 2G of the kernel text.
++ */
++#define MODULES_SIZE        (SZ_128M)
++#define MODULES_VADDR        (PAGE_OFFSET - MODULES_SIZE)
++#define MODULES_END        (VMALLOC_END)
++
+ #include <asm-generic/pgtable.h>
+ 
+ #endif /* !__ASSEMBLY__ */
+diff --git a/arch/riscv/kernel/module.c b/arch/riscv/kernel/module.c
+index 70bb94ae61c59..83fa4eb4f1746 100644
+--- a/arch/riscv/kernel/module.c
++++ b/arch/riscv/kernel/module.c
+@@ -8,6 +8,8 @@
+ #include <linux/err.h>
+ #include <linux/errno.h>
+ #include <linux/moduleloader.h>
++#include <linux/vmalloc.h>
++#include <asm/pgtable.h>
+ 
+ static int apply_r_riscv_32_rela(struct module *me, u32 *location, Elf_Addr v)
+ {
+@@ -386,3 +388,12 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
+ 
+     return 0;
+ }
++
++void *module_alloc(unsigned long size)
++{
++    return __vmalloc_node_range(size, 1, MODULES_VADDR,
++                    MODULES_END, GFP_KERNEL,
++                    PAGE_KERNEL_EXEC, 0,
++                    NUMA_NO_NODE,
++                    __builtin_return_address(0));
++}
+
+Login to unlock more features
+

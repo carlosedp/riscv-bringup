@@ -64,7 +64,7 @@ git clone https://github.com/sifive/freedom-u540-c000-bootloader
 git clone https://github.com/riscv/opensbi
 
 # U-Boot
-git clone https://github.com/U-Boot/U-Boot
+git clone https://github.com/U-Boot/U-Boot u-boot
 
 # Linux Kernel
 git clone https://github.com/torvalds/linux
@@ -95,7 +95,7 @@ U-Boot is the bootloader used to load the Kernels from the filesystem. It has a 
 We use latest released version just replacing it's DTB with last one from the Linux Kernel. This is not extrictly necessary though.
 
 ```bash
-pushd U-Boot
+pushd u-boot
 git checkout v2020.01
 cp -v ../linux/arch/riscv/boot/dts/sifive/{hifive-unleashed-a00.dts,fu540-c000.dtsi} arch/riscv/dts/
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make sifive_fu540_defconfig
@@ -104,7 +104,7 @@ CROSS_COMPILE=riscv64-unknown-linux-gnu- make -j 6
 popd
 ```
 
-This will generate the file `U-Boot.bin` to be used by OpenSBI.
+This will generate the file `u-boot.bin` to be used by OpenSBI.
 
 ## Build OpenSBI
 
@@ -112,9 +112,13 @@ OpenSBI is the secondary bootloader. It's the one that calls U-Boot. The build p
 
 ```sh
 pushd opensbi
+
+# Fix TLB flush errata on Unleashed board
+patch -p1 < ../opensbi-tlb_unleashed.patch
+
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- \
      PLATFORM=sifive/fu540 \
-     FW_PAYLOAD_PATH=../U-Boot/u-boot-dtb.bin
+     FW_PAYLOAD_PATH=../u-boot/u-boot.bin
 popd
 ```
 
@@ -122,13 +126,13 @@ This will generate the file `build/platform/sifive/fu540/firmware/fw_payload.bin
 
 ## Linux Kernel
 
+<details><summary>Kernel 5.3</summary>
+
 ### Kernel 5.3-rc4 (working)
 
-There is currently an issue causing segfaults and preventing Golang from build on newer kernels. This is the last known version to work. I'm bisecting the versions to find the problematic commit.
+There are a few patches that add functionality or fixes issues on 5.3:
 
-There are a few patches that add functionality or fixes issues:
-
-* SECCOMP support (later added to 5.5)
+* SECCOMP support (already added to 5.5)
 * CPUFREQ allowing changing CPU clock to 1.4Ghz (1Ghz by default)
 * GMAC fix for the network interface ID
 * Fix magic number generation
@@ -151,38 +155,38 @@ wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpu
 patch -p1 < cpufreq-5.3.patch
 wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/seccomp-5.3.patch
 patch -p1 < seccomp-5.3.patch
+wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/module_load.patch
+patch -p1 < module_load.patch
 ```
 
-### Kernel 5.5 (currently segfaults)
+</details>
+
+### Kernel 5.5
 
 Kernel 5.5 already supports RISC-V.
 
 ```sh
 pushd linux
-git checkout v5.5-rc5
+git checkout v5.5
 ```
 
-Here one can apply cpufreq patches (does not work with Microsemi expansion board, skip if this is your case) that allow controlling the clock of the board.
+Here one can apply cpufreq patch (has been reported that might not work with Microsemi expansion board, skip if this is your case) that allow controlling the clock of the board.
+
+Also there is a patch fixing network module load within relative jump range of the kernel text.
 
 ```sh
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpufreq.patch
+wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpufreq-5.5.patch
 patch -p1 < cpufreq.patch
+wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/module_load.patch
+patch -p1 < module_load.patch
 ```
-
-By default the Unleashed board runs at 1Ghz but many can support 1.4Ghz. To test this, after having your board booted set the parameter with:
-
-`echo 1400000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed`
-
-This need to be done after every reboot so you might want to add it to a script, systemd or cronjob. You board might not be stable or freeze so test after applying this before making the change permanent.
-
-Download config from the repo. This config has most requirements for containers and networking features built-in and is confirmed to work.
 
 ### Building the Kernel
 
-Get currently working config with most features:
+Download config from the repo. This config has most requirements for containers and networking features built-in and is confirmed to work. This config adds most networking features as modules and requires the `module_load.patch` patch. If you don't apply the patch, use the `unleashed_config` config to have the features baked-in.
 
 ```sh
-wget -O .config https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/unleashed_config
+wget -O .config https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/unleashed_config_modules
 ```
 
 Build the kernel. The `menuconfig` line is in case one want to customize any parameter. Also set the `$version` variable to be used later.
@@ -236,13 +240,13 @@ sudo sgdisk -g --clear \
 
 # Flash FSBL
 sudo dd if=freedom-u540-c000-bootloader/fsbl.bin of=/dev/sdc2 bs=1024
+
 # Flash OpenSBI
 sudo dd if=opensbi/build/platform/sifive/fu540/firmware/fw_payload.bin of=/dev/sdc3 bs=1024
 
 # Generate /boot partition
 sudo mkfs.ext2 /dev/sdc1
 sudo mount /dev/sdc1 /mnt
-
 sudo mkdir -p /mnt/boot/extlinux
 
 cat << EOF | sudo tee /mnt/boot/extlinux/extlinux.conf
@@ -262,7 +266,6 @@ sudo cp ./linux/arch/riscv/boot/dts/sifive/hifive-unleashed-a00.dtb /mnt/dtb-$ve
 sudo umount /mnt
 
 # Create root partition
-
 sudo mkfs.ext4 /dev/sdc4
 sudo mount /dev/sdc4 /mnt
 sudo tar vxf debian-sid-riscv64-rootfs-20200108.tar.bz2 -C /mnt --strip-components=1
@@ -278,11 +281,46 @@ popd
 sudo umount /mnt
 ```
 
-You can mount the `boot` partition by adding a line like `/dev/mmcblk0p1 /boot ext2 defaults 0 0` to `/etc/fstab`. This allow access to the available kernels, adding new ones to this filesystem and modifying `/boot/extlinux/extlinux.conf` file
+You can mount the `boot` partition using the command `echo "/dev/mmcblk0p1 /boot ext2 defaults 0 0" | sudo tee -a /etc/fstab` . This allow access to the available kernels just by adding new versions (vmlinux and dtb) to `/boot`  and modifying `/boot/extlinux/extlinux.conf` file.
 
 Use this with all the board switches in off position (facing inside the board).
 
-Root password is *riscv*.
+Root password for this rootfs is *riscv*.
+
+## Set default clock speed
+
+By default the Unleashed board runs at 1Ghz but many can support 1.4Ghz. To test this, after having your board booted set the parameter with:
+
+The included patch supports `999999` and `1400000`  clocks.
+
+`echo 1400000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed`
+
+This need to be done after every reboot so you might want to add it to a script, systemd or cronjob. You board might not be stable or freeze so test after applying this before making the change permanent. I have created a systemd service that starts/stops this configuration.
+
+```bash
+[Unit]
+Description=Set HiFive Unleashed clock to 1.4Ghz
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+
+ExecStart=/bin/sh -c 'echo 1400000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed'
+ExecStop=/bin/sh -c 'echo 999999 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed'
+
+[Install]
+WantedBy=multi-user.target
+```
+
+After creating this file on `/etc/systemd/system/set-clockspeed.service`, enable with:
+
+```bash
+systemctl daemon-reload
+systemctl start set-clockspeed
+
+# To enable on every boot, do
+systemctl enable set-clockspeed
+```
 
 ## References
 
