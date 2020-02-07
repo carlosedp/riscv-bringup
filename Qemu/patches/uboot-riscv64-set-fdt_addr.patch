@@ -1,0 +1,31 @@
+diff --git a/include/configs/qemu-riscv.h b/include/configs/qemu-riscv.h
+index fa9b9af9..bc831a84 100644
+--- a/include/configs/qemu-riscv.h
++++ b/include/configs/qemu-riscv.h
+@@ -56,6 +56,7 @@
+ 	"initrd_high=0xffffffffffffffff\0" \
+ 	"kernel_addr_r=0x84000000\0" \
+ 	"fdt_addr_r=0x88000000\0" \
++	"fdt_addr=0x88000000\0" \
+ 	"scriptaddr=0x88100000\0" \
+ 	"pxefile_addr_r=0x88200000\0" \
+ 	"ramdisk_addr_r=0x88300000\0" \
+diff --git a/include/configs/sifive-fu540.h b/include/configs/sifive-fu540.h
+index 736ceb1f..59cf0281 100644
+--- a/include/configs/sifive-fu540.h
++++ b/include/configs/sifive-fu540.h
+@@ -36,13 +36,10 @@
+ 	"initrd_high=0xffffffffffffffff\0" \
+ 	"kernel_addr_r=0x84000000\0" \
+ 	"fdt_addr_r=0x88000000\0" \
++	"fdt_addr=0x88000000\0" \
+ 	"scriptaddr=0x88100000\0" \
+ 	"pxefile_addr_r=0x88200000\0" \
+ 	"ramdisk_addr_r=0x88300000\0" \
+ 	BOOTENV
+ 
+-#define CONFIG_PREBOOT \
+-	"setenv fdt_addr ${fdtcontroladdr};" \
+-	"fdt addr ${fdtcontroladdr};"
+-
+ #endif /* __CONFIG_H */

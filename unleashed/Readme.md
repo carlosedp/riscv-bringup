@@ -128,7 +128,7 @@ This will generate the file `build/platform/sifive/fu540/firmware/fw_payload.bin
 
 <details><summary>Kernel 5.3</summary>
 
-### Kernel 5.3-rc4 (working)
+### Kernel 5.3-rc4
 
 There are a few patches that add functionality or fixes issues on 5.3:
 
@@ -163,7 +163,7 @@ patch -p1 < module_load.patch
 
 ### Kernel 5.5
 
-Kernel 5.5 already supports RISC-V.
+Kernel 5.5 already supports RISC-V with no patches.
 
 ```sh
 pushd linux
@@ -172,7 +172,7 @@ git checkout v5.5
 
 Here one can apply cpufreq patch (has been reported that might not work with Microsemi expansion board, skip if this is your case) that allow controlling the clock of the board.
 
-Also there is a patch fixing network module load within relative jump range of the kernel text.
+Also there is a patch fixing module load within relative jump range of the kernel text. Not required if bake-in (build kernel with embedded feature instead of module) the required fetures.
 
 ```sh
 wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpufreq-5.5.patch
@@ -247,9 +247,9 @@ sudo dd if=opensbi/build/platform/sifive/fu540/firmware/fw_payload.bin of=/dev/s
 # Generate /boot partition
 sudo mkfs.ext2 /dev/sdc1
 sudo mount /dev/sdc1 /mnt
-sudo mkdir -p /mnt/boot/extlinux
+sudo mkdir -p /mnt/extlinux
 
-cat << EOF | sudo tee /mnt/boot/extlinux/extlinux.conf
+cat << EOF | sudo tee /mnt/extlinux/extlinux.conf
 menu title SiFive Unleashed Boot Options
 timeout 100
 default unleashed-kernel-$version

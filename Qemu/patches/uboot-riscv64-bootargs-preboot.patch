@@ -1,0 +1,22 @@
+diff --git a/configs/qemu-riscv64_smode_defconfig b/configs/qemu-riscv64_smode_defconfig
+index a7b0e06..68387aa 100644
+--- a/configs/qemu-riscv64_smode_defconfig
++++ b/configs/qemu-riscv64_smode_defconfig
+@@ -14,3 +14,7 @@ CONFIG_CMD_NVEDIT_EFI=y
+ CONFIG_OF_PRIOR_STAGE=y
+ CONFIG_SYS_RELOC_GD_ENV_ADDR=y
+ CONFIG_DM_MTD=y
++CONFIG_USE_BOOTARGS=y
++CONFIG_BOOTARGS="console=ttyS0 earlycon"
++CONFIG_USE_PREBOOT=y
++CONFIG_PREBOOT="cp.l ${fdtcontroladdr} ${fdt_addr_r} 0x10000;"
+diff --git a/configs/sifive_fu540_defconfig b/configs/sifive_fu540_defconfig
+index 7d38ec9..d23f81a 100644
+--- a/configs/sifive_fu540_defconfig
++++ b/configs/sifive_fu540_defconfig
+@@ -13,3 +13,5 @@ CONFIG_DISPLAY_BOARDINFO=y
+ CONFIG_OF_SEPARATE=y
+ CONFIG_SYS_RELOC_GD_ENV_ADDR=y
+ CONFIG_DM_MTD=y
++CONFIG_USE_BOOTARGS=y
++CONFIG_BOOTARGS="console=ttySIF0 earlycon"
