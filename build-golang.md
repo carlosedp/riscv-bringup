@@ -17,14 +17,13 @@ Now on your RISC-V VM/SBC, clone the repository, export the path and bootstrap p
 # On RISC-V Host
 tar vxf go-linux-riscv64-bootstrap.tbz
 git clone https://github.com/golang/go
-cd go
+cd go/src
 export GOROOT_BOOTSTRAP=$HOME/go-linux-riscv64-bootstrap
-cd src
-./make.bash                            # Builds go on $HOME/riscv-go/bin that can be added to your path
+./make.bash                            # Builds go on $HOME/go/bin that can be added to your path
 GO_TEST_TIMEOUT_SCALE=10 ./run.bash    # Tests the build
 # Pack built Golang into a tarball
 cd ..
-sudo tar -cvf go-1.14dev-riscv64.tar --transform s/^riscv-go/go/ --exclude=pkg/obj --exclude .git go
+sudo tar -cvf go-1.14rc1-riscv64.tar --exclude=pkg/obj --exclude .git go
 ```
 
 Now you can use this go build for testing/developing other projects.

@@ -10,10 +10,10 @@ If you like this project and others I've been contributing and would like to sup
 
 ## Contents <!-- omit in toc -->
 
-* [RISC-V Virtual Machine, pre-built Go and Docker](#risc-v-virtual-machine-pre-built-go-and-docker)
+* [RISC-V Unleashed SBC, Virtual Machine and pre-built binaries](#risc-v-unleashed-sbc-virtual-machine-and-pre-built-binaries)
 * [Golang](#golang)
   * [Core Golang](#core-golang)
-  * [Go Libraries](#go-libraries)
+  * [Go Std Libraries](#go-std-libraries)
   * [External deps](#external-deps)
 * [Docker and pre-reqs](#docker-and-pre-reqs)
   * [Libseccomp](#libseccomp)
@@ -31,9 +31,9 @@ If you like this project and others I've been contributing and would like to sup
   * [Issues](#issues-1)
 * [Base Container Images](#base-container-images)
 * [Docker images for projects](#docker-images-for-projects)
+* [Kubernetes](#kubernetes)
+* [K3s](#k3s)
 * [Additional projects / libraries](#additional-projects--libraries)
-  * [Kubernetes](#kubernetes)
-  * [K3s](#k3s)
   * [ETCD](#etcd)
   * [OpenFaaS](#openfaas)
     * [Faas-cli](#faas-cli)
@@ -57,13 +57,11 @@ If you like this project and others I've been contributing and would like to sup
   * [Gin web framework](#gin-web-framework)
   * [go-isatty](#go-isatty)
   * [ginkgo](#ginkgo)
-  * [genuinetools/netns](#genuinetoolsnetns)
-  * [alexellis/faas-containerd](#alexellisfaas-containerd)
 * [Community](#community)
 * [References](#references)
 
 
-## RISC-V Virtual Machine, pre-built Go and Docker
+## RISC-V Unleashed SBC, Virtual Machine and pre-built binaries
 
 To make the development easier, there are Qemu virtual machines based on Debian and Fedora with some developer tools already installed.
 
@@ -71,9 +69,9 @@ Download the [RISC-V Debian VM](https://github.com/carlosedp/riscv-bringup/relea
 
 A prebuilt Go 1.14rc1 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.14rc1-riscv64.tar.gz).
 
-To run Go on this VM, download the VM and install with:
+If required to build the complete boot stack composed of OpenSBI, U-Boot, Linux, checkout the guides for [SiFive Unleashed](unleashed/Readme.md) and [Qemu](Qemu/Readme.md).
 
-<details><summary>Instructions</summary></u>
+To run Go on the VM or SBC, install with:
 
 ```bash
 # Start the VM
@@ -92,7 +90,6 @@ export PATH="/usr/local/go/bin:$PATH"
 echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 ```
 
-</details>
 
 To run Docker on your RISC-V Debian environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.5-dev_riscv64.deb) and install with `sudo apt install ./docker-19.03.5-dev_riscv64.deb`.
 
@@ -124,20 +121,17 @@ There is also a [Podman](https://podman.io) package. Check more info on [build-p
 
 ### Core Golang
 
-Golang is in process of upstreaming, CLs can be followed on [Gerrit](https://go-review.googlesource.com/q/riscv).
+Golang has been upstreamed as an experimental architecture in Go 1.14. There are no binaries published officially but the [releases](https://github.com/carlosedp/riscv-bringup/releases) section has the tarball.
 
 To build Go from source, check [build-golang.md](build-golang.md).
 
-* [ ] Golang upstreaming
+* [x] Golang upstreaming
   * Tracker Issue: <https://github.com/golang/go/issues/27532>
+  * Gerrit CLs: <https://go-review.googlesource.com/q/riscv+OR+riscv64>
   * RISC-V Fork: <https://github.com/4a6f656c/riscv-go>
 * [ ] CGO implementation - Draft on <https://github.com/carlosedp/riscv-go> but far from complete/funtcional.
-* [ ] Go Builder
-  * <https://go-review.googlesource.com/c/build/+/188501>
-  * <https://github.com/golang/build/pull/22>
-  * Based on <https://go-review.googlesource.com/c/build/+/177918>
 
-### Go Libraries
+### Go Std Libraries
 
 * [x] `golang.org/x/sys` - <https://go-review.googlesource.com/c/sys/+/177799>
 * [x] `golang.org/x/net` - <https://go-review.googlesource.com/c/net/+/177997>
@@ -164,11 +158,12 @@ Downloads for prebuilt packages are available on <https://github.com/carlosedp/r
 
 Builds fine with PR 134 even without Kernel support.
 
-* [ ] Kernel support - <https://patchwork.kernel.org/project/linux-riscv/list/?series=164025>
+* [x] Kernel support - <https://patchwork.kernel.org/project/linux-riscv/list/?series=164025>
   * Ref. <https://patchwork.kernel.org/patch/10716119/>
   * Ref. <https://patchwork.kernel.org/patch/10716121/>
   * Ref. <https://github.com/riscv/riscv-linux/commit/0712587b63964272397ed34864130912d2a87020>
-* [ ] PR - <https://github.com/seccomp/libseccomp/pull/134>
+* [ ] ~~PR - <https://github.com/seccomp/libseccomp/pull/134>~~
+* [ ] PR - <https://github.com/seccomp/libseccomp/pull/197>
 * [ ] Issue - <https://github.com/seccomp/libseccomp/issues/110>
 
 ### Runc
@@ -211,7 +206,8 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 * [x] Upstreamed / Works (must be built from `master`)
 * [x] Update `x/sys` and `x/net` modules in `vendor`. [PR](https://github.com/docker/cli/pull/1926)
 * [x] Add riscv64 to manifest annotation. [PR#2084](https://github.com/docker/cli/pull/2084)
-* [ ] Add support for riscv64 on binfmt. [PR#21](https://github.com/docker/binfmt/pull/21)
+* [x] Add support for riscv64 on binfmt. [PR#21](https://github.com/docker/binfmt/pull/21)
+* [ ] Docker for Mac - Add RISC-V binfmt. [PR#4237](https://github.com/docker/for-mac/issues/4237)
 * [ ] Add to CI
 
 #### Docker daemon
@@ -321,6 +317,7 @@ Podman is a library and tool for running OCI-based containers in Pods
 * whoami - [`carlosedp/whoami:riscv64`](https://hub.docker.com/r/carlosedp/whoami)
 
 **Kubernetes:**
+
 * kube-apiserver - [`carlosedp/kube-apiserver:1.16.0`](https://hub.docker.com/r/carlosedp/kube-apiserver)
 * kube-scheduler - [`carlosedp/kube-scheduler:1.16.0`](https://hub.docker.com/r/carlosedp/kube-scheduler)
 * kube-controller-manager - [`carlosedp/kube-controller-manager:1.16.0`](https://hub.docker.com/r/carlosedp/kube-controller-manager)
@@ -342,9 +339,7 @@ Some version mismatches due to Kubernetes hard-coded version check for CoreDNS a
 
 --------------------------------------------------------------------------------
 
-## Additional projects / libraries
-
-### Kubernetes
+## Kubernetes
 
 <https://github.com/kubernetes/kubernetes/>
 
@@ -371,21 +366,18 @@ To Do:
 # Update vendor dir
 ./hack/update-vendor.sh
 
-# Build main binaries
-for bin in kubeadm kubelet kubectl kube-apiserver kube-proxy kube-scheduler kube-controller-manager kubemark; do
-    make WHAT=./cmd/${bin} KUBE_BUILD_PLATFORMS=linux/riscv64
-done
+# Build all main binaries
+make KUBE_BUILD_PLATFORMS=linux/riscv64
+
+# Build specifiv binaries
+make WHAT=./cmd/${bin} KUBE_BUILD_PLATFORMS=linux/riscv64
 
 # Binaries will be placed on _output/local/go/bin/linux_riscv64/
-
-# Build all (will print error on e2e test)
-make all KUBE_BUILD_PLATFORMS=linux/riscv64
-...
 ```
 
 </details>
 
-### K3s
+## K3s
 
 <https://github.com/rancher/k3s/>
 
@@ -412,6 +404,8 @@ Bump:
 * Embed runtime
 
 </details>
+
+## Additional projects / libraries
 
 ### ETCD
 
@@ -643,20 +637,6 @@ Dependency for Gin Framework
 Dependency for building Kubernetes complete binaries
 
 * [x] PR <https://github.com/onsi/ginkgo/pull/632>
-
-### genuinetools/netns
-
-<https://github.com/genuinetools/netns>
-
-Dependency for <https://github.com/alexellis/faas-containerd>
-
-* [ ] PR <https://github.com/genuinetools/netns/pull/21>
-
-### alexellis/faas-containerd
-
-<https://github.com/alexellis/faas-containerd>
-
-* [ ] PR <https://github.com/alexellis/faas-containerd/pull/1>
 
 --------------------------------------------------------------------------------
 

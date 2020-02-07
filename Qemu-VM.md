@@ -4,7 +4,7 @@ This pack contains a functional virtual machine to be used on Qemu emulating Deb
 
 The VM requires Qemu that can be easily installed with `sudo apt-get install qemu-system` on Ubuntu/Debian host, `dnf install qemu` on Fedora and `brew install qemu` on Mac.
 
-The pack can be downloaded [here](https://drive.google.com/open?id=1z8b45YFGTN7aVkqPJIRn3a8hU9bXFaXl).
+The pack can be downloaded [here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-20181123.tar.bz2).
 
 ## Running
 
@@ -12,7 +12,7 @@ To run the VM, use the script:
 
     ./run_debian.sh
 
-There is currently a problem with Qemu atomics where on some occasions thread sync fails. There is a report on [qemu mailing list](http://lists.nongnu.org/archive/html/qemu-riscv/2019-05/msg00134.html) with a patch that fixes the problem. You can build Qemu with this patch to solve this until it get merged.
+Avoid using Qemu 4.2 due to a FP bug. Version 4.1.1 works as expected.
 
 ## SSH login into the guest
 
