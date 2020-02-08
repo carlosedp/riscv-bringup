@@ -93,6 +93,8 @@ OpenSBI is the bootloader. It's the one that calls U-Boot. The build process use
 
 ```sh
 pushd opensbi
+# Checkout a known compatible version
+git checkout ac1c229
 
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- \
      PLATFORM=qemu/virt \
@@ -215,6 +217,7 @@ pushd rootfs
 sudo tar vxf ../debian-sid-riscv64-rootfs-20200108.tar.bz2
 
 # Unpack Kernel modules
+sudo mkdir -p lib/modules
 pushd lib/modules
 sudo tar vxf ../../../linux/kernel-modules-$version.tar.gz
 popd
