@@ -259,9 +259,15 @@ sudo debootstrap --arch=riscv64 --variant=minbase --keyring /usr/share/keyrings/
 # chroot to it. Requires "qemu-user-static qemu-system qemu-utils qemu-system-misc binfmt-support" packages on host
 sudo chroot temp-rootfs /bin/bash
 
+# Add unreleased packages
+cat >/etc/apt/sources.list <<EOF
+deb http://deb.debian.org/debian-ports unstable main
+deb http://deb.debian.org/debian-ports unreleased main
+EOF
+
 # Install essential packages
 apt-get update
-apt-get install --no-install-recommends -y util-linux haveged openntpd ntpdate openssh-server systemd kmod initramfs-tools conntrack ebtables ethtool iproute2 iptables mount socat ifupdown iputils-ping
+apt-get install --no-install-recommends -y util-linux haveged openntpd ntpdate openssh-server systemd kmod initramfs-tools conntrack ebtables ethtool iproute2 iptables mount socat ifupdown iputils-ping vim
 
 # Create base config files
 mkdir -p /etc/network
@@ -295,7 +301,7 @@ echo "root:riscv" | chpasswd
 # Exit chroot
 exit
 
-tar -cf -S debian-rootfs.tar -C temp-rootfs .
+sudo tar -cSf debian-rootfs.tar -C temp-rootfs .
 bzip2 debian-rootfs.tar
 rm -rf temp-rootfs
 ```
@@ -324,13 +330,13 @@ timeout 100
 default kernel-$version
 
 label kernel-$version
-        menu label kernel-$version
+        menu label Linux kernel-$version
         kernel /boot/vmlinux-$version
         initrd /boot/initrd.img-$version
         append earlyprintk rw root=/dev/vda1 rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttyS0
 
 label rescue-kernel-$version
-        menu label kernel-$version (rescue)
+        menu label Linux kernel-$version (recovery mode)
         kernel /boot/vmlinux-$version
         initrd /boot/initrd.img-$version
         append earlyprintk rw root=/dev/vda1 rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttyS0 single
@@ -434,15 +440,16 @@ qemu-system-riscv64 \
     -machine virt \
     -smp 4 \
     -m 4G \
-    -kernel fw_jump.elf \
-    -device loader,file=vmlinux-5.5.0,addr=0x80200000 \
-    -append "console=ttyS0 rw root=/dev/vda1" \
-    -object rng-random,filename=/dev/urandom,id=rng0 \
-    -device virtio-rng-device,rng=rng0 \
-    -device virtio-blk-device,drive=hd0 \
+    -bios default \
+    -kernel vmlinux-5.5.0 \
+    -append "console=ttyS0 root=/dev/vda1 rw" \
     -drive file=riscv64-debianrootfs-qemu.qcow2,format=qcow2,id=hd0 \
+    -object rng-random,filename=/dev/urandom,id=rng0 \
+    -device virtio-rng-device,rng=rng0
     -device virtio-net-device,netdev=usernet \
     -netdev user,id=usernet,hostfwd=tcp::22222-:22
+
+    -drive file=riscv64-debianrootfs-qemu.qcow2,format=qcow2,if=virtio \
 ```
 
 You can also add more ports to the netdev line like the previous script.

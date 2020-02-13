@@ -255,13 +255,13 @@ timeout 100
 default kernel-$version
 
 label kernel-$version
-        menu label kernel-$version
+        menu label Linux kernel-$version
         kernel /vmlinux-$version
         fdt /dtb-$version
         append earlyprintk rw root=/dev/mmcblk0p4 rhgb rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttySIF0
 
-label kernel-$version
-        menu label kernel-$version (rescue)
+label recovery-kernel-$version
+        menu label Linux kernel-$version (recovery mode)
         kernel /vmlinux-$version
         fdt /dtb-$version
         append earlyprintk rw root=/dev/mmcblk0p4 rhgb rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttySIF0 single
