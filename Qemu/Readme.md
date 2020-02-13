@@ -1,15 +1,17 @@
-# Building Qemu boot requirements
+# RISC-V Qemu Virtual Machine
 
-The objective of this guide is to provide an end-to-end solution on building the necessary packages to boot a Qemu virtual machine with it's boot requirements.
+The objective of this guide is to provide an end-to-end solution on running a RISC-V Virtual machine and building the necessary packages to a fully-functional Qemu VM and it's boot requirements.
 
-This is still a moving target so the process might change in the future. I confirm that with used versions everything works.
+This is still a moving target so the process might change in the future. I confirm that with the versions used here, everything works.
 
-The process is based on having OpenSBI (the second-stage boot loader) calling the Kernel directly . Changing Kernel versions is a matter of adjusting the start script/command.
+The process is based on having OpenSBI (the second-stage boot loader) calling U-Boot and thru extlinux present a menu for available Kernel versions. Changing Kernel versions is a matter of adding Image and initrd to `extlinux.conf`.
+
+There is also an alternative and simpler way to boot Qemu with by passing the Kernel image directly as a parameter bypassing U-Boot and the extlinux menu. More details in the section at the end of the guide.
 
 Below is a diagram of the process:
 
 ```sh
-+----------------------------------+      Extlinux.conf                Linux
++----------------------------------+      extlinux.conf                Linux
 |                                  |
 |         SBL - FW_PAYLOAD         |    +----------------+    +--------------------+
 |                                  |    |                |    |                    |
@@ -30,6 +32,53 @@ Below is a diagram of the process:
 * **U-Boot** - Universal Boot Loader. [Docs](https://www.denx.de/wiki/U-Boot)
 * **Extlinux** - Syslinux compatible configuration to load Linux Kernel and DTB thru a configurable menu from a filesystem.
 
+## Table of Contents <!-- omit in toc -->
+
+* [RISC-V Qemu Virtual Machine](#risc-v-qemu-virtual-machine)
+  * [Installing Qemu](#installing-qemu)
+    * [Mac](#mac)
+    * [Linux](#linux)
+  * [Install Toolchain to build Kernel](#install-toolchain-to-build-kernel)
+  * [Clone repositories](#clone-repositories)
+  * [Build U-Boot](#build-u-boot)
+  * [Build OpenSBI](#build-opensbi)
+  * [Linux Kernel](#linux-kernel)
+    * [Kernel 5.5](#kernel-55)
+    * [Building the Kernel](#building-the-kernel)
+    * [Generating Kernel modules](#generating-kernel-modules)
+  * [Creating disk image](#creating-disk-image)
+  * [Create tarball for distribution](#create-tarball-for-distribution)
+  * [Remount Qcow image for changes](#remount-qcow-image-for-changes)
+  * [Simplified way to boot Qemu](#simplified-way-to-boot-qemu)
+  * [References](#references)
+
+## Installing Qemu
+
+### Mac
+
+On mac, installing Qemu is a matter of using [homebrew](https://brew.sh/) and installing with `brew install qemu`. Avoid using Qemu 4.2 due to a know problem.
+
+In this case, after the install command above, edit the brewfile with `brew edit qemu` and change:
+
+*  `url` line to: `url "https://download.qemu.org/qemu-4.1.1.tar.xz"`
+*  `sha256` line to `sha256 "ed6fdbbdd272611446ff8036991e9b9f04a2ab2e3ffa9e79f3bab0eb9a95a1d2"`
+
+After this, run `brew reinstall qemu -s` to rebuild and install the 4.1.1 version.
+
+### Linux
+
+On Debian or Ubuntu distros, install Qemu with:
+
+```bash
+sudo apt-get update
+sudo apt-get install qemu-user-static qemu-system qemu-utils qemu-system-misc binfmt-support
+```
+
+On Fedora, install with `dnf install qemu`.
+
+
+Depending on the distro, you might need to build Qemu from source.
+
 ## Install Toolchain to build Kernel
 
 This process has been done in a amd64 VM running Ubuntu Xenial.
@@ -46,9 +95,11 @@ export PATH=/opt/riscv/bin:$PATH
 echo "export PATH=/opt/riscv/bin:$PATH" >> ~/.bashrc
 ```
 
+To use the bootlin toolchain you might need to adjust the `CROSS_COMPILE` variable to the correct GCC triplet.
+
 ## Clone repositories
 
-Then, clone the required repositories. You need the FSBL (First stage bootloader), OpenSBI (Second stage bootloader), U-Boot and the Linux kernel. I keep all in one directory.
+Clone the required repositories. You need OpenSBI (bootloader), U-Boot and the Linux kernel. I keep all in one directory.
 
 ```sh
 mkdir qemu-boot
@@ -66,7 +117,7 @@ git clone https://github.com/torvalds/linux
 
 ## Build U-Boot
 
-U-Boot is the bootloader used to load the Kernels from the filesystem. It has a menu that allows one to select which version of the Kernel to use (if needed).
+U-Boot is the bootloader used to load the Kernels from the filesystem. It has a menu that allows you to select which version of the Kernel to use (if needed).
 
 To allow booting on Qemu passing the configured CPU and memory parameters down to the Kernel, two patches are required. These might be upstreamed soon.
 
@@ -74,13 +125,15 @@ To allow booting on Qemu passing the configured CPU and memory parameters down t
 pushd u-boot
 git checkout v2020.01
 
+# Patch
 wget https://github.com/carlosedp/riscv-bringup/raw/master/qemu/patches/uboot-riscv64-set-fdt_addr.patch
 patch -p1 < uboot-riscv64-set-fdt_addr.patch
 wget https://github.com/carlosedp/riscv-bringup/raw/master/qemu/patches/uboot-riscv64-bootargs-preboot.patch
 patch -p1 < uboot-riscv64-bootargs-preboot.patch
 
+# Build
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make qemu-riscv64_smode_defconfig
-CROSS_COMPILE=riscv64-unknown-linux-gnu- make menuconfig # if needed
+CROSS_COMPILE=riscv64-unknown-linux-gnu- make menuconfig # optional
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make -j6
 popd
 ```
@@ -130,7 +183,9 @@ Download config from the repo. This config has most requirements for containers 
 wget -O .config https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/unleashed_config_modules
 ```
 
-Build the kernel. The `menuconfig` line is in case one want to customize any parameter. Also set the `$version` variable to be used later.
+If preferred to configure the Kernel based on defaults, run `make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv defconfig`.
+
+Build the kernel. The `menuconfig` line is in case you want to customize any parameter. Also set the `$version` variable to be used later.
 
 ```sh
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv olddefconfig
@@ -142,12 +197,13 @@ export VER=`cat Makefile |grep VERSION|head -1|awk  '{print $3}'`
 export PATCH=`cat Makefile |grep PATCHLEVEL|head -1|awk  '{print $3}'`
 export SUB=`cat Makefile |grep SUBLEVEL|head -1|awk  '{print $3}'`
 export EXTRA=`cat Makefile |grep EXTRAVERSION|head -1|awk  '{print $3}'`
-export version=$VER.$PATCH.$SUB$EXTRA
+export DIRTY=`git diff --quiet || echo '-dirty'`
+export version=$VER.$PATCH.$SUB$EXTRA$DIRTY
 echo $version
 popd
 ```
 
-Check if building produced the files `linux/arch/riscv/boot/Image`.
+Check if building produced the file `linux/arch/riscv/boot/Image`.
 
 ### Generating Kernel modules
 
@@ -170,62 +226,122 @@ qemu-img create -f qcow2 riscv64-debianrootfs-qemu.qcow2 10G
 sudo modprobe nbd max_part=16
 sudo qemu-nbd -c /dev/nbd0 riscv64-debianrootfs-qemu.qcow2
 
-cat > partition_table << 'EOF'
+sudo sfdisk /dev/nbd0 << 'EOF'
 label: dos
 label-id: 0x17527589
 device: /dev/nbd0
 unit: sectors
 
-/dev/nbd0p1 : start=        2048, size=      262144, type=83, bootable
-/dev/nbd0p2 : start=      264192,                    type=83
+/dev/nbd0p1 : start=        2048, type=83, bootable
 EOF
 
-sudo sfdisk /dev/nbd0 < partition_table
+sudo mkfs.ext4 /dev/nbd0p1
+sudo e2label /dev/nbd0p1 rootfs
 
-sudo mkfs.ext2 /dev/nbd0p1
-sudo mkfs.ext4 /dev/nbd0p2
-
-# Build the boot partition
-mkdir bootfs
-sudo mount /dev/nbd0p1 bootfs
-pushd bootfs
-sudo mkdir -p extlinux
-
-# Create uboot extlinux file
-cat << EOF | sudo tee extlinux/extlinux.conf
-menu title SiFive Unleashed Boot Options
-timeout 100
-default unleashed-kernel-$version
-
-label unleashed-kernel-$version
-        kernel /vmlinuz-$version
-        append earlyprintk rw root=/dev/vda2 rhgb rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttyS0
-EOF
-
-# Copy Kernel image file
-sudo cp ../linux/arch/riscv/boot/Image vmlinuz-$version
-popd
-
-# Build the root partition
 mkdir rootfs
-sudo mount /dev/nbd0p2 rootfs
+sudo mount /dev/nbd0p1 rootfs
+```
 
-# For Debian RootFS
-wget https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-sid-riscv64-rootfs-20200108.tar.bz2
+As the root filesystem, you can choose between downloading a pre-built Debian or build the rootfs yourself.
 
+The pre-built tarball can be downloaded with: `wget -O debian-rootfs.tar.bz2 https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-sid-riscv64-rootfs-20200108.tar.bz2`.
+
+Below are the instructions to build the rootfs from scratch:
+
+<details><summary>Debian Rootfs from scratch</summary>
+
+```bash
+mkdir temp-rootfs
+
+# Generate minimal bootstrap rootfs
+sudo debootstrap --arch=riscv64 --variant=minbase --keyring /usr/share/keyrings/debian-ports-archive-keyring.gpg --include=debian-ports-archive-keyring unstable ./temp-rootfs http://deb.debian.org/debian-ports
+
+# chroot to it. Requires "qemu-user-static qemu-system qemu-utils qemu-system-misc binfmt-support" packages on host
+sudo chroot temp-rootfs /bin/bash
+
+# Install essential packages
+apt-get update
+apt-get install --no-install-recommends -y util-linux haveged openntpd ntpdate openssh-server systemd kmod initramfs-tools conntrack ebtables ethtool iproute2 iptables mount socat ifupdown iputils-ping
+
+# Create base config files
+mkdir -p /etc/network
+cat >/etc/network/interfaces <<EOF
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+EOF
+
+cat >/etc/resolv.conf <<EOF
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+EOF
+
+cat >/etc/fstab <<EOF
+LABEL=rootfs	/	ext4	user_xattr,errors=remount-ro	0	1
+EOF
+
+echo "debian-riscv" > /etc/hostname
+
+# Disable some services on Qemu
+ln -s /dev/null /etc/systemd/network/99-default.link
+ln -sf /dev/null /etc/systemd/system/serial-getty@hvc0.service
+sed -i 's/^DAEMON_OPTS="/DAEMON_OPTS="-s /' /etc/default/openntpd
+
+# Set root passwd
+echo "root:riscv" | chpasswd
+
+# Exit chroot
+exit
+
+tar -cf -S debian-rootfs.tar -C temp-rootfs .
+bzip2 debian-rootfs.tar
+rm -rf temp-rootfs
+```
+
+<br></details>
+
+Install Kernel, modules and unmount rootfs.
+
+```bash
 pushd rootfs
-sudo tar vxf ../debian-sid-riscv64-rootfs-20200108.tar.bz2
+sudo tar vxf ../debian-rootfs.tar.bz2
 
 # Unpack Kernel modules
 sudo mkdir -p lib/modules
-pushd lib/modules
-sudo tar vxf ../../../linux/kernel-modules-$version.tar.gz
-popd
+sudo tar vxf ../../../linux/kernel-modules-$version.tar.gz -C ./lib/modules
+
+# Copy Kernel image file
+sudo cp ../linux/arch/riscv/boot/Image vmlinux-$version
+
+sudo mkdir -p boot/extlinux
+
+# Create uboot extlinux file
+cat << EOF | sudo tee boot/extlinux/extlinux.conf
+menu title RISC-V Qemu Boot Options
+timeout 100
+default kernel-$version
+
+label kernel-$version
+        menu label kernel-$version
+        kernel /boot/vmlinux-$version
+        initrd /boot/initrd.img-$version
+        append earlyprintk rw root=/dev/vda1 rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttyS0
+
+label rescue-kernel-$version
+        menu label kernel-$version (rescue)
+        kernel /boot/vmlinux-$version
+        initrd /boot/initrd.img-$version
+        append earlyprintk rw root=/dev/vda1 rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttyS0 single
+EOF
+
+# Generate initrd on rootfs by using chroot
+sudo chroot rootfs update-initramfs -k all -c
 
 # Unmount and disconnect nbd
 popd
 sudo umount rootfs
-sudo umount bootfs
 sudo qemu-nbd -d /dev/nbd0
 ```
 
@@ -282,12 +398,11 @@ tar -cf riscv64-debian-qemuVM.tar qemu-vm
 gzip riscv64-debian-qemuVM.tar
 ```
 
-Now start the VM with the `run_riscvVM.sh` script. After boot, connect via SSH using `ssh.sh`.
+Now start the VM with the `run_riscvVM.sh` script. After boot, login on console or connect via SSH using `ssh.sh` in another terminal.
 
-You can mount the `boot` partition using the command `echo "/dev/mmcblk0p1 /boot ext2 defaults 0 0" | sudo tee -a /etc/fstab` . This allow access to the available kernels just by adding new versions (vmlinux) to `/boot`  and modifying `/boot/extlinux/extlinux.conf` file.
+Kernel files are in `/boot`. You can add new versions or modify parameters on `/boot/extlinux/extlinux.conf` file.
 
-Root password for this rootfs is *riscv*.
-
+Root password for the rootfs is *riscv*.
 
 ## Remount Qcow image for changes
 
@@ -295,15 +410,42 @@ Root password for this rootfs is *riscv*.
 sudo qemu-nbd -c /dev/nbd0 ./qemu-vm/riscv64-debianrootfs-qemu.qcow2
 sudo partx -a /dev/nbd0
 
-sudo mount /dev/nbd0p1 bootfs
-sudo mount /dev/nbd0p2 rootfs
+sudo mount /dev/nbd0p1 rootfs
 
 # Edit as will
 
-sudo umount bootfs
 sudo umount rootfs
 sudo qemu-nbd -d /dev/nbd0
 ```
+
+## Simplified way to boot Qemu
+
+To bypass U-Boot and extlinux and pass the Linux kernel image directly to Qemu, create a dir and put together the files:
+
+* The rootfs image (`riscv64-debianrootfs-qemu.qcow2`)
+* Copy `fw_jump.elf` from `opensbi/build/platform/qemu/virt/firmware/`
+* The Linux Kernel from `linux/arch/riscv/boot/Image` as `vmlinux-5.5.0` in this case.
+
+Run Qemu with:
+
+```bash
+qemu-system-riscv64 \
+    -nographic \
+    -machine virt \
+    -smp 4 \
+    -m 4G \
+    -kernel fw_jump.elf \
+    -device loader,file=vmlinux-5.5.0,addr=0x80200000 \
+    -append "console=ttyS0 rw root=/dev/vda1" \
+    -object rng-random,filename=/dev/urandom,id=rng0 \
+    -device virtio-rng-device,rng=rng0 \
+    -device virtio-blk-device,drive=hd0 \
+    -drive file=riscv64-debianrootfs-qemu.qcow2,format=qcow2,id=hd0 \
+    -device virtio-net-device,netdev=usernet \
+    -netdev user,id=usernet,hostfwd=tcp::22222-:22
+```
+
+You can also add more ports to the netdev line like the previous script.
 
 ## References
 

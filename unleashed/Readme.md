@@ -252,15 +252,22 @@ sudo mkdir -p /mnt/extlinux
 cat << EOF | sudo tee /mnt/extlinux/extlinux.conf
 menu title SiFive Unleashed Boot Options
 timeout 100
-default unleashed-kernel-$version
+default kernel-$version
 
-label unleashed-kernel-$version
-        kernel /vmlinuz-$version
+label kernel-$version
+        menu label kernel-$version
+        kernel /vmlinux-$version
         fdt /dtb-$version
         append earlyprintk rw root=/dev/mmcblk0p4 rhgb rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttySIF0
+
+label kernel-$version
+        menu label kernel-$version (rescue)
+        kernel /vmlinux-$version
+        fdt /dtb-$version
+        append earlyprintk rw root=/dev/mmcblk0p4 rhgb rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttySIF0 single
 EOF
 
-sudo cp ./linux/arch/riscv/boot/Image /mnt/vmlinuz-$version
+sudo cp ./linux/arch/riscv/boot/Image /mnt/vmlinux-$version
 sudo cp ./linux/arch/riscv/boot/dts/sifive/hifive-unleashed-a00.dtb /mnt/dtb-$version
 
 sudo umount /mnt
@@ -321,6 +328,124 @@ systemctl start set-clockspeed
 # To enable on every boot, do
 systemctl enable set-clockspeed
 ```
+
+## Mount NBD volume
+
+### On Server
+
+Build latest version of NBD-Server
+
+```bash
+sudo apt-get install libglib2.0-dev
+wget https://sourceforge.net/projects/nbd/files/nbd/3.19/nbd-3.19.tar.gz/download -O nbd-3.19.tar.gz
+tar vxf nbd-3.19.tar.gz
+cd nbd-3.19
+./configure && make -j4
+sudo cp nbd-server nbd-client /usr/local/bin
+```
+
+Generate systemd service and configuration file
+
+```bash
+cat << EOF | sudo tee -a /etc/systemd/system/nbd-server.service
+[Unit]
+Description=NBD server
+After=network-online.target
+
+[Service]
+Type=forking
+ExecStartPre=/sbin/modprobe nbd
+ExecStart=/usr/local/bin/nbd-server --pid-file /var/run/nbd-server.pid -C /etc/nbd-server/config
+PIDFile=/var/run/nbd-server.pid
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+cat << EOF | sudo tee /etc/nbd-server/config
+[generic]
+
+# What follows are export definitions. You may create as much of them as
+# you want, but the section header has to be unique.
+[riscv]
+exportname = /data/riscv-nbd50g.img
+EOF
+
+# Create disk image
+
+sudo mkdir /data
+sudo dd if=/dev/zero of=/data/riscv-nbd50g.img bs=1M count=50000
+sudo mkfs.ext4 /data/riscv-nbd50g.img
+
+sudo systemctl daemon-reload
+sudo systemctl enable nbd-server.service
+sudo systemctl start nbd-server.service
+```
+
+On Unleashed SBC:
+
+```bash
+sudo apt-get install libglib2.0-dev
+wget https://sourceforge.net/projects/nbd/files/nbd/3.19/nbd-3.19.tar.gz/download -O nbd-3.19.tar.gz
+tar vxf nbd-3.19.tar.gz
+cd nbd-3.19
+./configure && make -j4
+sudo cp nbd-server nbd-client /usr/local/bin
+sudo mkdir -p /mnt/riscv
+
+# Create config file (Replace with server IP and export name)
+cat << EOF | sudo tee -a /usr/local/etc/nbdtab
+nbd0 192.168.15.15 riscv
+EOF
+
+# Create nbd-client service
+cat << EOF | sudo tee -a /etc/systemd/system/nbd-client.service
+[Unit]
+Description=NBD client connection for nbd0
+After=network-online.target
+
+[Service]
+Type=forking
+ExecStartPre=/sbin/modprobe nbd
+ExecStart=/usr/local/bin/nbd-client nbd0
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Create NBD mount
+cat << EOF | sudo tee -a /etc/systemd/system/mnt-riscv.mount
+[Unit]
+Description=Mount Risc-V NBD Volume at Boot after the network is up but before docker
+After=network-online.target nbd-client.service
+
+[Mount]
+What=/dev/nbd0
+# What=UUID="d6058112-f6a6-4e75-8345-1662abe3b975"
+Where=/mnt/riscv
+Type=ext4
+Options=defaults,noatime
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable nbd-client.service
+sudo systemctl start nbd-client.service
+sudo systemctl enable mnt-riscv.mount
+sudo systemctl start mnt-riscv.mount
+```
+
+Configure Docker to use this path as data (Optional)
+
+```bash
+sudo vi /etc/systemd/system/docker.service
+# Edit line:
+ExecStart=/usr/local/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --data-root=/mnt/riscv/docker
+```
+
 
 ## References
 
