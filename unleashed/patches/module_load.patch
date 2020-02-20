@@ -1,68 +1,343 @@
-From 8a56d1c8e8e91c1bc3893946d52b9217c96e1589 Mon Sep 17 00:00:00 2001
-From: Shea Levy <shea@shealevy.com>
-Date: Mon, 9 Apr 2018 08:58:00 -0400
-Subject: [PATCH] RISC-V: Load modules within relative jump range of the kernel
- text.
+From patchwork Wed Feb 19 07:28:23 2020
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-Patchwork-Submitter: Vincent Chen <vincent.chen@sifive.com>
+X-Patchwork-Id: 11390471
+Return-Path: 
+ <SRS0=L7GV=4H=lists.infradead.org=linux-riscv-bounces+patchwork-linux-riscv=patchwork.kernel.org@kernel.org>
+Received: from mail.kernel.org (pdx-korg-mail-1.web.codeaurora.org
+ [172.30.200.123])
+	by pdx-korg-patchwork-2.web.codeaurora.org (Postfix) with ESMTP id 82B73924
+	for <patchwork-linux-riscv@patchwork.kernel.org>;
+ Wed, 19 Feb 2020 07:28:54 +0000 (UTC)
+Received: from bombadil.infradead.org (bombadil.infradead.org
+ [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mail.kernel.org (Postfix) with ESMTPS id 553C22176D
+	for <patchwork-linux-riscv@patchwork.kernel.org>;
+ Wed, 19 Feb 2020 07:28:54 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=lists.infradead.org
+ header.i=@lists.infradead.org header.b="B/GSbzvo";
+	dkim=fail reason="signature verification failed" (2048-bit key)
+ header.d=sifive.com header.i=@sifive.com header.b="JDlJjhXZ"
+DMARC-Filter: OpenDMARC Filter v1.3.2 mail.kernel.org 553C22176D
+Authentication-Results: mail.kernel.org;
+ dmarc=none (p=none dis=none) header.from=sifive.com
+Authentication-Results: mail.kernel.org;
+ spf=none
+ smtp.mailfrom=linux-riscv-bounces+patchwork-linux-riscv=patchwork.kernel.org@lists.infradead.org
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=lists.infradead.org; s=bombadil.20170209; h=Sender:Cc:List-Subscribe:
+	List-Help:List-Post:List-Archive:List-Unsubscribe:List-Id:References:
+	In-Reply-To:Message-Id:Date:Subject:To:From:Reply-To:MIME-Version:
+	Content-Type:Content-Transfer-Encoding:Content-ID:Content-Description:
+	Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:
+	List-Owner; bh=f9m5e0QHNeNmV7aMCp0usfj64aJ0N1hu4WRwi2copvk=; b=B/GSbzvojlX/HJ
+	iFm9FjHhRvm2dXcllAjmhipkjGbBDX3gJyj7bhmAJeAdBf2nbAwo6hW0lacL+jqgO1fzosb4CSpMK
+	T2XEVLOWpO9gGU+4Myken3OlunufG7whaXbM3l3C+btJrX4/77KBsmcYaCcmWTjYeyWble1c2Zmc6
+	XRw+uSB0aCWsOtomJ2ppZojfowP+XzzKsHcr7H6i9ChHg1NuF0SOVpe54lqnzurbUn4C0O4Jz9xq8
+	ggwiEQCOxGIoLetiurTVICnV6Y4oNRtOhjsxX2zfJ9cUbMN8r5e9su2qMYsB0mRgekk011lFtXUiq
+	3HqMYeYznGvZDpf96eGQ==;
+Received: from localhost ([127.0.0.1] helo=bombadil.infradead.org)
+	by bombadil.infradead.org with esmtp (Exim 4.92.3 #3 (Red Hat Linux))
+	id 1j4Jmr-0005L1-1w; Wed, 19 Feb 2020 07:28:49 +0000
+Received: from mail-pj1-x1041.google.com ([2607:f8b0:4864:20::1041])
+ by bombadil.infradead.org with esmtps (Exim 4.92.3 #3 (Red Hat Linux))
+ id 1j4Jmo-0005Io-V9
+ for linux-riscv@lists.infradead.org; Wed, 19 Feb 2020 07:28:48 +0000
+Received: by mail-pj1-x1041.google.com with SMTP id m13so2162800pjb.2
+ for <linux-riscv@lists.infradead.org>; Tue, 18 Feb 2020 23:28:44 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sifive.com; s=google;
+ h=from:to:cc:subject:date:message-id:in-reply-to:references;
+ bh=f9m5e0QHNeNmV7aMCp0usfj64aJ0N1hu4WRwi2copvk=;
+ b=JDlJjhXZpOBLOD5RtrhxFUncUFHJpCKQrS3ZoLGLO7cqdbtGC4j2kLCRr+nDFNxjNU
+ w3Iw8eAfgGm+4Poy2C6mXGSrDitsJUuIsUDQ2B5hrhYVjDO0TvmcKL4PqsIOyx6ZNAbs
+ nnUmBKXfSaaWJhDoF0K3Sl9UME9Qvt/SmnzFjCAnnWRMlA0hbC2y1c4B9tsfhp48N+MJ
+ nmeZBTEDq1fsM2oG58s/TNHdZ4wWPrlai7rwNruAlPXjA/nnIArbAqoT8mV/QYwFPijj
+ 4cPi8We2lzqsnbwdOyiekx1vtRUTA42SzXnoMhqtoakcd9m/tkAXmUMWaPhVP1J8JB6D
+ MGBg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+ :references;
+ bh=f9m5e0QHNeNmV7aMCp0usfj64aJ0N1hu4WRwi2copvk=;
+ b=Nxk9dNPKSxtW8ECfNuQIcSfsFDDzJyFbYWNVYGwbEwoktc8zXACUIlvGX0dUamOzkj
+ OcxX9RzOrZZEn5WxMubhUfnkPAuRDOeYQIsBP9cBgoIW07uJOfBnwZGp1A0Z1B+nxM5J
+ JUjONlUB3BkZIJZ7ak0h6f5qr2BlEWfTCh4KwIq9plGV2YgiUoYpSGqcIrfnCY3iCgIk
+ 2Jo3DvLJeJB9fhm8t0YskgHtkOAzuLmaGiLGNhLIbOOqOZ90Q+onnJQF88/N4zXvr1Gg
+ 5LXSNKY7l2mYwlgJRli1JGmvvQLTvRlc0wrVJJ2svkm/V5VDvSKaHFlUnrww5S/3Ou/p
+ 2mzQ==
+X-Gm-Message-State: APjAAAUIkG1w92zEnOZWR2hgQH2FOYrvpKFt1ih6bgs0IljmW6/GM764
+ V8JLut18SLrBg6CC7LgH/ZZUPmjcEIv00g==
+X-Google-Smtp-Source: 
+ APXvYqz+Y1kcPgwA44GJzCt/feu/VB+Nuww3TXKWoTdjtUm6rXXWM2OUPr48k0DpRaHbCiiYEEJYXQ==
+X-Received: by 2002:a17:902:be08:: with SMTP id
+ r8mr24725893pls.175.1582097324395;
+ Tue, 18 Feb 2020 23:28:44 -0800 (PST)
+Received: from VincentChen-ThinkPad-T480s.internal.sifive.com
+ (220-132-236-182.HINET-IP.hinet.net. [220.132.236.182])
+ by smtp.gmail.com with ESMTPSA id c188sm1500699pfb.151.2020.02.18.23.28.42
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+ Tue, 18 Feb 2020 23:28:43 -0800 (PST)
+From: Vincent Chen <vincent.chen@sifive.com>
+To: paul.walmsley@sifive.com,
+	palmer@dabbelt.com
+Subject: [PATCH 1/2] riscv: avoid the PIC offset of static percpu data in
+ module beyond 2G limits
+Date: Wed, 19 Feb 2020 15:28:23 +0800
+Message-Id: <1582097304-5547-2-git-send-email-vincent.chen@sifive.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1582097304-5547-1-git-send-email-vincent.chen@sifive.com>
+References: <1582097304-5547-1-git-send-email-vincent.chen@sifive.com>
+X-CRM114-Version: 20100106-BlameMichelson ( TRE 0.8.0 (BSD) ) MR-646709E3 
+X-CRM114-CacheID: sfid-20200218_232847_018680_872A2178 
+X-CRM114-Status: GOOD (  11.89  )
+X-Spam-Score: -0.2 (/)
+X-Spam-Report: SpamAssassin version 3.4.3 on bombadil.infradead.org summary:
+ Content analysis details:   (-0.2 points)
+ pts rule name              description
+ ---- ----------------------
+ --------------------------------------------------
+ -0.0 SPF_PASS               SPF: sender matches SPF record
+ 0.0 SPF_HELO_NONE          SPF: HELO does not publish an SPF Record
+ 0.1 DKIM_SIGNED            Message has a DKIM or DK signature,
+ not necessarily
+ valid
+ -0.1 DKIM_VALID_AU          Message has a valid DKIM or DK signature from
+ author's domain
+ -0.1 DKIM_VALID_EF          Message has a valid DKIM or DK signature from
+ envelope-from domain
+ -0.1 DKIM_VALID Message has at least one valid DKIM or DK signature
+X-BeenThere: linux-riscv@lists.infradead.org
+X-Mailman-Version: 2.1.29
+Precedence: list
+List-Id: <linux-riscv.lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-riscv>,
+ <mailto:linux-riscv-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-riscv/>
+List-Post: <mailto:linux-riscv@lists.infradead.org>
+List-Help: <mailto:linux-riscv-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-riscv>,
+ <mailto:linux-riscv-request@lists.infradead.org?subject=subscribe>
+Cc: Vincent Chen <vincent.chen@sifive.com>, linux-riscv@lists.infradead.org,
+ deanbo422@gmail.com
+Sender: "linux-riscv" <linux-riscv-bounces@lists.infradead.org>
+Errors-To: 
+ linux-riscv-bounces+patchwork-linux-riscv=patchwork.kernel.org@lists.infradead.org
 
-Signed-off-by: Shea Levy <shea@shealevy.com>
+The compiler uses the PIC-relative method to access static variables
+instead of GOT when the code model is PIC. Therefore, the limitation of
+the access range from the instruction to the symbol address is +-2GB.
+Under this circumstance, the kernel cannot load a kernel module if this
+module has static per-CPU symbols declared by DEFINE_PER_CPU(). The reason
+is that kernel relocates the .data..percpu section of the kernel module to
+the end of kernel's .data..percpu. Hence, the distance between the per-CPU
+symbols and the instruction will exceed the 2GB limits. To solve this
+problem, the kernel should place the loaded module in the memory area
+[&_end-2G, VMALLOC_END].
+
+Signed-off-by: Vincent Chen <vincent.chen@sifive.com>
+Suggested-by: Alex Ghiti <alex@ghiti.fr>
+Suggested-by: Anup Patel <anup@brainfault.org>
+Tested-by: Alexandre Ghiti <alex@ghiti.fr>
+Tested-by: Carlos de Paula <me@carlosedp.com>
 ---
- arch/riscv/include/asm/pgtable.h |  9 +++++++++
- arch/riscv/kernel/module.c       | 11 +++++++++++
- 2 files changed, 20 insertions(+)
+ arch/riscv/kernel/module.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-diff --git a/arch/riscv/include/asm/pgtable.h b/arch/riscv/include/asm/pgtable.h
-index d3221017194dd..be043a2a902c7 100644
---- a/arch/riscv/include/asm/pgtable.h
-+++ b/arch/riscv/include/asm/pgtable.h
-@@ -18,6 +18,7 @@
- #include <asm/page.h>
- #include <asm/tlbflush.h>
- #include <linux/mm_types.h>
-+#include <linux/sizes.h>
- 
- #ifdef CONFIG_64BIT
- #include <asm/pgtable-64.h>
-@@ -446,6 +447,14 @@ extern void paging_init(void);
- #define TASK_SIZE FIXADDR_START
- #endif
- 
-+/*
-+ * The module space lives between the addresses given by TASK_SIZE
-+ * and PAGE_OFFSET - it must be within 2G of the kernel text.
-+ */
-+#define MODULES_SIZE        (SZ_128M)
-+#define MODULES_VADDR        (PAGE_OFFSET - MODULES_SIZE)
-+#define MODULES_END        (VMALLOC_END)
-+
- #include <asm-generic/pgtable.h>
- 
- #endif /* !__ASSEMBLY__ */
 diff --git a/arch/riscv/kernel/module.c b/arch/riscv/kernel/module.c
-index 70bb94ae61c59..83fa4eb4f1746 100644
+index b7401858d872..c498beb82369 100644
 --- a/arch/riscv/kernel/module.c
 +++ b/arch/riscv/kernel/module.c
-@@ -8,6 +8,8 @@
+@@ -8,6 +8,10 @@
  #include <linux/err.h>
  #include <linux/errno.h>
  #include <linux/moduleloader.h>
 +#include <linux/vmalloc.h>
++#include <linux/sizes.h>
 +#include <asm/pgtable.h>
++#include <asm/sections.h>
  
  static int apply_r_riscv_32_rela(struct module *me, u32 *location, Elf_Addr v)
  {
-@@ -386,3 +388,12 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
+@@ -386,3 +390,17 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
  
-     return 0;
+ 	return 0;
  }
-+
++#if defined(CONFIG_MMU) && defined(CONFIG_64BIT)
++#ifdef CONFIG_MAXPHYSMEM_2GB
++#define VMALLOC_MODULE_START \
++	max(PFN_ALIGN((unsigned long)&_end - SZ_2G), VMALLOC_START)
++#else
++#define VMALLOC_MODULE_START PFN_ALIGN((unsigned long)&_end - SZ_2G)
++#endif
 +void *module_alloc(unsigned long size)
 +{
-+    return __vmalloc_node_range(size, 1, MODULES_VADDR,
-+                    MODULES_END, GFP_KERNEL,
-+                    PAGE_KERNEL_EXEC, 0,
-+                    NUMA_NO_NODE,
-+                    __builtin_return_address(0));
++	return __vmalloc_node_range(size, 1, VMALLOC_MODULE_START,
++	VMALLOC_END, GFP_KERNEL, PAGE_KERNEL_EXEC, 0, NUMA_NO_NODE,
++	__builtin_return_address(0));
 +}
++#endif
 
-Login to unlock more features
+From patchwork Wed Feb 19 07:28:24 2020
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Patchwork-Submitter: Vincent Chen <vincent.chen@sifive.com>
+X-Patchwork-Id: 11390475
+Return-Path: 
+ <SRS0=L7GV=4H=lists.infradead.org=linux-riscv-bounces+patchwork-linux-riscv=patchwork.kernel.org@kernel.org>
+Received: from mail.kernel.org (pdx-korg-mail-1.web.codeaurora.org
+ [172.30.200.123])
+	by pdx-korg-patchwork-2.web.codeaurora.org (Postfix) with ESMTP id B348D930
+	for <patchwork-linux-riscv@patchwork.kernel.org>;
+ Wed, 19 Feb 2020 07:29:00 +0000 (UTC)
+Received: from bombadil.infradead.org (bombadil.infradead.org
+ [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mail.kernel.org (Postfix) with ESMTPS id 913742176D
+	for <patchwork-linux-riscv@patchwork.kernel.org>;
+ Wed, 19 Feb 2020 07:29:00 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=lists.infradead.org
+ header.i=@lists.infradead.org header.b="Kn0k+JYm";
+	dkim=fail reason="signature verification failed" (2048-bit key)
+ header.d=sifive.com header.i=@sifive.com header.b="hRVJ/xGy"
+DMARC-Filter: OpenDMARC Filter v1.3.2 mail.kernel.org 913742176D
+Authentication-Results: mail.kernel.org;
+ dmarc=none (p=none dis=none) header.from=sifive.com
+Authentication-Results: mail.kernel.org;
+ spf=none
+ smtp.mailfrom=linux-riscv-bounces+patchwork-linux-riscv=patchwork.kernel.org@lists.infradead.org
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=lists.infradead.org; s=bombadil.20170209; h=Sender:Cc:List-Subscribe:
+	List-Help:List-Post:List-Archive:List-Unsubscribe:List-Id:
+	Content-Transfer-Encoding:Content-Type:MIME-Version:References:In-Reply-To:
+	Message-Id:Date:Subject:To:From:Reply-To:Content-ID:Content-Description:
+	Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:
+	List-Owner; bh=7RE8yadqunBbRH3qS8QB++tHjtjwApk9t/HNNGZGt0k=; b=Kn0k+JYm6UGfab
+	96zwvz5zosoGMePorEhMZsBtS0tx/YgLbHrbrrqdXAqsNvu/lts2K+rjVxhGGqDEEjaQ4nT5q12kI
+	K3J5+dZOgHbrWKKfk++b+Yb6l9aEB6De2oLTvgss3H9U5bmLcGX+EQ/y18ysa1uITxgCLYrqZ6jdn
+	FPzhZzK5cs66yIjRdhMB6WITY3KgIYBcfl4fbZa5eW/JuhdOJP4Mw8io9It5EFTxWbA/WLj5iUGiX
+	xP2+HRQsM1HscUryJWYiTcruTUzjlIrHPDmRNBQF0mqgP5FrvL1ngEjOl/M9DyP9IUOLOl/GuFiXz
+	ZeoMNqA1qZIC4h3AlZhw==;
+Received: from localhost ([127.0.0.1] helo=bombadil.infradead.org)
+	by bombadil.infradead.org with esmtp (Exim 4.92.3 #3 (Red Hat Linux))
+	id 1j4Jmt-0005O1-PY; Wed, 19 Feb 2020 07:28:51 +0000
+Received: from mail-pj1-x1044.google.com ([2607:f8b0:4864:20::1044])
+ by bombadil.infradead.org with esmtps (Exim 4.92.3 #3 (Red Hat Linux))
+ id 1j4Jmp-0005K3-Ja
+ for linux-riscv@lists.infradead.org; Wed, 19 Feb 2020 07:28:48 +0000
+Received: by mail-pj1-x1044.google.com with SMTP id j17so2162488pjz.3
+ for <linux-riscv@lists.infradead.org>; Tue, 18 Feb 2020 23:28:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sifive.com; s=google;
+ h=from:to:cc:subject:date:message-id:in-reply-to:references
+ :mime-version:content-transfer-encoding;
+ bh=7RE8yadqunBbRH3qS8QB++tHjtjwApk9t/HNNGZGt0k=;
+ b=hRVJ/xGyrloptlAPvAR32rydKjzeXKJcG9PPOH8C3EGAsSmJ03rjrLXvlvMTFhW7rr
+ fBXBhhkT9NQbLh4ejvI3dkLvP/Y0IJrf+Bcghe2PAJv65e3U5WGB9S78gjRCu9ZsciuY
+ 3kwnZPgs2nVaHzrc0E2mzVXCnhbas2BkuhMyf+SwSgxlMQMYT7Y7GclaF2nTOOvf7SZI
+ NBBtTAgVyt6FXKRt01wR+cVNq2FG2/+gd3JSaO5dVPAwXOY3Ub3+bYlP7VlD54mJpdT0
+ R216NXu/9BbvGu0s3c95lfv9k6UCikHTqNEzQbG8cih7WFivzEEZzuVVHJtgYmhlKGjG
+ oRsA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+ :references:mime-version:content-transfer-encoding;
+ bh=7RE8yadqunBbRH3qS8QB++tHjtjwApk9t/HNNGZGt0k=;
+ b=DgHJYSH+MGvDmVXm2KmzdNLTawA1lnr7mDvOFU8pavTId4SY8ua8P4XDDDx7T4emVd
+ pGs0sdOZ3RWMah1v+E2XV/DnTmia0/MvLLazKqo3BgmMwGos5a0Xa0u10XVTBX9631dz
+ djy7yaEh3VcIMoSgWN6qJ9ifYtvm2fXxaQEaJ5/1SKCsP1SIlNQrwHrhj5qaHOp8LiUk
+ YkolLAEkS6ptPB63TOeM3ROsq6VJ0lHlwh6M1/xFqvwYY3zEcZk81iY8YQmo2rRrWEGl
+ 0ahYO2362kURHMiQJUGV/oRP2jQfkTypBgjXNhjsId04HkdXp8fIuY+TKF0cCEJNxD86
+ rN4g==
+X-Gm-Message-State: APjAAAW1OwdgqJWVnSkoBAbqjkR+vBPuQz+74UD9maptq1bLDwgdSJyy
+ qLVMRetF49n02q9gqD+hNKEmXJMC9f/JbQ==
+X-Google-Smtp-Source: 
+ APXvYqzpvsON3Fj/73h0kzTbPUfHmS7shpX2yONmhg6vBNNd5ttRZCtyvYFBlaGa8V947i52c9BnlA==
+X-Received: by 2002:a17:902:8eca:: with SMTP id
+ x10mr23990054plo.94.1582097326738;
+ Tue, 18 Feb 2020 23:28:46 -0800 (PST)
+Received: from VincentChen-ThinkPad-T480s.internal.sifive.com
+ (220-132-236-182.HINET-IP.hinet.net. [220.132.236.182])
+ by smtp.gmail.com with ESMTPSA id c188sm1500699pfb.151.2020.02.18.23.28.45
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+ Tue, 18 Feb 2020 23:28:46 -0800 (PST)
+From: Vincent Chen <vincent.chen@sifive.com>
+To: paul.walmsley@sifive.com,
+	palmer@dabbelt.com
+Subject: [PATCH 2/2] riscv: Change code model of module to medany to improve
+ data accessing
+Date: Wed, 19 Feb 2020 15:28:24 +0800
+Message-Id: <1582097304-5547-3-git-send-email-vincent.chen@sifive.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1582097304-5547-1-git-send-email-vincent.chen@sifive.com>
+References: <1582097304-5547-1-git-send-email-vincent.chen@sifive.com>
+MIME-Version: 1.0
+X-CRM114-Version: 20100106-BlameMichelson ( TRE 0.8.0 (BSD) ) MR-646709E3 
+X-CRM114-CacheID: sfid-20200218_232847_644742_76938998 
+X-CRM114-Status: GOOD (  10.89  )
+X-Spam-Score: -0.2 (/)
+X-Spam-Report: SpamAssassin version 3.4.3 on bombadil.infradead.org summary:
+ Content analysis details:   (-0.2 points)
+ pts rule name              description
+ ---- ----------------------
+ --------------------------------------------------
+ -0.0 SPF_PASS               SPF: sender matches SPF record
+ 0.0 SPF_HELO_NONE          SPF: HELO does not publish an SPF Record
+ 0.1 DKIM_SIGNED            Message has a DKIM or DK signature,
+ not necessarily
+ valid
+ -0.1 DKIM_VALID_AU          Message has a valid DKIM or DK signature from
+ author's domain
+ -0.1 DKIM_VALID_EF          Message has a valid DKIM or DK signature from
+ envelope-from domain
+ -0.1 DKIM_VALID Message has at least one valid DKIM or DK signature
+X-BeenThere: linux-riscv@lists.infradead.org
+X-Mailman-Version: 2.1.29
+Precedence: list
+List-Id: <linux-riscv.lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-riscv>,
+ <mailto:linux-riscv-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-riscv/>
+List-Post: <mailto:linux-riscv@lists.infradead.org>
+List-Help: <mailto:linux-riscv-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-riscv>,
+ <mailto:linux-riscv-request@lists.infradead.org?subject=subscribe>
+Cc: Vincent Chen <vincent.chen@sifive.com>, linux-riscv@lists.infradead.org,
+ deanbo422@gmail.com
+Sender: "linux-riscv" <linux-riscv-bounces@lists.infradead.org>
+Errors-To: 
+ linux-riscv-bounces+patchwork-linux-riscv=patchwork.kernel.org@lists.infradead.org
 
+All the loaded module locates in the region [＆_end-2G，VMALLOC_END] at
+runtime, so the distance from the module start to the end of the kernel
+image does not exceed 2GB. Hence, the code model of the kernel module can
+be changed to medany to improve the performance data access.
+
+Signed-off-by: Vincent Chen <vincent.chen@sifive.com>
+---
+ arch/riscv/Makefile | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/riscv/Makefile b/arch/riscv/Makefile
+index 33a1d7cbf775..a6abe5847e42 100644
+--- a/arch/riscv/Makefile
++++ b/arch/riscv/Makefile
+@@ -13,8 +13,10 @@ LDFLAGS_vmlinux :=
+ ifeq ($(CONFIG_DYNAMIC_FTRACE),y)
+ 	LDFLAGS_vmlinux := --no-relax
+ endif
+-KBUILD_AFLAGS_MODULE += -fPIC
+-KBUILD_CFLAGS_MODULE += -fPIC
++
++ifeq ($(CONFIG_64BIT)$(CONFIG_CMODEL_MEDLOW),yy)
++KBUILD_CFLAGS_MODULE += -mcmodel=medany
++endif
+ 
+ export BITS
+ ifeq ($(CONFIG_ARCH_RV64I),y)

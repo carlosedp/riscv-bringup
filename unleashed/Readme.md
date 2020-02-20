@@ -126,53 +126,18 @@ This will generate the file `build/platform/sifive/fu540/firmware/fw_payload.bin
 
 ## Linux Kernel
 
-<details><summary>Kernel 5.3</summary>
+### Kernel 5.5 and up
 
-### Kernel 5.3-rc4
-
-There are a few patches that add functionality or fixes issues on 5.3:
-
-* SECCOMP support (already added to 5.5)
-* CPUFREQ allowing changing CPU clock to 1.4Ghz (1Ghz by default)
-* GMAC fix for the network interface ID
-* Fix magic number generation
-
-Checkout kernel:
-
-```sh
-pushd linux
-git checkout v5.3-rc4
-```
-
-Apply patches:
-
-```sh
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/gmac-fix.patch
-patch -p1 < gmac-fix.patch
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/magicnumber-5.3.patch
-patch -p1 < magicnumber-5.3.patch
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpufreq-5.3.patch
-patch -p1 < cpufreq-5.3.patch
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/seccomp-5.3.patch
-patch -p1 < seccomp-5.3.patch
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/module_load.patch
-patch -p1 < module_load.patch
-```
-
-</details>
-
-### Kernel 5.5
-
-Kernel 5.5 already supports RISC-V with no patches.
+Kernel 5.5 and up already supports RISC-V on Unleashed.
 
 ```sh
 pushd linux
 git checkout v5.5
 ```
 
-Here one can apply cpufreq patch (has been reported that might not work with Microsemi expansion board, skip if this is your case) that allow controlling the clock of the board.
+As an option, you can apply cpufreq patch (has been reported that might not work with Microsemi expansion board, skip if this is your case) that allow controlling the clock of the processor. By default it runs at 1Ghz but some can run up to 1.4Ghz.
 
-Also there is a patch fixing module load within relative jump range of the kernel text. Not required if bake-in (build kernel with embedded feature instead of module) the required fetures.
+Also there is a patch fixing module load within relative jump range of the kernel text. Not required if you bake-in (build kernel with embedded feature instead of module) the required fetures.
 
 ```sh
 wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpufreq-5.5.patch

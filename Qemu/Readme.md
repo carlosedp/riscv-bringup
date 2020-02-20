@@ -49,6 +49,7 @@ Below is a diagram of the process:
   * [Creating disk image](#creating-disk-image)
   * [Create tarball for distribution](#create-tarball-for-distribution)
   * [Remount Qcow image for changes](#remount-qcow-image-for-changes)
+  * [Creating snapshots](#creating-snapshots)
   * [Simplified way to boot Qemu](#simplified-way-to-boot-qemu)
   * [References](#references)
 
@@ -168,7 +169,7 @@ pushd linux
 git checkout v5.5
 ```
 
-There is a patch fixing network module load within relative jump range of the kernel text.
+Apply a patch fixing network module load.
 
 ```sh
 wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/module_load.patch
@@ -424,9 +425,20 @@ sudo umount rootfs
 sudo qemu-nbd -d /dev/nbd0
 ```
 
+## Creating snapshots
+
+You can create a snapshot Qcow2 file that works as copy-on-write based on an existing base image.
+This way you can keep the original image with base packages and the new snapshot holds all changes.
+
+```bash
+sudo qemu-img create -f qcow2 -b riscv64-debianrootfs-qemu.qcow2 snapshot-layer.qcow2
+```
+
+Then point the `-drive` parameter to this new layer. Keep both on same directory.
+
 ## Simplified way to boot Qemu
 
-To bypass U-Boot and extlinux and pass the Linux kernel image directly to Qemu, create a dir and put together the files:
+To bypass U-Boot and extlinux and pass the Linux kernel image directly to Qemu, create a dir and put together:
 
 * The rootfs image (`riscv64-debianrootfs-qemu.qcow2`)
 * Copy `fw_jump.elf` from `opensbi/build/platform/qemu/virt/firmware/`
@@ -448,8 +460,6 @@ qemu-system-riscv64 \
     -device virtio-rng-device,rng=rng0
     -device virtio-net-device,netdev=usernet \
     -netdev user,id=usernet,hostfwd=tcp::22222-:22
-
-    -drive file=riscv64-debianrootfs-qemu.qcow2,format=qcow2,if=virtio \
 ```
 
 You can also add more ports to the netdev line like the previous script.
