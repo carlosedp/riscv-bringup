@@ -67,7 +67,7 @@ To make the development easier, there are Qemu virtual machines based on Debian 
 
 Download the [RISC-V Debian VM](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-20181123.tar.bz2). or [RISC-V Fedora VM](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla). For more information, check [the readme](Qemu-VM.md).
 
-A prebuilt Go 1.14rc1 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.14rc1-riscv64.tar.gz).
+A prebuilt Go 1.14 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.14-riscv64.tar.gz).
 
 If required to build the complete boot stack composed of OpenSBI, U-Boot, Linux, checkout the guides for [SiFive Unleashed](unleashed/Readme.md) and [Qemu](Qemu/Readme.md).
 
@@ -78,10 +78,10 @@ To run Go on the VM or SBC, install with:
 ./run_debian.sh
 
 # Download Golang tarball
-wget https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.14rc1-riscv64.tar.gz
+wget https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.14-riscv64.tar.gz
 
 # In the VM, unpack (in root dir for example)
-tar vxf go-1.14rc1-riscv64.tar.gz -C /usr/local/
+tar vxf go-1.14-riscv64.tar.gz -C /usr/local/
 
 # Add to your PATH
 export PATH="/usr/local/go/bin:$PATH"
@@ -155,15 +155,15 @@ Downloads for prebuilt packages are available on <https://github.com/carlosedp/r
 
 <https://github.com/seccomp/libseccomp>
 
-Builds fine with PR 134 even without Kernel support.
+Builds fine from master branch. Will be released with riscv64 support on 2.5.
 
 * [x] Kernel support - <https://patchwork.kernel.org/project/linux-riscv/list/?series=164025>
   * Ref. <https://patchwork.kernel.org/patch/10716119/>
   * Ref. <https://patchwork.kernel.org/patch/10716121/>
   * Ref. <https://github.com/riscv/riscv-linux/commit/0712587b63964272397ed34864130912d2a87020>
 * [ ] ~~PR - <https://github.com/seccomp/libseccomp/pull/134>~~
-* [ ] PR - <https://github.com/seccomp/libseccomp/pull/197>
-* [ ] Issue - <https://github.com/seccomp/libseccomp/issues/110>
+* [x] PR - <https://github.com/seccomp/libseccomp/pull/197>
+* [x] Issue - <https://github.com/seccomp/libseccomp/issues/110>
 
 ### Runc
 
@@ -214,6 +214,7 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 <https://github.com/moby/moby>
 
 * [x] Upstreamed / Works
+* [ ] PR <https://github.com/moby/moby/pull/40664> - Build scripts support for riscv64
 * [x] PR <https://github.com/moby/moby/pull/39423> - Update dependencies
 * [x] PR <https://github.com/moby/moby/pull/39327> - Remove CGO dependency
 * [x] Update `x/sys` and `x/net` modules in `vendor`.

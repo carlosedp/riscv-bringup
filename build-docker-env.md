@@ -13,23 +13,24 @@ cd $HOME/riscv-docker
 
 ## Kernel seccomp support
 
+Since Linux kernel 5.4, seccomp is supported.
+
 ## libseccomp
 
-Libseccomp builds fine without Kernel support, just applying the PR https://github.com/seccomp/libseccomp/pull/134.
+Libseccomp builds fine from its master branch. Will be included in version 2.5.
 
 ```bash
 git clone git://github.com/seccomp/libseccomp
 pushd libseccomp
-git fetch origin pull/134/head:riscv64
-git checkout riscv64
-./autogen.sh
-./configure
+./autogen.sh && ./configure
 make
 make install
 popd
 ```
 
 ## crun
+
+Since `runc`, Docker's default runtime does not build on riscv64 due to CGO dependency, we can use `crun`, a pure C based runtime that is OCI compliant.
 
 ```bash
 # Install pre-reqs
@@ -83,13 +84,14 @@ pushd docker
 
 patch --ignore-whitespace << 'EOF'
 diff --git a/hack/make.sh b/hack/make.sh
-index 1bd37b02cd..49c5df6b0a 100755
+index 427def3aca..bc7501f497 100755
 --- a/hack/make.sh
 +++ b/hack/make.sh
-@@ -91,6 +91,10 @@ elif ${PKG_CONFIG} 'libsystemd-journal' 2> /dev/null ; then
+@@ -89,6 +89,11 @@ elif ${PKG_CONFIG} 'libsystemd-journal' 2> /dev/null; then
         DOCKER_BUILDTAGS+=" journald journald_compat"
  fi
 
++# riscv64 architecture does not support CGO so disable dependencies
 +if [ "$(uname -m)" = 'riscv64' ]; then
 +    DOCKER_BUILDTAGS+=" exclude_disk_quota exclude_graphdriver_devicemapper"
 +fi
@@ -98,22 +100,21 @@ index 1bd37b02cd..49c5df6b0a 100755
  # functionality. We favour libdm_dlsym_deferred_remove over
  # libdm_no_deferred_remove in dynamic cases because the binary could be shipped
 diff --git a/hack/make/.binary b/hack/make/.binary
-index 66f4ca05f3..0685828d8b 100644
+index 2e194f2f10..329c3e5ae0 100644
 --- a/hack/make/.binary
 +++ b/hack/make/.binary
-@@ -72,7 +72,7 @@ fi
+@@ -72,7 +72,7 @@ hash_files() {
 
- # -buildmode=pie is not supported on Windows and Linux on mips.
- case "$(go env GOOS)/$(go env GOARCH)" in
--       windows/*|linux/mips*)
-+       windows/*|linux/mips*|linux/riscv*)
-                ;;
-        *)
-                BUILDFLAGS+=( "-buildmode=pie" )
+        # -buildmode=pie is not supported on Windows and Linux on mips and riscv64.
+        case "$(go env GOOS)/$(go env GOARCH)" in
+-               windows/* | linux/mips*) ;;
++               windows/*|linux/mips*|linux/riscv*) ;;
+
+                *)
+                        BUILDFLAGS+=("-buildmode=pie")
 EOF
 
 ./hack/make.sh binary
-go build -tags "exclude_disk_quota exclude_graphdriver_devicemapper" ./cmd/dockerd/
 sudo cp bundles/binary-daemon/dockerd-dev /usr/local/bin
 popd
 popd
@@ -121,7 +122,7 @@ popd
 
 ## docker-init
 
-```bash
+ ```bash
 git clone https://github.com/krallin/tini
 pushd tini
 export CFLAGS="-DPR_SET_CHILD_SUBREAPER=36 -DPR_GET_CHILD_SUBREAPER=37"
@@ -132,7 +133,7 @@ popd
 
 ## docker-proxy
 
-```bash
+ ```bash
 mkdir $GOPATH/src/github.com/docker
 pushd docker
 git clone https://github.com/docker/libnetwork/
@@ -143,8 +144,6 @@ sudo cp proxy /usr/local/bin/docker-proxy
 popd
 popd
 ```
-
-Or run dockerd with: `sudo dockerd --userland-proxy=false`
 
 --------------------------------------------------------------------------------
 
@@ -161,3 +160,181 @@ sudo dockerd #or with the proxy parameter
 sudo docker version
 ```
 
+--------------------------------------------------------------------------------
+
+## Systemd config
+
+To enable Systemd support, create the following files:
+
+`/etc/systemd/system/containerd.service`
+
+```bash
+[Unit]
+Description=containerd container runtime
+Documentation=https://containerd.io
+After=network.target
+
+[Service]
+ExecStartPre=-/sbin/modprobe overlay
+ExecStart=/usr/local/bin/containerd
+KillMode=process
+Delegate=yes
+LimitNOFILE=1048576
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+
+[Install]
+WantedBy=multi-user.target
+```
+
+`/etc/systemd/system/docker.service`
+
+```bash
+[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+BindsTo=containerd.service
+After=network-online.target firewalld.service containerd.service mnt-riscv.mount
+Wants=network-online.target
+Requires=docker.socket
+
+[Service]
+Type=notify
+# the default is not to use systemd for cgroups because the delegate issues still
+# exists and systemd currently does not support the cgroup feature set required
+# for containers run by docker
+ExecStart=/usr/local/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+ExecReload=/bin/kill -s HUP $MAINPID
+TimeoutSec=0
+RestartSec=2
+Restart=always
+
+# Note that StartLimit* options were moved from "Service" to "Unit" in systemd 229.
+# Both the old, and new location are accepted by systemd 229 and up, so using the old location
+# to make them work for either version of systemd.
+StartLimitBurst=3
+
+# Note that StartLimitInterval was renamed to StartLimitIntervalSec in systemd 230.
+# Both the old, and new name are accepted by systemd 230 and up, so using the old name to make
+# this option work for either version of systemd.
+StartLimitInterval=60s
+
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+
+# Comment TasksMax if your systemd version does not supports it.
+# Only systemd 226 and above support this option.
+TasksMax=infinity
+
+# set delegate yes so that systemd does not reset the cgroups of docker containers
+Delegate=yes
+
+# kill only the docker process, not all processes in the cgroup
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+```
+
+`/etc/systemd/system/docker.socket`
+
+```bash
+[Unit]
+Description=Docker Socket for the API
+PartOf=docker.service
+
+[Socket]
+ListenStream=/var/run/docker.sock
+SocketMode=0660
+SocketUser=root
+SocketGroup=docker
+
+[Install]
+WantedBy=sockets.target
+```
+
+`/etc/docker/daemon.json`
+
+```bash
+{
+  "debug": true,
+  "max-concurrent-uploads": 1
+}
+```
+
+Your tree should be similar to:
+
+```
+❯ tree
+.
+├── etc
+│   ├── docker
+│   │   └── daemon.json
+│   └── systemd
+│       └── system
+│           ├── containerd.service
+│           ├── docker.service
+│           └── docker.socket
+└── usr
+    └── local
+        ├── bin
+        │   ├── containerd
+        │   ├── containerd-shim
+        │   ├── containerd-shim-runc-v1
+        │   ├── containerd-shim-runc-v2
+        │   ├── containerd-stress
+        │   ├── crun
+        │   ├── ctr
+        │   ├── docker -> docker-linux-riscv64
+        │   ├── dockerd
+        │   ├── docker-init
+        │   ├── docker-linux-riscv64
+        │   ├── docker-proxy
+        │   └── runc -> crun
+        ├── include
+        │   └── seccomp.h
+        ├── lib
+        │   ├── libseccomp.a
+        │   ├── libseccomp.la
+        │   ├── libseccomp.so -> libseccomp.so.0.0.0
+        │   ├── libseccomp.so.0 -> libseccomp.so.0.0.0
+        │   ├── libseccomp.so.0.0.0
+        │   └── pkgconfig
+        │       └── libseccomp.pc
+        └── share
+            └── man
+                ├── man1
+                │   └── scmp_sys_resolver.1
+                └── man3
+                    ├── seccomp_api_get.3
+                    ├── seccomp_api_set.3
+                    ├── seccomp_arch_add.3
+                    ├── seccomp_arch_exist.3
+                    ├── seccomp_arch_native.3
+                    ├── seccomp_arch_remove.3
+                    ├── seccomp_arch_resolve_name.3
+                    ├── seccomp_attr_get.3
+                    ├── seccomp_attr_set.3
+                    ├── seccomp_export_bpf.3
+                    ├── seccomp_export_pfc.3
+                    ├── seccomp_init.3
+                    ├── seccomp_load.3
+                    ├── seccomp_merge.3
+                    ├── seccomp_release.3
+                    ├── seccomp_reset.3
+                    ├── seccomp_rule_add.3
+                    ├── seccomp_rule_add_array.3
+                    ├── seccomp_rule_add_exact.3
+                    ├── seccomp_rule_add_exact_array.3
+                    ├── seccomp_syscall_priority.3
+                    ├── seccomp_syscall_resolve_name.3
+                    ├── seccomp_syscall_resolve_name_arch.3
+                    ├── seccomp_syscall_resolve_name_rewrite.3
+                    ├── seccomp_syscall_resolve_num_arch.3
+```

@@ -23,7 +23,7 @@ export GOROOT_BOOTSTRAP=$HOME/go-linux-riscv64-bootstrap
 GO_TEST_TIMEOUT_SCALE=10 ./run.bash    # Tests the build
 # Pack built Golang into a tarball
 cd ..
-sudo tar -cvf go-1.14rc1-riscv64.tar --exclude=pkg/obj --exclude .git go
+sudo tar -cvf go-1.14-riscv64.tar --exclude=pkg/obj --exclude .git go
 ```
 
 Now you can use this go build for testing/developing other projects.

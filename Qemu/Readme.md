@@ -262,6 +262,7 @@ sudo chroot temp-rootfs /bin/bash
 
 # Add unreleased packages
 cat >/etc/apt/sources.list <<EOF
+deb http://ftp.ports.debian.org/debian-ports/ sid main
 deb http://deb.debian.org/debian-ports unstable main
 deb http://deb.debian.org/debian-ports unreleased main
 EOF
