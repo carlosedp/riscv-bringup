@@ -113,8 +113,6 @@ OpenSBI is the secondary bootloader. It's the one that calls U-Boot. The build p
 ```sh
 pushd opensbi
 git checkout v0.6
-# Fix TLB flush errata on Unleashed board
-patch -p1 < ../opensbi-tlb_unleashed.patch
 
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- \
      PLATFORM=sifive/fu540 \
@@ -148,7 +146,7 @@ patch -p1 < module_load.patch
 
 ### Kernel 5.6
 
-Kernel 5.6 and up already supports RISC-V on Unleashed. Module loading patch is already merged.
+Kernel 5.6 and up already supports RISC-V on Unleashed. Module loading patch from 5.5 is already upstream.
 
 ```sh
 pushd linux
@@ -210,6 +208,8 @@ mv ./modules_install/lib/modules/kernel-modules-${version}.tar.gz .
 Create the SDcard. The partition typecodes are important here. I suggest using a card with 4GB or bigger. This depends on which rootfs you will use.
 
 I have available a Debian rootfs available for download at <https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-sid-riscv64-rootfs-20200108.tar.bz2>.
+
+If you want to build a Debian rootfs from scratch, [check this guide](https://github.com/carlosedp/riscv-bringup/blob/master/Debian-Rootfs-Guide.md).
 
 ```sh
 # Assuming your SD card is /dev/sdc. Adjust as necessary.
