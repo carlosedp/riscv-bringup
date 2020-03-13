@@ -30,7 +30,7 @@ git clone git://github.com/seccomp/libseccomp
 pushd libseccomp
 ./autogen.sh && ./configure
 make
-make install
+sudo make install
 # For debs
 DESTDIR=$HOME/riscv-docker/debs make install
 popd

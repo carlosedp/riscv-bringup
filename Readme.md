@@ -47,7 +47,6 @@ If you like this project and others I've been contributing and would like to sup
   * [AlertManager](#alertmanager)
   * [Traefik](#traefik)
   * [SQlite](#sqlite)
-  * [LXD](#lxd)
   * [Go-Jsonnet](#go-jsonnet)
   * [Github Hub tool](#github-hub-tool)
   * [Labstack Echo Framework](#labstack-echo-framework)
@@ -71,7 +70,7 @@ A prebuilt Go 1.14 tarball can be [downloaded here](https://github.com/carlosedp
 
 If required to build the complete boot stack composed of OpenSBI, U-Boot, Linux, checkout the guides for [SiFive Unleashed](unleashed/Readme.md) and [Qemu](Qemu/Readme.md).
 
-To run Go on the VM or SBC, install with:
+To run Go on the VM or board, install with:
 
 ```bash
 # Start the VM
@@ -92,7 +91,7 @@ echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 
 To run Docker on your RISC-V Debian environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.8-dev_riscv64.deb) and install with `sudo apt install ./docker-19.03.8-dev_riscv64.deb`.
 
-For other distros get the [tarball here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.8-dev_riscv64.tar.gz) and unpack to your root. If the docker service doesn't start on install script, re-run `systemctl start docker`.
+For other distros get the [tarball here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.8-dev_riscv64.tar.gz) and unpack to your `/` dir. If the docker service doesn't start on install script, re-run `systemctl start docker`.
 
 <details><summary>Docker-compose install instructions</summary></u>
 
@@ -112,7 +111,7 @@ To test it out after install, just run `docker run -d -p 8080:8080 carlosedp/ech
 
 There are a couple of projects that build on RISC-V in my [go-playground](https://github.com/carlosedp/go-playground) repo.
 
-There is also a [Podman](https://podman.io) package. Check more info on [build-podman-env.md](build-podman-env.md).
+There is also a [Podman](https://podman.io) package [here](https://github.com/carlosedp/riscv-bringup/releases/) in both `.deb` and `.tar.gz`. Check more info on [build-podman-env.md](build-podman-env.md) to build the package from scratch.
 
 --------------------------------------------------------------------------------
 
@@ -185,7 +184,7 @@ Builds fine from master branch. Will be released with riscv64 support on 2.5.
 No changes required, builds fine even without Kernel support for seccomp. Depends on libseccomp.
 
 * [x] Upstreamed / Works
-* [ ] Rebuild with libseccomp
+* [x] Rebuild with libseccomp
 * [ ] Add to CI
 
 ### Containerd
@@ -417,7 +416,6 @@ Build with `go build .`, run with `ETCD_UNSUPPORTED_ARCH=riscv64 ./etcd`.
 * [x] PR <https://github.com/etcd-io/etcd/pull/10834>
 * [x] Bump `golang.org/x/net`
 * [x] Bump `golang.org/x/sys`
-* [ ] Backport changes to release 3.2.x for Kubernetes?
 
 ### OpenFaaS
 
@@ -508,7 +506,7 @@ Already builds successfully with `make build`.
 * [x] Upstreamed / Works
 * [x] PR <https://github.com/containous/traefik/pull/5245>
 
-<details><summary>Building</summary>
+<details><summary>Building and running</summary>
 
 ```bash
 rm -rf static/ autogen/
@@ -519,11 +517,9 @@ GOARCH=riscv64 GOOS=linux go build -o dist/traefik ./cmd/traefik
 docker build -t carlosedp/traefik:v2.1-riscv64 .
 ```
 
-</details>
-
 To run an example stack with Docker Compose, create the file below and start it with `docker-compose up -d`. To test, you can open the address `http://[IP]:8080/dashboard` or `curl http://localhost:8080/api/rawdata`. Prometheus metrics are exposed on `http://localhost:8080/metrics`.
 
-<details><summary>docker-compose.yml</summary>
+Create a `docker-compose.yml`
 
 ```yaml
 version: '3'
@@ -549,21 +545,22 @@ services:
       - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
 ```
 
+Run with:
+
+```bash
+docker-compose up -d
+```
+
 </details>
 
 ### SQlite
+
+SQLite builds on RISC-V but requires replacing its building files.
 
 Repository mirror: <https://github.com/CanonicalLtd/sqlite>
 
 * [ ] Upstreamed / Works
 * [ ] Update `config.guess` and `config.sub` to newer version. Posted to [mailing list](https://www.mail-archive.com/sqlite-users@mailinglists.sqlite.org/msg115489.html).
-
-### LXD
-
-* [ ] Upstreamed / Works
-* [x] LXC build successfully
-* [ ] SQLite `config` update to build successfully
-* [ ] CGO to build storage backends
 
 ### Go-Jsonnet
 
