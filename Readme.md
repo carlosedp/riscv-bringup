@@ -90,9 +90,9 @@ export PATH="/usr/local/go/bin:$PATH"
 echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 ```
 
-To run Docker on your RISC-V Debian environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.5-dev_riscv64.deb) and install with `sudo apt install ./docker-19.03.5-dev_riscv64.deb`.
+To run Docker on your RISC-V Debian environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.8-dev_riscv64.deb) and install with `sudo apt install ./docker-19.03.8-dev_riscv64.deb`.
 
-For other distros get the [tarball here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-riscv64.tar.gz) and use the `install.sh` script. If the docker service doesn't start on install script, re-run `systemctl start docker`.
+For other distros get the [tarball here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.8-dev_riscv64.tar.gz) and unpack to your root. If the docker service doesn't start on install script, re-run `systemctl start docker`.
 
 <details><summary>Docker-compose install instructions</summary></u>
 

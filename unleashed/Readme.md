@@ -112,7 +112,7 @@ OpenSBI is the secondary bootloader. It's the one that calls U-Boot. The build p
 
 ```sh
 pushd opensbi
-
+git checkout v0.6
 # Fix TLB flush errata on Unleashed board
 patch -p1 < ../opensbi-tlb_unleashed.patch
 
@@ -126,7 +126,7 @@ This will generate the file `build/platform/sifive/fu540/firmware/fw_payload.bin
 
 ## Linux Kernel
 
-### Kernel 5.5 and up
+### Kernel 5.5
 
 Kernel 5.5 and up already supports RISC-V on Unleashed.
 
@@ -144,6 +144,22 @@ wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpu
 patch -p1 < cpufreq.patch
 wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/module_load.patch
 patch -p1 < module_load.patch
+```
+
+### Kernel 5.6
+
+Kernel 5.6 and up already supports RISC-V on Unleashed. Module loading patch is already merged.
+
+```sh
+pushd linux
+git checkout v5.6
+```
+
+As an option, you can apply cpufreq patch (has been reported that might not work with Microsemi expansion board, skip if this is your case) that allow controlling the clock of the processor. By default it runs at 1Ghz but some can run up to 1.4Ghz.
+
+```sh
+wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpufreq-5.5.patch
+patch -p1 < cpufreq.patch
 ```
 
 ### Building the Kernel
@@ -168,6 +184,9 @@ export SUB=`cat Makefile |grep SUBLEVEL|head -1|awk  '{print $3}'`
 export EXTRA=`cat Makefile |grep EXTRAVERSION|head -1|awk  '{print $3}'`
 export version=$VER.$PATCH.$SUB$EXTRA
 echo $version
+
+cp ./arch/riscv/boot/Image ./vmlinux-$version
+cp ./arch/riscv/boot/dts/sifive/hifive-unleashed-a00.dtb ./dtb-$version
 popd
 ```
 
