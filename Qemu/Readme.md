@@ -127,9 +127,9 @@ pushd u-boot
 git checkout v2020.01
 
 # Patch
-wget https://github.com/carlosedp/riscv-bringup/raw/master/qemu/patches/uboot-riscv64-set-fdt_addr.patch
+wget https://github.com/carlosedp/riscv-bringup/raw/master/Qemu/patches/uboot-riscv64-set-fdt_addr.patch
 patch -p1 < uboot-riscv64-set-fdt_addr.patch
-wget https://github.com/carlosedp/riscv-bringup/raw/master/qemu/patches/uboot-riscv64-bootargs-preboot.patch
+wget https://github.com/carlosedp/riscv-bringup/raw/master/Qemu/patches/uboot-riscv64-bootargs-preboot.patch
 patch -p1 < uboot-riscv64-bootargs-preboot.patch
 
 # Build
