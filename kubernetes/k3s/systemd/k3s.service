@@ -12,7 +12,7 @@ ExecStart=/usr/local/bin/k3s server \
     --datastore-cafile /etc/etcd/ca.pem \
     --datastore-certfile /etc/etcd/kubernetes.pem \
     --datastore-keyfile /etc/etcd/kubernetes-key.pem \
-    --kubelet-arg pod-infra-container-image=carlosedp/k8s-pause:riscv64
+    --kubelet-arg pod-infra-container-image=carlosedp/pause:3.1
 KillMode=process
 Delegate=yes
 LimitNOFILE=infinity

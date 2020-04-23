@@ -1,13 +1,11 @@
-# Copy go pack built with tar -cvf go-1.13dev-riscv64.tar --transform s/^riscv-go/go/ --exclude=pkg/obj --exclude .git riscv-go
-# DOCKER_BUILDKIT=0 docker build -t carlosedp/golang:1.13-riscv64 -f Dockerfile.golang .
-
+# DOCKER_BUILDKIT=0 docker build -t carlosedp/golang:1.14-riscv64 -f Dockerfile.golang .
 FROM carlosedp/debian:sid-slim-riscv64
 
-ENV GOLANG_VERSION 1.13beta1
+ENV GOLANG_VERSION 1.14
 
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ca-certificates curl && rm -rf /var/lib/apt/lists/*
 
-ADD https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.14rc1-riscv64.tar.gz /usr/local/
+RUN curl -L https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-$GOLANG_VERSION-riscv64.tar.gz | tar vxf -C /usr/local/
 
 RUN export PATH="/usr/local/go/bin:$PATH"; \
     go version

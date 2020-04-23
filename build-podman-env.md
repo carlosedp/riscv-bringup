@@ -81,6 +81,9 @@ sudo make install
 
 # For debs
 DESTDIR=$HOME/riscv-podman/debs make install
+pushd $HOME/riscv-podman/debs/usr/local/bin
+ln -sf crun runc
+popd
 popd
 ```
 

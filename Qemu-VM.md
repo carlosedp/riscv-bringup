@@ -4,7 +4,7 @@ This pack contains a functional virtual machine to be used on Qemu emulating Deb
 
 The VM requires Qemu that can be easily installed with `sudo apt-get install qemu-system` on Ubuntu/Debian host, `dnf install qemu` on Fedora and `brew install qemu` on Mac.
 
-The pack can be downloaded [here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-20181123.tar.bz2).
+The pack can be downloaded [here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-QemuVM-202002.tar.gz).
 
 ## Running
 

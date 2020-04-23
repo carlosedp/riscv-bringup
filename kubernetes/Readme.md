@@ -93,7 +93,7 @@ kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":
 ## Deploy Nginx as a reverse proxy in front of Traefik NodePorts
 
 ```bash
-sudo dnf install nginx
+sudo apt install nginx
 sudo systemctl enable nginx
 sudo cp k3s-nginx-revproxy.conf /etc/nginx/conf.d/
 # Remove `server` entries from `/etc/nginx/nginx.conf`

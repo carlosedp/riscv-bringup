@@ -52,6 +52,8 @@ sudo make install
 
 # For debs
 DESTDIR=$HOME/riscv-docker/debs make install
+pushd $HOME/riscv-docker/debs/usr/local/bin
+ln -sf crun runc
 popd
 ```
 
@@ -150,8 +152,8 @@ sudo cp ./contrib/dockerd-rootless.sh /usr/local/bin
 git cherry-pick fbfe6e0ca4adef7c1826d066a2163b4082641463
 
 ./hack/make.sh binary
-sudo cp bundles/binary-daemon/dockerd-dev /usr/local/bin/docker
-sudo cp bundles/binary-daemon/dockerd-dev $HOME/riscv-docker/debs/usr/local/bin/docker
+sudo cp bundles/binary-daemon/dockerd-dev /usr/local/bin/dockerd
+sudo cp bundles/binary-daemon/dockerd-dev $HOME/riscv-docker/debs/usr/local/bin/dockerd
 popd
 popd
 ```

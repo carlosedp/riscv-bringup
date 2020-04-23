@@ -3,6 +3,9 @@
 This guide walks thru the build of a Debian root filesystem from scratch.
 
 ```bash
+# Install pre-reqs
+sudo apt-get install debootstrap qemu-user-static binfmt-support debian-ports-archive-keyring qemu-system qemu-utils qemu-system-misc
+
 mkdir temp-rootfs
 
 # Generate minimal bootstrap rootfs
@@ -20,7 +23,7 @@ EOF
 
 # Install essential packages
 apt-get update
-apt-get install --no-install-recommends -y util-linux haveged openntpd ntpdate openssh-server systemd kmod initramfs-tools conntrack ebtables ethtool iproute2 iptables mount socat ifupdown iputils-ping vim
+apt-get install --no-install-recommends -y util-linux haveged openntpd ntpdate openssh-server systemd kmod initramfs-tools conntrack ebtables ethtool iproute2 iptables mount socat ifupdown iputils-ping vim neofetch
 
 # Create base config files
 mkdir -p /etc/network

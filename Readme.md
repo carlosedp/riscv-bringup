@@ -10,7 +10,7 @@ If you like this project and others I've been contributing and would like to sup
 
 ## Contents <!-- omit in toc -->
 
-* [RISC-V Unleashed SBC, Virtual Machine and pre-built binaries](#risc-v-unleashed-sbc-virtual-machine-and-pre-built-binaries)
+* [RISC-V Unleashed SBC, Virtual Machines and pre-built binaries](#risc-v-unleashed-sbc-virtual-machines-and-pre-built-binaries)
 * [Golang](#golang)
   * [Core Golang](#core-golang)
   * [Go Std Libraries](#go-std-libraries)
@@ -60,11 +60,17 @@ If you like this project and others I've been contributing and would like to sup
 * [References](#references)
 
 
-## RISC-V Unleashed SBC, Virtual Machine and pre-built binaries
+## RISC-V Unleashed SBC, Virtual Machines and pre-built binaries
 
 To make the development easier, there are Qemu virtual machines based on Debian and Fedora with some developer tools already installed.
 
-Download the [RISC-V Debian VM](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-20181123.tar.bz2). or [RISC-V Fedora VM](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla). For more information, check [the readme](Qemu-VM.md).
+Currently there are three distributions of RISC-V VM pre-packaged for Qemu:
+
+* [Debian Sid](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-QemuVM-202002.tar.gz)
+* [Ubuntu Focal](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuFocal-riscv64-QemuVM.tar.gz)
+* [Fedora](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla)
+
+The user is `root` and password `riscv`. For more information, check [the readme](Qemu-VM.md).
 
 A prebuilt Go 1.14 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.14-riscv64.tar.gz).
 
@@ -89,7 +95,7 @@ export PATH="/usr/local/go/bin:$PATH"
 echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 ```
 
-To run Docker on your RISC-V Debian environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.8-dev_riscv64.deb) and install with `sudo apt install ./docker-19.03.8-dev_riscv64.deb`.
+To run Docker on your RISC-V Debian or Ubuntu environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-v19.03.8-dev_riscv64.deb) and install with `sudo apt install ./docker-v19.03.8-dev_riscv64.deb`.
 
 For other distros get the [tarball here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.8-dev_riscv64.tar.gz) and unpack to your `/` dir. If the docker service doesn't start on install script, re-run `systemctl start docker`.
 
@@ -213,7 +219,7 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 <https://github.com/moby/moby>
 
 * [x] Upstreamed / Works
-* [ ] PR <https://github.com/moby/moby/pull/40664> - Build scripts support for riscv64
+* [x] PR <https://github.com/moby/moby/pull/40664> - Build scripts support for riscv64
 * [x] PR <https://github.com/moby/moby/pull/39423> - Update dependencies
 * [x] PR <https://github.com/moby/moby/pull/39327> - Remove CGO dependency
 * [x] Update `x/sys` and `x/net` modules in `vendor`.
@@ -287,7 +293,7 @@ Podman is a library and tool for running OCI-based containers in Pods
 * Debian Sid iptables Slim (Multiarch) -> [`carlosedp/debian-iptables:sid-slim`](https://hub.docker.com/r/carlosedp/debian-iptables)
 * Alpine -> No MUSL available yet
 * Busybox (1.31.0) -> [`carlosedp/busybox:1.31`](https://hub.docker.com/r/carlosedp/busybox)
-* Go 1.13 (Multiarch) -> [`carlosedp/golang:1.13`](https://hub.docker.com/r/carlosedp/golang)
+* Go 1.14 (Multiarch) -> [`carlosedp/golang:1.14`](https://hub.docker.com/r/carlosedp/golang)
 
 ## Docker images for projects
 

@@ -8,13 +8,10 @@ REPO=carlosedp
 
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
-# force Go 1.13
-export PATH=/home/carlosedp/riscv-go/bin:$PATH
-
 # Build Kubernetes binaries
 pushd kubernetes
 
-patch --dry-run --ignore-whitespace << 'EOF'
+patch --ignore-whitespace << 'EOF'
 diff --git a/hack/lib/golang.sh b/hack/lib/golang.sh
 index ce7de73301..211580051e 100755
 --- a/hack/lib/golang.sh

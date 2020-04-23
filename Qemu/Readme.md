@@ -43,7 +43,7 @@ Below is a diagram of the process:
   * [Build U-Boot](#build-u-boot)
   * [Build OpenSBI](#build-opensbi)
   * [Linux Kernel](#linux-kernel)
-    * [Kernel 5.5](#kernel-55)
+    * [Kernel 5.6](#kernel-56)
     * [Building the Kernel](#building-the-kernel)
     * [Generating Kernel modules](#generating-kernel-modules)
   * [Creating disk image](#creating-disk-image)
@@ -61,8 +61,8 @@ On mac, installing Qemu is a matter of using [homebrew](https://brew.sh/) and in
 
 In this case, after the install command above, edit the brewfile with `brew edit qemu` and change:
 
-*  `url` line to: `url "https://download.qemu.org/qemu-4.1.1.tar.xz"`
-*  `sha256` line to `sha256 "ed6fdbbdd272611446ff8036991e9b9f04a2ab2e3ffa9e79f3bab0eb9a95a1d2"`
+* `url` line to: `url "https://download.qemu.org/qemu-4.1.1.tar.xz"`
+* `sha256` line to `sha256 "ed6fdbbdd272611446ff8036991e9b9f04a2ab2e3ffa9e79f3bab0eb9a95a1d2"`
 
 After this, run `brew reinstall qemu -s` to rebuild and install the 4.1.1 version.
 
@@ -76,7 +76,6 @@ sudo apt-get install qemu-user-static qemu-system qemu-utils qemu-system-misc bi
 ```
 
 On Fedora, install with `dnf install qemu`.
-
 
 Depending on the distro, you might need to build Qemu from source.
 
@@ -96,7 +95,7 @@ export PATH=/opt/riscv/bin:$PATH
 echo "export PATH=/opt/riscv/bin:$PATH" >> ~/.bashrc
 ```
 
-To use the bootlin toolchain you might need to adjust the `CROSS_COMPILE` variable to the correct GCC triplet.
+To use the [bootlin](https://toolchains.bootlin.com/) toolchain you might need to adjust the `CROSS_COMPILE` variable to the correct GCC triplet.
 
 ## Clone repositories
 
@@ -148,7 +147,7 @@ OpenSBI is the bootloader. It's the one that calls U-Boot. The build process use
 ```sh
 pushd opensbi
 # Checkout a known compatible version
-git checkout ac1c229
+git checkout v0.6
 
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- \
      PLATFORM=qemu/virt \
@@ -160,25 +159,18 @@ This will generate the file `build/platform/qemu/virt/firmware/fw_payload.bin` t
 
 ## Linux Kernel
 
-### Kernel 5.5
+### Kernel 5.6
 
-Kernel 5.5 already supports RISC-V.
+Kernel 5.6 already supports RISC-V.
 
 ```sh
 pushd linux
-git checkout v5.5
-```
-
-Apply a patch fixing network module load.
-
-```sh
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/module_load.patch
-patch -p1 < module_load.patch
+git checkout v5.6
 ```
 
 ### Building the Kernel
 
-Download config from the repo. This config has most requirements for containers and networking features built-in and is confirmed to work. This config adds most networking features as modules and requires the `module_load.patch` patch. If you don't apply the patch, use the `unleashed_config` config to have the features baked-in.
+Download config from the repo. This config has most requirements for containers and networking features built-in and is confirmed to work. This config adds most networking features as modules.
 
 ```sh
 wget -O .config https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/unleashed_config_modules
@@ -192,16 +184,6 @@ Build the kernel. The `menuconfig` line is in case you want to customize any par
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv olddefconfig
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv menuconfig
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv -j6
-
-# Build version string
-export VER=`cat Makefile |grep VERSION|head -1|awk  '{print $3}'`
-export PATCH=`cat Makefile |grep PATCHLEVEL|head -1|awk  '{print $3}'`
-export SUB=`cat Makefile |grep SUBLEVEL|head -1|awk  '{print $3}'`
-export EXTRA=`cat Makefile |grep EXTRAVERSION|head -1|awk  '{print $3}'`
-export DIRTY=`git diff --quiet || echo '-dirty'`
-export version=$VER.$PATCH.$SUB$EXTRA$DIRTY
-echo $version
-popd
 ```
 
 Check if building produced the file `linux/arch/riscv/boot/Image`.
@@ -212,7 +194,10 @@ Check if building produced the file `linux/arch/riscv/boot/Image`.
 rm -rf modules_install
 mkdir -p modules_install
 CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv make modules_install INSTALL_MOD_PATH=./modules_install
+version=`cat include/config/kernel.release`
+echo $version
 pushd ./modules_install/lib/modules
+
 tar -cf kernel-modules-${version}.tar .
 gzip kernel-modules-${version}.tar
 popd
@@ -243,26 +228,28 @@ mkdir rootfs
 sudo mount /dev/nbd0p1 rootfs
 ```
 
-As the root filesystem, you can choose between downloading a pre-built Debian or build the rootfs yourself.
+As the root filesystem, you can choose between downloading a pre-built Debian or Ubuntu or build the rootfs yourself.
 
 The pre-built tarball can be downloaded with: `wget -O debian-rootfs.tar.bz2 https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-sid-riscv64-rootfs-20200108.tar.bz2`.
 
 If you want to build a Debian rootfs from scratch, [check this guide](https://github.com/carlosedp/riscv-bringup/blob/master/Debian-Rootfs-Guide.md).
 
+If you want to build an Ubuntu rootfs from scratch, [check this guide](https://github.com/carlosedp/riscv-bringup/blob/master/Ubuntu-Rootfs-Guide.md).
+
 Install Kernel, modules and unmount rootfs.
 
 ```bash
 pushd rootfs
-sudo tar vxf ../debian-rootfs.tar.bz2
+sudo tar vxf ../debian-rootfs.tar.bz2 # or choosen rootfs
 
 # Unpack Kernel modules
 sudo mkdir -p lib/modules
 sudo tar vxf ../../../linux/kernel-modules-$version.tar.gz -C ./lib/modules
 
-# Copy Kernel image file
-sudo cp ../linux/arch/riscv/boot/Image vmlinux-$version
-
 sudo mkdir -p boot/extlinux
+
+# Copy Kernel image file
+sudo cp ../linux/arch/riscv/boot/Image boot/vmlinuz-$version
 
 # Create uboot extlinux file
 cat << EOF | sudo tee boot/extlinux/extlinux.conf
@@ -272,13 +259,13 @@ default kernel-$version
 
 label kernel-$version
         menu label Linux kernel-$version
-        kernel /boot/vmlinux-$version
+        kernel /boot/vmlinuz-$version
         initrd /boot/initrd.img-$version
         append earlyprintk rw root=/dev/vda1 rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttyS0
 
 label rescue-kernel-$version
         menu label Linux kernel-$version (recovery mode)
-        kernel /boot/vmlinux-$version
+        kernel /boot/vmlinuz-$version
         initrd /boot/initrd.img-$version
         append earlyprintk rw root=/dev/vda1 rootwait rootfstype=ext4 LANG=en_US.UTF-8 console=ttyS0 single
 EOF
@@ -382,7 +369,7 @@ To bypass U-Boot and extlinux and pass the Linux kernel image directly to Qemu, 
 
 * The rootfs image (`riscv64-debianrootfs-qemu.qcow2`)
 * Copy `fw_jump.elf` from `opensbi/build/platform/qemu/virt/firmware/`
-* The Linux Kernel from `linux/arch/riscv/boot/Image` as `vmlinux-5.5.0` in this case.
+* The Linux Kernel from `linux/arch/riscv/boot/Image` as `vmlinuz-5.5.0` in this case.
 
 Run Qemu with:
 
@@ -393,7 +380,7 @@ qemu-system-riscv64 \
     -smp 4 \
     -m 4G \
     -bios default \
-    -kernel vmlinux-5.5.0 \
+    -kernel vmlinuz-5.5.0 \
     -append "console=ttyS0 root=/dev/vda1 rw" \
     -drive file=riscv64-debianrootfs-qemu.qcow2,format=qcow2,id=hd0 \
     -object rng-random,filename=/dev/urandom,id=rng0 \
