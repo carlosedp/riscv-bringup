@@ -70,7 +70,7 @@ Currently there are three distributions of RISC-V VM pre-packaged for Qemu:
 * [Ubuntu Focal](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuFocal-riscv64-QemuVM.tar.gz)
 * [Fedora](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla)
 
-The user is `root` and password `riscv`. For more information, check [the readme](Qemu-VM.md).
+The user is `root` and password `riscv`. For more information, check [the readme](Qemu/Readme.md).
 
 A prebuilt Go 1.14 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.14-riscv64.tar.gz).
 

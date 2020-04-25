@@ -1,4 +1,4 @@
-# RISC-V Qemu Virtual Machine
+# RISC-V Qemu Virtual Machine <!-- omit in toc -->
 
 The objective of this guide is to provide an end-to-end solution on running a RISC-V Virtual machine and building the necessary packages to a fully-functional Qemu VM and it's boot requirements.
 
@@ -34,10 +34,13 @@ Below is a diagram of the process:
 
 ## Table of Contents <!-- omit in toc -->
 
-* [RISC-V Qemu Virtual Machine](#risc-v-qemu-virtual-machine)
-  * [Installing Qemu](#installing-qemu)
-    * [Mac](#mac)
-    * [Linux](#linux)
+* [Installing and running the Qemu VM](#installing-and-running-the-qemu-vm)
+  * [Install on Mac](#install-on-mac)
+  * [Install on Linux](#install-on-linux)
+  * [Running](#running)
+  * [SSH login into the guest](#ssh-login-into-the-guest)
+  * [Additional config](#additional-config)
+* [Building the Qemu VM Image](#building-the-qemu-vm-image)
   * [Install Toolchain to build Kernel](#install-toolchain-to-build-kernel)
   * [Clone repositories](#clone-repositories)
   * [Build U-Boot](#build-u-boot)
@@ -51,11 +54,11 @@ Below is a diagram of the process:
   * [Remount Qcow image for changes](#remount-qcow-image-for-changes)
   * [Creating snapshots](#creating-snapshots)
   * [Simplified way to boot Qemu](#simplified-way-to-boot-qemu)
-  * [References](#references)
+* [References](#references)
 
-## Installing Qemu
+## Installing and running the Qemu VM
 
-### Mac
+### Install on Mac
 
 On mac, installing Qemu is a matter of using [homebrew](https://brew.sh/) and installing with `brew install qemu`. Avoid using Qemu 4.2 due to a know problem.
 
@@ -66,7 +69,7 @@ In this case, after the install command above, edit the brewfile with `brew edit
 
 After this, run `brew reinstall qemu -s` to rebuild and install the 4.1.1 version.
 
-### Linux
+### Install on Linux
 
 On Debian or Ubuntu distros, install Qemu with:
 
@@ -74,12 +77,41 @@ On Debian or Ubuntu distros, install Qemu with:
 sudo apt-get update
 sudo apt-get install qemu-user-static qemu-system qemu-utils qemu-system-misc binfmt-support
 ```
-
 On Fedora, install with `dnf install qemu`.
 
 Depending on the distro, you might need to build Qemu from source.
 
-## Install Toolchain to build Kernel
+Currently there are three distributions of RISC-V VM pre-packaged for Qemu:
+
+* [Debian Sid](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-QemuVM-202002.tar.gz)
+* [Ubuntu Focal](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuFocal-riscv64-QemuVM.tar.gz)
+* [Fedora](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla)
+
+### Running
+
+To run the VM, use the script:
+
+    ./run_riscvVM.sh
+
+Avoid using Qemu 4.2 due to a FP bug. Version 4.1.1 works as expected.
+
+### SSH login into the guest
+
+    ssh -p 22222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost
+
+Login with user `root` and password `riscv`.
+
+### Additional config
+
+If required, you can add additional ports to be mapped between the VM and your host. Add into the startup script `run_riscvVM.sh` line the host and VM ports in the format `hostfwd=tcp::[HOST PORT]-:[VM PORT]`:
+
+    -netdev user,id=usernet,hostfwd=tcp::10000-:22,hostfwd=tcp::2049-:2049,hostfwd=udp::2049-:2049,hostfwd=tcp::38188-:38188,hostfwd=udp::38188-:38188,hostfwd=tcp::8080-:8080
+
+--------------------------------------------------------------------------------
+
+## Building the Qemu VM Image
+
+### Install Toolchain to build Kernel
 
 This process has been done in a amd64 VM running Ubuntu Xenial.
 
@@ -97,7 +129,7 @@ echo "export PATH=/opt/riscv/bin:$PATH" >> ~/.bashrc
 
 To use the [bootlin](https://toolchains.bootlin.com/) toolchain you might need to adjust the `CROSS_COMPILE` variable to the correct GCC triplet.
 
-## Clone repositories
+### Clone repositories
 
 Clone the required repositories. You need OpenSBI (bootloader), U-Boot and the Linux kernel. I keep all in one directory.
 
@@ -115,7 +147,7 @@ git clone https://github.com/U-Boot/U-Boot u-boot
 git clone https://github.com/torvalds/linux
 ```
 
-## Build U-Boot
+### Build U-Boot
 
 U-Boot is the bootloader used to load the Kernels from the filesystem. It has a menu that allows you to select which version of the Kernel to use (if needed).
 
@@ -140,7 +172,7 @@ popd
 
 This will generate the file `u-boot.bin` to be used by OpenSBI.
 
-## Build OpenSBI
+### Build OpenSBI
 
 OpenSBI is the bootloader. It's the one that calls U-Boot. The build process uses the U-Boot as it's payload to have it embedded into the same binary.
 
@@ -157,9 +189,9 @@ popd
 
 This will generate the file `build/platform/qemu/virt/firmware/fw_payload.bin` that will be flashed into the SDcard later.
 
-## Linux Kernel
+### Linux Kernel
 
-### Kernel 5.6
+#### Kernel 5.6
 
 Kernel 5.6 already supports RISC-V.
 
@@ -168,7 +200,7 @@ pushd linux
 git checkout v5.6
 ```
 
-### Building the Kernel
+#### Building the Kernel
 
 Download config from the repo. This config has most requirements for containers and networking features built-in and is confirmed to work. This config adds most networking features as modules.
 
@@ -188,7 +220,7 @@ make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv -j6
 
 Check if building produced the file `linux/arch/riscv/boot/Image`.
 
-### Generating Kernel modules
+#### Generating Kernel modules
 
 ```bash
 rm -rf modules_install
@@ -204,7 +236,7 @@ popd
 mv ./modules_install/lib/modules/kernel-modules-${version}.tar.gz .
 ```
 
-## Creating disk image
+### Creating disk image
 
 ```bash
 # Create and mount the disk image. Adjust maximum size on qemu-img below
@@ -281,7 +313,7 @@ sudo umount rootfs
 sudo qemu-nbd -d /dev/nbd0
 ```
 
-## Create tarball for distribution
+### Create tarball for distribution
 
 ```bash
 mkdir qemu-vm
@@ -340,7 +372,7 @@ Kernel files are in `/boot`. You can add new versions or modify parameters on `/
 
 Root password is *riscv*.
 
-## Remount Qcow image for changes
+### Remount Qcow image for changes
 
 ```bash
 sudo qemu-nbd -c /dev/nbd0 ./qemu-vm/riscv64-QemuVM.qcow2
@@ -354,7 +386,7 @@ sudo umount rootfs
 sudo qemu-nbd -d /dev/nbd0
 ```
 
-## Creating snapshots
+### Creating snapshots
 
 You can create a snapshot Qcow2 file that works as copy-on-write based on an existing base image.
 This way you can keep the original image with base packages and the new snapshot holds all changes.
@@ -365,7 +397,7 @@ sudo qemu-img create -f qcow2 -b riscv64-QemuVM.qcow2 snapshot-layer.qcow2
 
 Then point the `-drive` parameter to this new layer. Keep both on same directory.
 
-## Simplified way to boot Qemu
+### Simplified way to boot Qemu
 
 To bypass U-Boot and extlinux and pass the Linux kernel image directly to Qemu, create a dir and put together:
 
