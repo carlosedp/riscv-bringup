@@ -208,9 +208,9 @@ mv ./modules_install/lib/modules/kernel-modules-${version}.tar.gz .
 
 ```bash
 # Create and mount the disk image. Adjust maximum size on qemu-img below
-qemu-img create -f qcow2 riscv64-debianrootfs-qemu.qcow2 10G
+qemu-img create -f qcow2 riscv64-QemuVM.qcow2 10G
 sudo modprobe nbd max_part=16
-sudo qemu-nbd -c /dev/nbd0 riscv64-debianrootfs-qemu.qcow2
+sudo qemu-nbd -c /dev/nbd0 riscv64-QemuVM.qcow2
 
 sudo sfdisk /dev/nbd0 << 'EOF'
 label: dos
@@ -230,9 +230,11 @@ sudo mount /dev/nbd0p1 rootfs
 
 As the root filesystem, you can choose between downloading a pre-built Debian or Ubuntu or build the rootfs yourself.
 
-The pre-built tarball can be downloaded with: `wget -O debian-rootfs.tar.bz2 https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-sid-riscv64-rootfs-20200108.tar.bz2`.
+The pre-built Debian tarball can be downloaded with: `wget -O rootfs.tar.bz2 https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-sid-riscv64-rootfs-20200108.tar.bz2`.
 
-If you want to build a Debian rootfs from scratch, [check this guide](https://github.com/carlosedp/riscv-bringup/blob/master/Debian-Rootfs-Guide.md).
+The pre-built Ubuntu Focal tarball can be downloaded with: `wget -O rootfs.tar.bz2 https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuFocal-riscv64-rootfs.tar.gz`.
+
+If you want to build a Debian rootfs from scratch, [check this guide](https://github.com/carlosedp/riscv-bringup/blob/master/rootfs-Guide.md).
 
 If you want to build an Ubuntu rootfs from scratch, [check this guide](https://github.com/carlosedp/riscv-bringup/blob/master/Ubuntu-Rootfs-Guide.md).
 
@@ -240,7 +242,7 @@ Install Kernel, modules and unmount rootfs.
 
 ```bash
 pushd rootfs
-sudo tar vxf ../debian-rootfs.tar.bz2 # or choosen rootfs
+sudo tar vxf ../rootfs.tar.bz2 # or choosen rootfs
 
 # Unpack Kernel modules
 sudo mkdir -p lib/modules
@@ -283,7 +285,7 @@ sudo qemu-nbd -d /dev/nbd0
 
 ```bash
 mkdir qemu-vm
-mv riscv64-debianrootfs-qemu.qcow2 qemu-vm
+mv riscv64-QemuVM.qcow2 qemu-vm
 cp opensbi/build/platform/qemu/virt/firmware/fw_payload.bin qemu-vm
 
 # Create start script
@@ -316,7 +318,7 @@ qemu-system-riscv64 \
     -device virtio-blk-device,drive=hd0 \
     -object rng-random,filename=/dev/urandom,id=rng0 \
     -device virtio-rng-device,rng=rng0 \
-    -drive file=riscv64-debianrootfs-qemu.qcow2,format=qcow2,id=hd0 \
+    -drive file=riscv64-QemuVM.qcow2,format=qcow2,id=hd0 \
     -device virtio-net-device,netdev=usernet \
     -netdev user,id=usernet,$ports
 EOF
@@ -328,20 +330,20 @@ ssh -p 22222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@lo
 EOF
 
 chmod +x qemu-vm/run_riscvVM.sh qemu-vm/ssh.sh
-tar -cf riscv64-debian-qemuVM.tar qemu-vm
-gzip riscv64-debian-qemuVM.tar
+tar -cf riscv64-QemuVM.tar qemu-vm
+gzip riscv64-QemuVM.tar
 ```
 
 Now start the VM with the `run_riscvVM.sh` script. After boot, login on console or connect via SSH using `ssh.sh` in another terminal.
 
 Kernel files are in `/boot`. You can add new versions or modify parameters on `/boot/extlinux/extlinux.conf` file.
 
-Root password for the rootfs is *riscv*.
+Root password is *riscv*.
 
 ## Remount Qcow image for changes
 
 ```bash
-sudo qemu-nbd -c /dev/nbd0 ./qemu-vm/riscv64-debianrootfs-qemu.qcow2
+sudo qemu-nbd -c /dev/nbd0 ./qemu-vm/riscv64-QemuVM.qcow2
 sudo partx -a /dev/nbd0
 
 sudo mount /dev/nbd0p1 rootfs
@@ -358,7 +360,7 @@ You can create a snapshot Qcow2 file that works as copy-on-write based on an exi
 This way you can keep the original image with base packages and the new snapshot holds all changes.
 
 ```bash
-sudo qemu-img create -f qcow2 -b riscv64-debianrootfs-qemu.qcow2 snapshot-layer.qcow2
+sudo qemu-img create -f qcow2 -b riscv64-QemuVM.qcow2 snapshot-layer.qcow2
 ```
 
 Then point the `-drive` parameter to this new layer. Keep both on same directory.
@@ -367,7 +369,7 @@ Then point the `-drive` parameter to this new layer. Keep both on same directory
 
 To bypass U-Boot and extlinux and pass the Linux kernel image directly to Qemu, create a dir and put together:
 
-* The rootfs image (`riscv64-debianrootfs-qemu.qcow2`)
+* The rootfs image (`riscv64-QemuVM.qcow2`)
 * Copy `fw_jump.elf` from `opensbi/build/platform/qemu/virt/firmware/`
 * The Linux Kernel from `linux/arch/riscv/boot/Image` as `vmlinuz-5.5.0` in this case.
 
@@ -382,7 +384,7 @@ qemu-system-riscv64 \
     -bios default \
     -kernel vmlinuz-5.5.0 \
     -append "console=ttyS0 root=/dev/vda1 rw" \
-    -drive file=riscv64-debianrootfs-qemu.qcow2,format=qcow2,id=hd0 \
+    -drive file=riscv64-QemuVM.qcow2,format=qcow2,id=hd0 \
     -object rng-random,filename=/dev/urandom,id=rng0 \
     -device virtio-rng-device,rng=rng0
     -device virtio-net-device,netdev=usernet \
