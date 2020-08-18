@@ -77,6 +77,7 @@ On Debian or Ubuntu distros, install Qemu with:
 sudo apt-get update
 sudo apt-get install qemu-user-static qemu-system qemu-utils qemu-system-misc binfmt-support
 ```
+
 On Fedora, install with `dnf install qemu`.
 
 Depending on the distro, you might need to build Qemu from source.
@@ -155,7 +156,7 @@ To allow booting on Qemu passing the configured CPU and memory parameters down t
 
 ```bash
 pushd u-boot
-git checkout v2020.01
+git checkout v2020.04
 
 # Patch
 wget https://github.com/carlosedp/riscv-bringup/raw/master/Qemu/patches/uboot-riscv64-set-fdt_addr.patch
@@ -179,13 +180,15 @@ OpenSBI is the bootloader. It's the one that calls U-Boot. The build process use
 ```sh
 pushd opensbi
 # Checkout a known compatible version
-git checkout v0.6
+git checkout v0.8
 
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- \
-     PLATFORM=qemu/virt \
+     PLATFORM=generic \
      FW_PAYLOAD_PATH=../u-boot/u-boot.bin
 popd
 ```
+
+According to the [docs](https://github.com/avpatel/opensbi#supported-sbi-version), OpenSBI v0.7 and up requires a Kernel version 5.7 or up.
 
 This will generate the file `build/platform/qemu/virt/firmware/fw_payload.bin` that will be flashed into the SDcard later.
 
@@ -318,7 +321,7 @@ sudo qemu-nbd -d /dev/nbd0
 ```bash
 mkdir qemu-vm
 mv riscv64-QemuVM.qcow2 qemu-vm
-cp opensbi/build/platform/qemu/virt/firmware/fw_payload.bin qemu-vm
+cp opensbi/build/platform/generic/firmware/fw_payload.bin qemu-vm
 
 # Create start script
 cat > qemu-vm/run_riscvVM.sh << 'EOF'

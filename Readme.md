@@ -133,7 +133,7 @@ To build Go from source, check [build-golang.md](build-golang.md).
   * Tracker Issue: <https://github.com/golang/go/issues/27532>
   * Gerrit CLs: <https://go-review.googlesource.com/q/riscv+OR+riscv64>
   * RISC-V Fork: <https://github.com/4a6f656c/riscv-go>
-* [ ] CGO implementation - Draft on <https://github.com/carlosedp/riscv-go> but far from complete/funtcional.
+* [ ] CGO implementation(fork) - <https://github.com/golang/go/issues/36641>
 
 ### Go Std Libraries
 
@@ -211,7 +211,7 @@ No changes required, builds fine even without Kernel support for seccomp. Depend
 * [x] Update `x/sys` and `x/net` modules in `vendor`. [PR](https://github.com/docker/cli/pull/1926)
 * [x] Add riscv64 to manifest annotation. [PR#2084](https://github.com/docker/cli/pull/2084)
 * [x] Add support for riscv64 on binfmt. [PR#21](https://github.com/docker/binfmt/pull/21)
-* [ ] Docker for Mac - Add RISC-V binfmt. [PR#4237](https://github.com/docker/for-mac/issues/4237)
+* [x] Docker for Mac - Add RISC-V binfmt. [PR#4237](https://github.com/docker/for-mac/issues/4237)
 * [ ] Add to CI
 
 #### Docker daemon

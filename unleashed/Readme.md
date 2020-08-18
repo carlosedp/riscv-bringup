@@ -66,8 +66,8 @@ git clone https://github.com/riscv/opensbi
 # U-Boot
 git clone https://github.com/U-Boot/U-Boot u-boot
 
-# Linux Kernel
-git clone https://github.com/torvalds/linux
+# Linux Kernel (Stable)
+git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 ```
 
 ## Build FSBL
@@ -96,7 +96,7 @@ We use latest released version just replacing it's DTB with last one from the Li
 
 ```bash
 pushd u-boot
-git checkout v2020.01
+git checkout v2020.04
 cp -v ../linux/arch/riscv/boot/dts/sifive/{hifive-unleashed-a00.dts,fu540-c000.dtsi} arch/riscv/dts/
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make sifive_fu540_defconfig
 make menuconfig # if needed
@@ -104,7 +104,7 @@ CROSS_COMPILE=riscv64-unknown-linux-gnu- make -j 6
 popd
 ```
 
-This will generate the file `u-boot.bin` to be used by OpenSBI.
+This will generate the file `u-boot-dtb.bin` to be used by OpenSBI.
 
 ## Build OpenSBI
 
@@ -112,11 +112,11 @@ OpenSBI is the secondary bootloader. It's the one that calls U-Boot. The build p
 
 ```sh
 pushd opensbi
-git checkout v0.6
+git checkout v0.8
 
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- \
      PLATFORM=sifive/fu540 \
-     FW_PAYLOAD_PATH=../u-boot/u-boot.bin
+     FW_PAYLOAD_PATH=../u-boot/u-boot-dtb.bin
 popd
 ```
 
@@ -124,48 +124,28 @@ This will generate the file `build/platform/sifive/fu540/firmware/fw_payload.bin
 
 ## Linux Kernel
 
-### Kernel 5.5
+### Kernel 5.8
 
-Kernel 5.5 and up already supports RISC-V on Unleashed.
-
-```sh
-pushd linux
-git checkout v5.5
-```
-
-As an option, you can apply cpufreq patch (has been reported that might not work with Microsemi expansion board, skip if this is your case) that allow controlling the clock of the processor. By default it runs at 1Ghz but some can run up to 1.4Ghz.
-
-Also there is a patch fixing module load within relative jump range of the kernel text. Not required if you bake-in (build kernel with embedded feature instead of module) the required fetures.
-
-```sh
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpufreq-5.5.patch
-patch -p1 < cpufreq.patch
-wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/module_load.patch
-patch -p1 < module_load.patch
-```
-
-### Kernel 5.6
-
-Kernel 5.6 and up already supports RISC-V on Unleashed. Module loading patch from 5.5 is already upstream.
+Kernel 5.6 and up already supports RISC-V on Unleashed with no additional patches.
 
 ```sh
 pushd linux
-git checkout v5.6
+git checkout v5.8
 ```
 
 As an option, you can apply cpufreq patch (has been reported that might not work with Microsemi expansion board, skip if this is your case) that allow controlling the clock of the processor. By default it runs at 1Ghz but some can run up to 1.4Ghz.
 
 ```sh
 wget https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/patches/cpufreq-5.5.patch
-patch -p1 < cpufreq.patch
+patch -p1 < cpufreq-5.5.patch
 ```
 
 ### Building the Kernel
 
-Download config from the repo. This config has most requirements for containers and networking features built-in and is confirmed to work. This config adds most networking features as modules and requires the `module_load.patch` patch. If you don't apply the patch, use the `unleashed_config` config to have the features baked-in.
+Download config from the repo. This config has most requirements for containers and networking features built-in and is confirmed to work.
 
 ```sh
-wget -O .config https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/unleashed_config_modules
+wget -O .config https://github.com/carlosedp/riscv-bringup/raw/master/unleashed/unleashed_config_5.8
 ```
 
 Build the kernel. The `menuconfig` line is in case one want to customize any parameter. Also set the `$version` variable to be used later.
@@ -176,11 +156,7 @@ make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv menuconfig
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv -j6
 
 # Build version string
-export VER=`cat Makefile |grep VERSION|head -1|awk  '{print $3}'`
-export PATCH=`cat Makefile |grep PATCHLEVEL|head -1|awk  '{print $3}'`
-export SUB=`cat Makefile |grep SUBLEVEL|head -1|awk  '{print $3}'`
-export EXTRA=`cat Makefile |grep EXTRAVERSION|head -1|awk  '{print $3}'`
-export version=$VER.$PATCH.$SUB$EXTRA
+version=`cat include/config/kernel.release`
 echo $version
 
 cp ./arch/riscv/boot/Image ./vmlinux-$version
@@ -207,9 +183,15 @@ mv ./modules_install/lib/modules/kernel-modules-${version}.tar.gz .
 
 Create the SDcard. The partition typecodes are important here. I suggest using a card with 4GB or bigger. This depends on which rootfs you will use.
 
-I have available a Debian rootfs available for download at <https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-sid-riscv64-rootfs-20200108.tar.bz2>.
+As the root filesystem, you can choose between downloading a pre-built Debian or Ubuntu or build the rootfs yourself.
 
-If you want to build a Debian rootfs from scratch, [check this guide](https://github.com/carlosedp/riscv-bringup/blob/master/Debian-Rootfs-Guide.md).
+The pre-built Debian tarball can be downloaded with: `wget -O rootfs.tar.bz2 https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-sid-riscv64-rootfs-20200108.tar.bz2`.
+
+The pre-built Ubuntu Focal tarball can be downloaded with: `wget -O rootfs.tar.bz2 https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuFocal-riscv64-rootfs.tar.gz`.
+
+If you want to build a Debian rootfs from scratch, [check this guide](https://github.com/carlosedp/riscv-bringup/blob/master/rootfs-Guide.md).
+
+If you want to build an Ubuntu rootfs from scratch, [check this guide](https://github.com/carlosedp/riscv-bringup/blob/master/Ubuntu-Rootfs-Guide.md).
 
 ```sh
 # Assuming your SD card is /dev/sdc. Adjust as necessary.
