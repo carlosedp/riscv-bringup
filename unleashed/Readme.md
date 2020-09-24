@@ -178,6 +178,7 @@ tar -cf kernel-modules-${version}.tar .
 gzip kernel-modules-${version}.tar
 popd
 mv ./modules_install/lib/modules/kernel-modules-${version}.tar.gz .
+cd ..
 ```
 
 ## Flashing to the SD Card
