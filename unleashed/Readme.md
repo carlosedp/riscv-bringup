@@ -169,6 +169,7 @@ Check if building produced the files `linux/arch/riscv/boot/Image` and `linux/ar
 ### Generating Kernel modules
 
 ```bash
+cd linux/
 rm -rf modules_install
 mkdir -p modules_install
 CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv make modules_install INSTALL_MOD_PATH=./modules_install
