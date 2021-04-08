@@ -2,6 +2,8 @@
 
 The objective of this repository is to track the progress and pre-requisites to allow containers and Go applications on RISC-V.
 
+The repo also hosts multiple files and images suited for the SiFive Unmatched and QEmu VMs.
+
 There is a companion article available on <https://medium.com/@carlosedp/docker-containers-on-RISC-V-architecture-5bc45725624b>.
 
 This page is also linked from [http://bit.ly/riscvtracker](http://bit.ly/riscvtracker).
@@ -64,7 +66,9 @@ If you like this project and others I've been contributing and would like to sup
 
 To make the development easier, there are Qemu virtual machines based on Debian and Fedora with some developer tools already installed.
 
-Currently there are three distributions of RISC-V VM pre-packaged for Qemu:
+For the SiFive Unmatched, there is a prebuilt SDcard image at [https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuHippo-RISC-V.img.gz](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuHippo-RISC-V.img.gz)
+
+For QEmu, there are three distributions of RISC-V pre-packaged VM images:
 
 * [Debian Sid](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-QemuVM-202002.tar.gz)
 * [Ubuntu Focal](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuFocal-riscv64-QemuVM.tar.gz)
@@ -72,9 +76,9 @@ Currently there are three distributions of RISC-V VM pre-packaged for Qemu:
 
 The user is `root` and password `riscv`. For more information, check [the readme](Qemu/Readme.md).
 
-A prebuilt Go 1.14 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.14-riscv64.tar.gz).
+A prebuilt Go 1.16 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go1.16.2-riscv64.tar.gz).
 
-If required to build the complete boot stack composed of OpenSBI, U-Boot, Linux, checkout the guides for [SiFive Unleashed](unleashed/Readme.md) and [Qemu](Qemu/Readme.md).
+If required to build the complete boot stack composed of OpenSBI, U-Boot, Linux, checkout the guides for [SiFive Unmatched](unmatched/Readme.md), [SiFive Unleashed](unleashed/Readme.md) and [Qemu](Qemu/Readme.md).
 
 To run Go on the VM or board, install with:
 
@@ -83,10 +87,10 @@ To run Go on the VM or board, install with:
 ./run_debian.sh
 
 # Download Golang tarball
-wget https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-1.14-riscv64.tar.gz
+wget https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go1.16.2-riscv64.tar.gz
 
 # In the VM, unpack (in root dir for example)
-tar vxf go-1.14-riscv64.tar.gz -C /usr/local/
+tar vxf go1.16.2-riscv64.tar.gz -C /usr/local/
 
 # Add to your PATH
 export PATH="/usr/local/go/bin:$PATH"
@@ -95,9 +99,9 @@ export PATH="/usr/local/go/bin:$PATH"
 echo "export PATH=/usr/local/go/bin:$PATH" >> ~/.bashrc
 ```
 
-To run Docker on your RISC-V Debian or Ubuntu environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-v19.03.8-dev_riscv64.deb) and install with `sudo apt install ./docker-v19.03.8-dev_riscv64.deb`.
+To run Docker on your RISC-V Debian or Ubuntu environment, download a [deb package](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-v20.10.2-dev_riscv64.deb) and install with `sudo apt install ./docker-v20.10.2-dev_riscv64.deb`.
 
-For other distros get the [tarball here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-19.03.8-dev_riscv64.tar.gz) and unpack to your `/` dir. If the docker service doesn't start on install script, re-run `systemctl start docker`.
+For other distros get the [tarball here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-v20.10.2-dev_riscv64.tar.gz) and unpack to your `/` dir. If the docker service doesn't start on install script, re-run `systemctl start docker`.
 
 <details><summary>Docker-compose install instructions</summary></u>
 

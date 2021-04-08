@@ -1,6 +1,8 @@
 # Building Go on your RISC-V VM or SBC
 
-Golang is still not upstreamed so to build it from source, you will need a machine to do the initial bootstrap, copy this bootstraped tree to your RISC-V host or VM and then build the complete Go distribution. This bootstrap host can be a Windows, Mac or Linux.
+Golang is already upstream but no packaged binaries are provided. To build it from source, a previously built Go or build yourself a golang bootstrap. Copy this bootstraped tree to your RISC-V host or VM and then build the complete Go distribution. This bootstrap host can be a Windows, Mac or Linux.
+
+You can get prebuilt packages in the releases section and skip bootstrap generation.
 
 ```bash
 # On bootstrap Host
@@ -11,19 +13,22 @@ GOOS=linux GOARCH=riscv64 ./bootstrap.bash
 scp -P 22222 ../../go-linux-riscv64-bootstrap.tbz root@localhost: # In case you use the VM provided here
 ```
 
-Now on your RISC-V VM/SBC, clone the repository, export the path and bootstrap path you unpacked and build/test:
+On your RISC-V VM/SBC, clone the repository, export the path to go and build/test:
 
 ```bash
 # On RISC-V Host
-tar vxf go-linux-riscv64-bootstrap.tbz
+tar vxf go-linux-riscv64-bootstrap.tbz      # or use an already unpacked Go
 git clone https://github.com/golang/go
-cd go/src
-export GOROOT_BOOTSTRAP=$HOME/go-linux-riscv64-bootstrap
-./make.bash                            # Builds go on $HOME/go/bin that can be added to your path
+# Checkout latest tag
+git checkout $(git --git-dir ./go/.git describe --tags)
+
+pushd go/src
+export GOROOT_BOOTSTRAP=$HOME/go-linux-riscv64-bootstrap    # Or adjust to your local go
+./make.bash                            # Builds go
 GO_TEST_TIMEOUT_SCALE=10 ./run.bash    # Tests the build
 # Pack built Golang into a tarball
-cd ..
-sudo tar -cvf go-1.14-riscv64.tar --exclude=pkg/obj --exclude .git go
+popd
+tar -cvf $(git --git-dir ./go/.git describe --tags)-$(uname -m).tar --exclude=pkg/obj --exclude=.git go
 ```
 
 Now you can use this go build for testing/developing other projects.

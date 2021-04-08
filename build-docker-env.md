@@ -2,6 +2,8 @@
 
 This doc allows one to build and set the requirements to run containers on Risc-V architecture.
 
+You need a recent working Golang version (1.16) installed and in the path. Check releases to download a prebuilt package.
+
 It has been tested on a SiFive Unleashed board.
 
 Create a temporary place for building:
@@ -23,6 +25,8 @@ Since Linux kernel 5.4, seccomp is supported.
 
 ## libseccomp
 
+Some distros already have libseccomp2 available, check `apt` or `yum` repos. If not available, build from source with instructions below.
+
 Libseccomp builds fine from its master branch. Will be included in version 2.5.
 
 ```bash
@@ -36,9 +40,24 @@ DESTDIR=$HOME/riscv-docker/debs make install
 popd
 ```
 
+## runc
+
+Install `pkg-config`, `libseccomp2` and `libseccomp-dev` before building.
+
+```sh
+sudo apt install pkg-config libseccomp2 libseccomp-dev
+git clone https://github.com/opencontainers/runc
+cd runc
+make
+sudo make install
+DESTDIR=$HOME/riscv-docker/debs make install
+cd ..
+```
+
+
 ## crun
 
-Since `runc`, Docker's default runtime does not build on riscv64 due to CGO dependency, we can use `crun`, a pure C based runtime that is OCI compliant.
+An alternative to `runc`, we can use `crun`, a pure C based runtime that is OCI compliant.
 
 ```bash
 # Install pre-reqs
@@ -60,17 +79,14 @@ popd
 ## containerd
 
 ```bash
-mkdir -p $GOPATH/src/github.com/containerd/
-pushd $GOPATH/src/github.com/containerd/
 git clone https://github.com/containerd/containerd
 pushd containerd
 
-make BUILDTAGS="no_btrfs" GO_GCFLAGS="-buildmode=default"
-DESTDIR=/usr/local make install
+make BUILDTAGS="no_btrfs"
+sudo make install
 
 # For debs
 DESTDIR=$HOME/riscv-docker/debs/usr/local make install
-popd
 popd
 ```
 
@@ -81,7 +97,7 @@ mkdir -p $GOPATH/src/github.com/docker/
 pushd $GOPATH/src/github.com/docker/
 git clone https://github.com/docker/cli
 pushd cli
-./scripts/build/binary
+DISABLE_WARN_OUTSIDE_CONTAINER=1 GO111MODULE=off make
 sudo cp ./build/docker-linux-riscv64 /usr/local/bin
 sudo ln -sf /usr/local/bin/docker-linux-riscv64 /usr/local/bin/docker
 
@@ -110,11 +126,11 @@ popd
 
  ```bash
 mkdir $GOPATH/src/github.com/docker
-pushd docker
+pushd $GOPATH/src/github.com/docker
 git clone https://github.com/docker/libnetwork/
 pushd libnetwork
 go get github.com/ishidawataru/sctp
-go build ./cmd/proxy
+GO111MODULE=off go build ./cmd/proxy
 sudo cp proxy /usr/local/bin/docker-proxy
 
 # For debs
@@ -131,10 +147,10 @@ pushd $GOPATH/src/github.com/rootless-containers/
 git clone https://github.com/rootless-containers/rootlesskit.git
 pushd rootlesskit
 make
-sudo cp bin/* /usr/local/bin
+sudo make install
 
 # For debs
-cp bin/* $HOME/riscv-docker/debs/usr/local/bin/
+DESTDIR=$HOME/riscv-docker/debs/ make install
 popd
 popd
 ```
@@ -144,12 +160,10 @@ popd
 ```bash
 mkdir -p $GOPATH/src/github.com/docker/
 pushd $GOPATH/src/github.com/docker/
-git clone git://github.com/moby/moby docker
+git clone https://github.com/moby/moby docker
 pushd docker
 sudo cp ./contrib/dockerd-rootless.sh /usr/local/bin
-
-# Apply PR https://github.com/moby/moby/pull/40664 until it gets merged
-git cherry-pick fbfe6e0ca4adef7c1826d066a2163b4082641463
+sudo cp ./contrib/dockerd-rootless.sh $HOME/riscv-docker/debs/usr/local/bin
 
 ./hack/make.sh binary
 sudo cp bundles/binary-daemon/dockerd-dev /usr/local/bin/dockerd
@@ -265,10 +279,11 @@ EOF
 cat << EOF | sudo tee -a /etc/systemd/system/docker.socket
 [Unit]
 Description=Docker Socket for the API
-PartOf=docker.service
 
 [Socket]
-ListenStream=/var/run/docker.sock
+# If /var/run is not implemented as a symlink to /run, you may need to
+# specify ListenStream=/var/run/docker.sock instead.
+ListenStream=/run/docker.sock
 SocketMode=0660
 SocketUser=root
 SocketGroup=docker
@@ -309,10 +324,10 @@ Generate DEB files
 mkdir -p $HOME/riscv-docker/debs/DEBIAN
 cat << EOF | sudo tee -a $HOME/riscv-docker/debs/DEBIAN/control
 Package: docker
-Version: 19.03.5-dev
+Version: v20.10.2-dev
 Architecture: riscv64
 Maintainer: Carlos de Paula <carlosedp@gmail.com>
-Depends: conntrack, ebtables, ethtool, iproute2, iptables, mount, socat, util-linux, libyajl-dev
+Depends: conntrack, ebtables, ethtool, iproute2, iptables, mount, socat, util-linux
 Description: Docker Engine and CLI
 EOF
 
