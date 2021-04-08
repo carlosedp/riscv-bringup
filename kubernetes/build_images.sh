@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script requires docker cli built from master since released version does not support riscv64 manifest annotation
 
-ARCHITECTURES="amd64 arm64 arm ppc64le riscv64"
+ARCHITECTURES=(amd64 arm64 arm ppc64le riscv64)
 BASEIMAGE=carlosedp/debian:sid-slim
 VERSION=`git describe | sed -E 's/(v[0-9]\.[0-9]*\.[0-9]*-[a-zA-Z0-9]*\.[0-9]*).*/\1/'`
 REPO=carlosedp
@@ -11,7 +11,7 @@ export DOCKER_CLI_EXPERIMENTAL=enabled
 # Build Kubernetes binaries
 pushd kubernetes
 
-patch --ignore-whitespace << 'EOF'
+patch -p1--ignore-whitespace << 'EOF'
 diff --git a/hack/lib/golang.sh b/hack/lib/golang.sh
 index ce7de73301..211580051e 100755
 --- a/hack/lib/golang.sh
@@ -50,8 +50,8 @@ index ce7de73301..211580051e 100755
  )
 EOF
 
-make generated_files
 for arch in $ARCHITECTURES; do
+   #make cross KUBE_BUILD_PLATFORMS=linux/$arch
 	for i in kubeadm kubelet kubectl kube-apiserver kube-proxy kube-scheduler kube-controller-manager kubemark;
 	do
     echo "Building $i for $arch"
@@ -106,18 +106,22 @@ for bin in kube-proxy; do
 done
 
 # Build pause image
-pushd build/pause
-TAG=3.1
+TAG=3.2
+docker run -it --rm -v $(PWD):/src -e TAG=${TAG} -w /src carlosedp/crossbuild-riscv64
+cd build/pause
 REV=`git describe --contains --always --match='v*'`
-riscv64-buildroot-linux-gnu-gcc -Os -Wall -Werror -static -DVERSION=v${TAG}-${REV} -o bin/pause-riscv64 pause.c
-docker build -t ${REPO}/pause:${TAG} --build-arg=ARCH=riscv64 .
-docker push ${REPO}/pause:${TAG}
+riscv64-linux-gcc -Os -Wall -Werror -static -DVERSION=v${TAG}-${REV} -o bin/pause-riscv64 linux/pause.c
+exit
+pushd build/pause
+docker build -t ${REPO}/pause:${TAG}-riscv64 --build-arg=ARCH=riscv64 --build-arg=BASE=scratch -f Dockerfile .
+docker push ${REPO}/pause:${TAG}-riscv64
+popd
 popd
 
-ARCHITECTURES="amd64 arm64 arm ppc64le riscv64"
-ORIGINIMAGE=k8s.gcr.io/pause
+ARCHITECTURES=(amd64 arm64 arm ppc64le riscv64)
+ORIGINIMAGE=gcr.io/google-containers/pause
 IMAGE=carlosedp/pause
-VERSION=3.1
+VERSION=3.2
 # Build image for riscv and push as carlosedp/pause:3.1-riscv64
 for arch in amd64 arm64 arm ppc64le; do
     docker pull $ORIGINIMAGE-$arch:$VERSION
@@ -127,28 +131,38 @@ done
 docker manifest create --amend $IMAGE:$VERSION `echo $ARCHITECTURES | sed -e "s~[^ ]*~$IMAGE:$VERSION\-&~g"`
 for arch in $ARCHITECTURES; do docker manifest annotate --arch $arch $IMAGE:$VERSION $IMAGE:$VERSION-$arch; done
 docker manifest push --purge $IMAGE:$VERSION
+cd ..
 
 # Build CoreDNS
+git clone https://github.com/coredns/coredns
 cd coredns
+VER=v1.7.0
+git checkout ${VER}
 GITCOMMIT=`git describe --dirty --always`
 for arch in amd64 arm arm64 riscv64 ppc64le; do CGO_ENABLED=0 GOOS=linux GOARCH=$arch go build -v -ldflags="-s -w -X github.com/coredns/coredns/coremain.GitCommit=${GITCOMMIT}" -o coredns-$arch .; done
 
-cp -R /etc/ssl/certs .
+docker run -it --rm -v $(PWD):/src -w /src carlosedp/crossbuild-riscv64 bash -c "cp -R /etc/ssl/certs . && cp -R /usr/share/ca-certificates/mozilla/ ./mozilla"
 cat > Dockerfile.custom << 'EOF'
 FROM scratch
 ARG TARGETARCH
 ENV arch=$TARGETARCH
-COPY certs /etc/ssl/certs
+ADD certs /etc/ssl/certs
+ADD mozilla /usr/share/ca-certificates/mozilla
 ADD coredns-$arch /coredns
 
 EXPOSE 53 53/udp
 ENTRYPOINT ["/coredns"]
 EOF
-docker buildx build -t ${REPO}/coredns:1.6.2 --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm,linux/riscv64 --push -f Dockerfile.custom .
+mv .dockerignore dockerignore-dis
+docker buildx build -t ${REPO}/coredns:${VER} --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm,linux/riscv64 --push -f Dockerfile.custom .
+mv dockerignore-dis .dockerignore
+cd ..
 
 # Build Etcd
-
+git clone https://github.com/etcd-io/etcd
+VER=3.4.13
 cd etcd
+git checkout v${VER}
 for arch in amd64 arm arm64 riscv64 ppc64le; do CGO_ENABLED=0 GOOS=linux GOARCH=$arch gob -o  etcd-$arch .; done
 for arch in amd64 arm arm64 riscv64 ppc64le; do CGO_ENABLED=0 GOOS=linux GOARCH=$arch gob -o  etcdctl-$arch ./etcdctl; done
 
@@ -159,18 +173,27 @@ FROM carlosedp/debian:sid-slim
 ARG TARGETARCH
 ENV arch=$TARGETARCH
 ENV ETCD_UNSUPPORTED_ARCH=riscv64
-EXPOSE 2379 2380 4001 7001
 COPY etcd-$arch /usr/local/bin/etcd
 COPY etcdctl-$arch /usr/local/bin/etcdctl
 COPY migrate-if-needed.sh migrate /usr/local/bin/
+RUN mkdir -p /var/etcd/
+RUN mkdir -p /var/lib/etcd/
+RUN echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf
+EXPOSE 2379 2380
+CMD ["/usr/local/bin/etcd"]
 EOF
-docker buildx build -t ${REPO}/etcd:3.3.10 --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm,linux/riscv64 --push .
+docker buildx build -t ${REPO}/etcd:${VER} --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm,linux/riscv64 --push .
+cd ..
 
 # Build Flannel
 ARCHITECTURES="amd64 arm64 arm ppc64le riscv64"
 ORIGINIMAGE=quay.io/coreos/flannel
 IMAGE=carlosedp/flannel
-VERSION=v0.11.0
+VERSION=v0.13.1-rc2
+git clone https://github.com/flannel-io/flannel
+cd flannel
+
+git checkout ${VERSION}
 
 cat > Dockerfile.riscv64 << EOF
 FROM carlosedp/debian-iptables:sid-slim
@@ -180,6 +203,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends iproute2 net-to
 RUN apt-get install -y --no-install-recommends wireguard-tools
 COPY dist/flanneld-$FLANNEL_ARCH /opt/bin/flanneld
 COPY dist/mk-docker-opts.sh /opt/bin/
+COPY dist/iptables-wrapper-installer.sh /
+RUN /iptables-wrapper-installer.sh
 ENTRYPOINT ["/opt/bin/flanneld"]
 EOF
 

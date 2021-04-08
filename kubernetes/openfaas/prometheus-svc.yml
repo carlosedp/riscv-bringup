@@ -23,7 +23,7 @@ metadata:
   namespace: openfaas
 spec:
   rules:
-  - host: faas-prometheus.192.168.15.16.nip.io
+  - host: faas-prometheus.192.168.1.17.nip.io
     http:
       paths:
       - path: /

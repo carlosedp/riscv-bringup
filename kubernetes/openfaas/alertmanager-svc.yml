@@ -22,7 +22,7 @@ metadata:
   namespace: openfaas
 spec:
   rules:
-  - host: faas-alertmanager.192.168.15.16.nip.io
+  - host: faas-alertmanager.192.168.1.17.nip.io
     http:
       paths:
       - path: /
