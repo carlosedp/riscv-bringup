@@ -42,7 +42,7 @@ First install the RISC-V toolchain. You can build from source by using the comma
 ```sh
 git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
 cd riscv-gnu-toolchain
-sudo apt-get install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev libncurses-dev device-tree-compiler
+sudo apt-get install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev libncurses-dev device-tree-compiler libssl-dev
 ./configure --prefix=/opt/riscv
 sudo make linux -j6
 export PATH=/opt/riscv/bin:$PATH

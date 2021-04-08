@@ -1,0 +1,39 @@
+From 502141f0fe95742ecfd077b2ab9fb2b347bf415d Mon Sep 17 00:00:00 2001
+From: Carlos de Paula <me@carlosedp.com>
+Date: Tue, 16 Mar 2021 11:39:50 -0400
+Subject: [PATCH] kbuild: buildtar: add riscv support
+
+Make 'make tar-pkg' and 'tarbz2-pkg' work on riscv.
+
+Signed-off-by: Carlos de Paula <me@carlosedp.com>
+---
+ scripts/package/buildtar | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/scripts/package/buildtar b/scripts/package/buildtar
+index 936198a90477..221aa7df008d 100755
+--- a/scripts/package/buildtar
++++ b/scripts/package/buildtar
+@@ -123,10 +123,18 @@ case "${ARCH}" in
+ 				cp -v -- "${objtree}/arch/arm64/boot/${i}" "${tmpdir}/boot/vmlinuz-${KERNELRELEASE}"
+ 				break
+ 			fi
+ 		done
+ 		;;
++	riscv)
++		for i in Image.bz2 Image.gz Image; do
++			if [ -f "${objtree}/arch/riscv/boot/${i}" ] ; then
++				cp -v -- "${objtree}/arch/riscv/boot/${i}" "${tmpdir}/boot/vmlinux-${KERNELRELEASE}"
++				break
++			fi
++		done
++		;;
+ 	*)
+ 		[ -f "${KBUILD_IMAGE}" ] && cp -v -- "${KBUILD_IMAGE}" "${tmpdir}/boot/vmlinux-kbuild-${KERNELRELEASE}"
+ 		echo "" >&2
+ 		echo '** ** **  WARNING  ** ** **' >&2
+ 		echo "" >&2
+-- 
+2.20.1
+
+
