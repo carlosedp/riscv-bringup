@@ -35,19 +35,7 @@ sudo rm -rf /var/lib/rancher/k3s
 sudo rm -rf /var/lib/kubelet
 ```
 
-### Patch Deployments to use our images supporting riscv64
-
-Currently K3s tries to use it's standard images that do not support RISC-V so it's required to patch the deployments.
-
-Patch images:
-
-```sh
-kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":{"containers":[{"name":"coredns","image":"carlosedp/coredns:v1.7.0"}]}}}}'
-kubectl patch deployment metrics-server -n kube-system -p '{"spec":{"template":{"spec":{"containers":[{"name":"metrics-server","image":"carlosedp/metrics-server:v0.3.6"}]}}}}'
-kubectl patch deployment local-path-provisioner -n kube-system -p '{"spec":{"template":{"spec":{"containers":[{"name":"local-path-provisioner","image":"carlosedp/local-path-provisioner:v0.0.19"}]}}}}'
-```
-
-Customize Traefik
+Customize Traefik to use our image
 
 ```sh
 DOMAIN=`ip route get 8.8.8.8 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}'`.nip.io
@@ -74,7 +62,6 @@ spec:
     dashboard.domain: "traefik.$DOMAIN"
 EOF
 ```
-
 
 ## Deploy a test application
 
@@ -134,7 +121,7 @@ go get -u github.com/prometheus/procfs
 ## Images
 
 ```sh
-docker.io/rancher/coredns-coredns:1.8.0 -> carlosedp/coredns:1.8.0
+docker.io/rancher/coredns-coredns:1.8.0 -> carlosedp/coredns:v1.8.0
 docker.io/rancher/klipper-helm:v0.4.3 -> carlosedp/klipper-helm:v0.4.3
 docker.io/rancher/klipper-lb:v0.1.2 -> carlosedp/klipper-lb:v0.2.0
 docker.io/rancher/library-busybox:1.32.1 -> carlosedp/busybox:1.31

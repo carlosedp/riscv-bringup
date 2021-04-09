@@ -48,6 +48,7 @@ Below is a diagram of the process:
 * [Creating an SDCard Image file](#creating-an-sdcard-image-file)
 * [MSEL for Unmatched](#msel-for-unmatched)
 * [Use NVME as root filesystem](#use-nvme-as-root-filesystem)
+* [Installing new Kernel and Bootloader packages](#installing-new-kernel-and-bootloader-packages)
 * [References](#references)
 
 ## Install Toolchain to build Kernel
@@ -100,11 +101,12 @@ We apply Unmatched patches until they get upstreamed
 pushd opensbi
 # Checkout version that requires the external patches. This changes when upstreamed
 git checkout v0.9
-patch -p1 < ../meta-sifive/recipes-bsp/opensbi/files/*.patch
-patch -p1 < ../meta-sifive/recipes-bsp/opensbi/files/unmatched/*.patch
+
+for f in ../meta-sifive/recipes-bsp/opensbi/files/*.patch; do echo $f;patch -p1 < $f;done
+for f in ../meta-sifive/recipes-bsp/opensbi/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
 
 # Build
-make CROSS_COMPILE=riscv64-buildroot-linux-gnu- PLATFORM=generic
+make CROSS_COMPILE=riscv64-unknown-linux-gnu- PLATFORM=generic
 
 # Export OpenSBI dynamic firmware to be used by U-Boot
 export OPENSBI=`realpath build/platform/generic/firmware/fw_dynamic.bin`
@@ -123,8 +125,7 @@ We use latest released version with Unmatched patches until they get upstreamed.
 ```bash
 pushd u-boot
 git checkout c4fddedc48f336eabc4ce3f74940e6aa372de18c
-patch -p1 < ../meta-sifive/recipes-bsp/u-boot/files/*.patch
-patch -p1 < ../meta-sifive/recipes-bsp/u-boot/files/unmatched/*.patch
+for f in ../meta-sifive/recipes-bsp/u-boot/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
 
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make sifive_hifive_unmatched_fu740_defconfig
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make menuconfig # if needed
@@ -148,8 +149,7 @@ git checkout linux-5.11.y
 Apply Unmatched patches until they get upstream.
 
 ```sh
-patch -p1 < ../meta-sifive/recipes-kernel/linux/files/*.patch
-patch -p1 < ../meta-sifive/recipes-kernel/linux/files/unmatched/*.patch
+for f in ../meta-sifive/recipes-kernel/linux/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
 ```
 
 ### Building the Kernel
@@ -164,6 +164,12 @@ Patch to allow packaging kernel and modules for RISC-V arch
 
 ```sh
 patch -p1 < ../patches/0001-kbuild-buildtar-add-riscv-support.patch
+```
+
+If you prefer to have a Kernel without the `-dirty` naming due to applied patches, do:
+
+```sh
+touch .scmversion
 ```
 
 Build the kernel. The `menuconfig` line is in case one want to customize any parameter (adjust the CROSS_COMPILE triplet if using a different toolchain).
@@ -264,14 +270,14 @@ label kernel-$version
         kernel /boot/vmlinuz-$version
         fdt /boot/dtbs/$version/sifive/hifive-unmatched-a00.dtb
         initrd /boot/initrd.img-$version
-        append earlyprintk rw root=/dev/mmcblk0p3 rootfstype=ext4 rootwait console=ttySIF0,115200 LANG=en_US.UTF-8 earlycon=sbi
+        append earlyprintk rw root=/dev/mmcblk0p3 rootfstype=ext4 rootwait console=ttySIF0,115200 LANG=en_US.UTF-8 earlycon
 
 label recovery-kernel-$version
         menu label Linux kernel-$version (recovery mode)
         kernel /boot/vmlinuz-$version
         fdt /boot/dtbs/$version/sifive/hifive-unmatched-a00.dtb
         initrd /boot/initrd.img-$version
-        append earlyprintk rw root=/dev/mmcblk0p3 rootfstype=ext4 rootwait console=ttySIF0,115200 LANG=en_US.UTF-8 earlycon=sbi single
+        append earlyprintk rw root=/dev/mmcblk0p3 rootfstype=ext4 rootwait console=ttySIF0,115200 LANG=en_US.UTF-8 earlycon single
 EOF
 
 # Unmount image
@@ -354,6 +360,46 @@ sudo umount /mnt
 Edit `/boot/extlinux/extlinux.conf` to point the root partition to the NVME. Change `root=/dev/mmcblk0p3` to `root=/dev/nvme0n1p1` on both Kernel instances (in `append` lines).
 
 Now reboot and check if U-boot loaded the Kernel and rootfs from NVME.
+
+## Installing new Kernel and Bootloader packages
+
+To build new Kernel packages and U-boot binaries, follow the respective sections above.
+
+Transfer the `u-boot-spl.bin` and `u-boot.itb` files and the three kernel `.deb` files to the Unmatched.
+
+```sh
+# Write the new U-boot and SPL to the SDcard
+sudo dd if=u-boot.itb of=/dev/mmcblk0p2 bs=4k oflag=direct
+sudo dd if=u-boot-spl.bin of=/dev/mmcblk0p1 bs=4k oflag=direct
+
+#Install Kernel packages (set the version variable)
+version=5.11.12
+sudo apt install ./*.deb
+
+# Copy DTBs
+sudo cp -R /usr/lib/linux-image-$version/ /boot/dtbs/$version
+
+cat << EOF | sudo tee -a /boot/extlinux/extlinux.conf
+
+label kernel-$version
+        menu label Linux kernel-$version
+        kernel /boot/vmlinuz-$version
+        fdt /boot/dtbs/$version/sifive/hifive-unmatched-a00.dtb
+        initrd /boot/initrd.img-$version
+        append earlyprintk rw root=$(mount |grep "on /\ "|cut -d" " -f1) rootfstype=ext4 rootwait console=ttySIF0,115200 LANG=en_US.UTF-8 earlycon
+
+label recovery-kernel-$version
+        menu label Linux kernel-$version (recovery mode)
+        kernel /boot/vmlinuz-$version
+        fdt /boot/dtbs/$version/sifive/hifive-unmatched-a00.dtb
+        initrd /boot/initrd.img-$version
+        append earlyprintk rw root=$(mount |grep "on /\ "|cut -d" " -f1) rootfstype=ext4 rootwait console=ttySIF0,115200 LANG=en_US.UTF-8 earlycon single
+EOF
+```
+
+Edit `/boot/extlinux/extlinux.conf` to set your default Kernel editing the line `default` pointing to the desired `label`.
+
+Reboot
 
 ## References
 
