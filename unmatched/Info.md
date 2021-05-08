@@ -90,3 +90,63 @@ NVME is faster too:
 3000+0 records out
 3145728000 bytes (3.1 GB, 2.9 GiB) copied, 2.09847 s, 1.5 GB/s
 ```
+
+Hoult's Prime
+
+```sh
+Starting run
+3713160 primes found in 21952 ms
+236 bytes of code in countPrimes()
+```
+
+## Benchmark With 1.4Ghz
+
+### 7zip
+
+```sh
+❯ 7z b
+
+7-Zip 16.02 : Copyright (c) 1999-2016 Igor Pavlov : 2016-05-21
+p7zip Version 16.02 (locale=en_US.UTF-8,Utf16=on,HugeFiles=on,64 bits,4 CPUs LE)
+
+LE
+CPU Freq: 64000000 64000000 - 64000000 - - - - 2048000000
+
+RAM size:   16003 MB,  # CPU hardware threads:   4
+RAM usage:    882 MB,  # Benchmark threads:      4
+
+                       Compressing  |                  Decompressing
+Dict     Speed Usage    R/U Rating  |      Speed Usage    R/U Rating
+         KiB/s     %   MIPS   MIPS  |      KiB/s     %   MIPS   MIPS
+
+22:       2041   333    597   1986  |      53399   397   1148   4556
+23:       2046   349    598   2085  |      52575   398   1143   4549
+24:       2003   355    607   2154  |      51438   397   1137   4516
+25:       1924   354    620   2197  |      50214   397   1127   4469
+----------------------------------  | ------------------------------
+Avr:             348    606   2106  |              397   1139   4522
+Tot:             372    872   3314
+```
+
+NVME is faster too:
+
+```sh
+❯ dd if=/dev/zero of=testimg oflag=direct bs=1M count=3000
+3000+0 records in
+3000+0 records out
+3145728000 bytes (3.1 GB, 2.9 GiB) copied, 3.78181 s, 832 MB/s
+
+❯ dd if=testimg of=/dev/null iflag=direct bs=1M count=3000
+3000+0 records in
+3000+0 records out
+3145728000 bytes (3.1 GB, 2.9 GiB) copied, 1.98913 s, 1.6 GB/s
+```
+
+Hoult's Prime
+
+```sh
+❯ ./primes
+Starting run
+3713160 primes found in 19046 ms
+236 bytes of code in countPrimes()
+```

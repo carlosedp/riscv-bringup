@@ -49,6 +49,7 @@ Below is a diagram of the process:
 * [MSEL for Unmatched](#msel-for-unmatched)
 * [Use NVME as root filesystem](#use-nvme-as-root-filesystem)
 * [Installing new Kernel and Bootloader packages](#installing-new-kernel-and-bootloader-packages)
+* [Post configs](#post-configs)
 * [References](#references)
 
 ## Install Toolchain to build Kernel
@@ -181,7 +182,7 @@ make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv -j`nproc`
 # Package kernel and modules into a tarball and debian package
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv INSTALL_MOD_STRIP=1 -j`nproc` tarbz2-pkg
 make CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv INSTALL_MOD_STRIP=1 -j`nproc` bindeb-pkg
-
+$$
 # Build version string
 version=`cat include/config/kernel.release`
 echo $version
@@ -380,7 +381,6 @@ sudo apt install ./*.deb
 sudo cp -R /usr/lib/linux-image-$version/ /boot/dtbs/$version
 
 cat << EOF | sudo tee -a /boot/extlinux/extlinux.conf
-
 label kernel-$version
         menu label Linux kernel-$version
         kernel /boot/vmlinuz-$version
@@ -399,7 +399,60 @@ EOF
 
 Edit `/boot/extlinux/extlinux.conf` to set your default Kernel editing the line `default` pointing to the desired `label`.
 
+```sh
+sudo sed s/default.*/"default kernel-$version"/ -i /boot/extlinux/extlinux.conf
+```
+
 Reboot
+
+## Post configs
+
+Create heartbeat led udev rule:
+
+```sh
+cat << EOF | sudo tee /etc/udev/rules.d/99-pwm-leds.rules
+# D12 LED: heartbeat
+SUBSYSTEM=="leds", KERNEL=="green:d12", ACTION=="add", ATTR{trigger}="heartbeat"
+
+# D12 RGB LED: boot status
+SUBSYSTEM=="leds", KERNEL=="green:d2", ACTION=="add", ATTR{trigger}="default-on", ATTR{brightness}="25"
+SUBSYSTEM=="leds", KERNEL=="red:d2", ACTION=="add", ATTR{trigger}="default-on", ATTR{brightness}="25"
+SUBSYSTEM=="leds", KERNEL=="blue:d2", ACTION=="add", ATTR{trigger}="default-on", ATTR{brightness}="25"
+EOF
+
+
+cat << EOF | sudo tee /etc/systemd/system/led-bootstate-green.service
+[Unit]
+Description="Change the color of D2 LED to green"
+ConditionPathIsReadWrite=/sys/class/leds/green:d2/trigger
+ConditionPathIsReadWrite=/sys/class/leds/red:d2/trigger
+ConditionPathIsReadWrite=/sys/class/leds/blue:d2/trigger
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c '/bin/echo "default-on" > /sys/class/leds/green:d2/trigger'
+ExecStart=/bin/bash -c '/bin/echo "25" > /sys/class/leds/green:d2/brightness'
+ExecStart=/bin/bash -c '/bin/echo "none" > /sys/class/leds/red:d2/trigger'
+ExecStart=/bin/bash -c '/bin/echo "none" > /sys/class/leds/blue:d2/trigger'
+EOF
+
+cat << EOF | sudo tee /etc/systemd/system/led-bootstate-green.timer
+[Unit]
+Description=timer to trun-on green LED
+After=getty.target
+
+[Timer]
+OnActiveSec=3min
+Unit=led-bootstate-green.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable led-bootstate-green
+sudo systemctl start led-bootstate-green
+```
 
 ## References
 
