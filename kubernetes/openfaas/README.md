@@ -47,3 +47,16 @@ faas-cli list
 Function                        Invocations     Replicas
 ```
 
+### 4.0 Deploy and test a function
+
+```sh
+faas-cli deploy --image carlosedp/faas-figlet:riscv64 --name figlet-riscv
+echo "Hello World! I'm running OpenFaaS on Kubernetes in RISC-V" |faas-cli invoke figlet-riscv
+```
+
+Remove if desired:
+
+```sh
+faas-cli remove figlet-riscv
+```
+
