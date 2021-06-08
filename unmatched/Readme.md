@@ -48,7 +48,7 @@ Below is a diagram of the process:
 * [Creating an SDCard Image file](#creating-an-sdcard-image-file)
 * [MSEL for Unmatched](#msel-for-unmatched)
 * [Use NVME as root filesystem](#use-nvme-as-root-filesystem)
-* [Installing new Kernel and Bootloader packages](#installing-new-kernel-and-bootloader-packages)
+* [Installing/Updating new Kernel and Bootloader packages](#installingupdating-new-kernel-and-bootloader-packages)
 * [Post configs](#post-configs)
 * [References](#references)
 
@@ -90,6 +90,13 @@ git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 
 # SiFive patches
 git clone https://github.com/sifive/meta-sifive
+
+# Checkout latest patch tag (Check last)
+pushd meta-sifive
+lasttag=$(git describe --tags `git rev-list --tags --max-count=1`)
+echo $lasttag
+git checkout $lasttag
+popd
 ```
 
 ## Build OpenSBI
@@ -128,6 +135,13 @@ pushd u-boot
 git checkout c4fddedc48f336eabc4ce3f74940e6aa372de18c
 for f in ../meta-sifive/recipes-bsp/u-boot/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
 
+# To change clock rate, edit file (at own risk)
+vi arch/riscv/dts/fu740-c000-u-boot.dtsi b/arch/riscv/dts/fu740-c000-u-boot.dtsi
+# clock is at `assigned-clock-rates` key
+
+# Check if OpenSBI is exported
+ls -ltr $OPENSBI
+
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make sifive_hifive_unmatched_fu740_defconfig
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make menuconfig # if needed
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make -j`nproc`
@@ -150,7 +164,7 @@ git checkout linux-5.11.y
 Apply Unmatched patches until they get upstream.
 
 ```sh
-for f in ../meta-sifive/recipes-kernel/linux/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
+for f in ../meta-sifive/recipes-kernel/linux/files/*.patch; do echo $f;patch -p1 < $f;done
 ```
 
 ### Building the Kernel
@@ -362,7 +376,7 @@ Edit `/boot/extlinux/extlinux.conf` to point the root partition to the NVME. Cha
 
 Now reboot and check if U-boot loaded the Kernel and rootfs from NVME.
 
-## Installing new Kernel and Bootloader packages
+## Installing/Updating new Kernel and Bootloader packages
 
 To build new Kernel packages and U-boot binaries, follow the respective sections above.
 
@@ -447,6 +461,14 @@ Unit=led-bootstate-green.service
 
 [Install]
 WantedBy=timers.target
+EOF
+
+cat << EOF | sudo tee -a /etc/sensors3.conf
+
+chip "tmp451-*"
+
+    label temp1 "M/B Temp"
+    label temp2 "CPU Temp"
 EOF
 
 sudo systemctl daemon-reload
