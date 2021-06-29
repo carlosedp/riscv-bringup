@@ -86,7 +86,6 @@ Currently there are three distributions of RISC-V VM pre-packaged for Qemu:
 
 * [Debian Sid](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-QemuVM-202002.tar.gz)
 * [Ubuntu Focal](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuFocal-riscv64-QemuVM.tar.gz)
-* [Fedora](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla)
 
 ### Running
 

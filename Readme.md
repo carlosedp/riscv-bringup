@@ -64,7 +64,7 @@ If you like this project and others I've been contributing and would like to sup
 
 ## RISC-V Unleashed SBC, Virtual Machines and pre-built binaries
 
-To make the development easier, there are Qemu virtual machines based on Debian and Fedora with some developer tools already installed.
+To make the development easier, there are Qemu virtual machines based on Debian and Ubuntu with some developer tools already installed.
 
 For the SiFive Unmatched, there is a prebuilt SDcard image at [https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuHippo-RISC-V.img.gz](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuHippo-RISC-V.img.gz)
 
@@ -72,7 +72,6 @@ For QEmu, there are three distributions of RISC-V pre-packaged VM images:
 
 * [Debian Sid](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/debian-riscv64-QemuVM-202002.tar.gz)
 * [Ubuntu Focal](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuFocal-riscv64-QemuVM.tar.gz)
-* [Fedora](https://drive.google.com/open?id=1MndnrABt3LUgEBVq-ZYWWzo1PVhxfOla)
 
 The user is `root` and password `riscv`. For more information, check [the readme](Qemu/Readme.md).
 
@@ -109,7 +108,7 @@ For other distros get the [tarball here](https://github.com/carlosedp/riscv-brin
 # In Debian image
 sudo apt-get install python3 python3-dev python3-pip
 
-# In Fedora image
+# For Fedora image
 sudo dnf install python3-devel
 
 sudo pip3 install docker-compose
