@@ -242,8 +242,8 @@ sudo sgdisk -g --clear --set-alignment=1 \
 sudo losetup --partscan --find --show UbuntuHippo-RISC-V.img
 
 # Write the bootloader partitions. Adjust "loop0" to your loop device created in previous command if needed.
-sudo dd if=u-boot/spl/u-boot-spl.bin of=/dev/loop0p1 bs=8k iflag=fullblock oflag=direct conv=fsync status=progress
-sudo dd if=opensbi/build/platform/generic/firmware/fw_payload.bin of=/dev/loop0p2 bs=8k iflag=fullblock oflag=direct conv=fsync status=progress
+sudo dd if=u-boot/spl/u-boot-spl.bin of=/dev/loop0p1 bs=4k iflag=fullblock oflag=direct conv=fsync status=progress
+sudo dd if=u-boot/u-boot.itb of=/dev/loop0p2 bs=4k iflag=fullblock oflag=direct conv=fsync status=progress
 
 # Create and mount root filesystem
 sudo mkfs.ext4 /dev/loop0p3
