@@ -136,7 +136,7 @@ git checkout c4fddedc48f336eabc4ce3f74940e6aa372de18c
 for f in ../meta-sifive/recipes-bsp/u-boot/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
 
 # To change clock rate, edit file (at own risk)
-vi arch/riscv/dts/fu740-c000-u-boot.dtsi b/arch/riscv/dts/fu740-c000-u-boot.dtsi
+vi arch/riscv/dts/fu740-c000-u-boot.dtsi
 # clock is at `assigned-clock-rates` key
 
 # Check if OpenSBI is exported

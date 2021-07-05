@@ -75,7 +75,7 @@ For QEmu, there are three distributions of RISC-V pre-packaged VM images:
 
 The user is `root` and password `riscv`. For more information, check [the readme](Qemu/Readme.md).
 
-A prebuilt Go 1.16 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go1.16.2-riscv64.tar.gz).
+A prebuilt Go 1.16 tarball can be [downloaded here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go1.16.5-riscv64.tar.gz).
 
 If required to build the complete boot stack composed of OpenSBI, U-Boot, Linux, checkout the guides for [SiFive Unmatched](unmatched/Readme.md), [SiFive Unleashed](unleashed/Readme.md) and [Qemu](Qemu/Readme.md).
 
@@ -86,10 +86,10 @@ To run Go on the VM or board, install with:
 ./run_debian.sh
 
 # Download Golang tarball
-wget https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go1.16.2-riscv64.tar.gz
+wget https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go1.16.5-riscv64.tar.gz
 
 # In the VM, unpack (in root dir for example)
-tar vxf go1.16.2-riscv64.tar.gz -C /usr/local/
+tar vxf go1.16.5-riscv64.tar.gz -C /usr/local/
 
 # Add to your PATH
 export PATH="/usr/local/go/bin:$PATH"
