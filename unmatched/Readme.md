@@ -18,7 +18,7 @@ Below is a diagram of the process:
                                     |                                  |    |                |    |                    |
 +--------------+   +----------+     |  +-----------+    +-----------+  |    | Unleashed Menu |    | Starting kernel ...|
 |              |   |          |     |  |           |    |           |  |    |                |    | [0.00] Linux versio|
-|  ROM - ZSBL  |   |  U-Boot  |     |  |           |    |           |  |    | 1. Kernel 5.11 |    | [0.00] Kernel comma|
+|  ROM - ZSBL  |   |  U-Boot  |     |  |           |    |           |  |    | 1. Kernel 5.12 |    | [0.00] Kernel comma|
 |  In the SoC  +-->+  SPL     +---->+  |  OpenSBI  +--->+  U-Boot + |  +--->+ 2. Kernel 5.x  +--->+ ..                 |
 |              |   |          |     |  |           |    |  DTB      |  |    |                |    | ...                |
 +--------------+   +----------+     |  |           |    |           |  |    |                |    |                    |
@@ -42,7 +42,7 @@ Below is a diagram of the process:
 * [Build OpenSBI](#build-opensbi)
 * [Build U-Boot](#build-u-boot)
 * [Linux Kernel](#linux-kernel)
-  * [Kernel 5.11 checkout and patches](#kernel-511-checkout-and-patches)
+  * [Kernel 5.12 checkout and patches](#kernel-512-checkout-and-patches)
   * [Building the Kernel](#building-the-kernel)
 * [Building or getting a root filesystem](#building-or-getting-a-root-filesystem)
 * [Creating an SDCard Image file](#creating-an-sdcard-image-file)
@@ -152,13 +152,13 @@ This will generate the file `u-boot.itb` and `spl/u-boot-spl.bin` to be flashed 
 
 ## Linux Kernel
 
-### Kernel 5.11 checkout and patches
+### Kernel 5.12 checkout and patches
 
-The patches supporting the Unmatched targets the 5.11 Kernel.
+The patches supporting the Unmatched targets the 5.12 Kernel.
 
 ```sh
 pushd linux
-git checkout linux-5.11.y
+git checkout linux-5.12.y
 ```
 
 Apply Unmatched patches until they get upstream.
@@ -172,7 +172,7 @@ for f in ../meta-sifive/recipes-kernel/linux/files/*.patch; do echo $f;patch -p1
 Apply the defconfig supporting Unmatched. This config has most requirements for containers and networking features built-in and is confirmed to work.
 
 ```sh
-cp ../patches/linux-5.11-defconfig ./.config
+cp ../patches/linux-5.12-defconfig ./.config
 ```
 
 Patch to allow packaging kernel and modules for RISC-V arch
@@ -205,7 +205,7 @@ popd
 
 Check if building produced the files `linux/arch/riscv/boot/Image` and `linux/arch/riscv/boot/dts/sifive/hifive-unmatched-a00.dtb`. This is the kernel file and the dtb that is the descriptor for the board hardware.
 
-The last command will create three `.deb` packages in parent directory. They are `linux-headers-5.11.7...`, `linux-libc-dev_5.11.7...` and `linux-image-5.11.7...` where the ellipsis denote de dirty version. They will be used on the rootfs to install the Kernel and modules.
+The last command will create three `.deb` packages in parent directory. They are `linux-headers-5.12.19...`, `linux-libc-dev_5.12.19...` and `linux-image-5.12.19...` where the ellipsis denote de dirty version. They will be used on the rootfs to install the Kernel and modules.
 
 ## Building or getting a root filesystem
 
@@ -388,7 +388,7 @@ sudo dd if=u-boot.itb of=/dev/mmcblk0p2 bs=4k oflag=direct
 sudo dd if=u-boot-spl.bin of=/dev/mmcblk0p1 bs=4k oflag=direct
 
 #Install Kernel packages (set the version variable)
-version=5.11.12
+version=5.12.19
 sudo apt install ./*.deb
 
 # Copy DTBs
