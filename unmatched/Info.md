@@ -150,3 +150,46 @@ Starting run
 3713160 primes found in 19046 ms
 236 bytes of code in countPrimes()
 ```
+
+## Benchmark With 1.5Ghz
+
+```sh
+❯ ./mhz
+count=645643 us50=22257 us250=110298 diff=88041 cpu_MHz=1466.687
+```
+
+7zip
+
+```sh
+❯ sudo 7z b
+
+7-Zip 16.02 : Copyright (c) 1999-2016 Igor Pavlov : 2016-05-21
+p7zip Version 16.02 (locale=en_US.UTF-8,Utf16=on,HugeFiles=on,64 bits,4 CPUs LE)
+
+LE
+CPU Freq: 64000000 - - - 128000000 - 512000000 - -
+
+RAM size:   16003 MB,  # CPU hardware threads:   4
+RAM usage:    882 MB,  # Benchmark threads:      4
+
+                       Compressing  |                  Decompressing
+Dict     Speed Usage    R/U Rating  |      Speed Usage    R/U Rating
+         KiB/s     %   MIPS   MIPS  |      KiB/s     %   MIPS   MIPS
+
+22:       2160   336    626   2102  |      56916   397   1223   4856
+23:       2120   344    629   2161  |      56343   399   1221   4875
+24:       2141   361    639   2302  |      55216   399   1213   4847
+25:       1843   322    653   2105  |      53778   398   1202   4786
+----------------------------------  | ------------------------------
+Avr:             341    636   2167  |              398   1215   4841
+Tot:             370    926   3504
+```
+
+Hoult's Prime
+
+```sh
+❯ ./primes
+Starting run
+3713160 primes found in 17709 ms
+236 bytes of code in countPrimes()
+```
