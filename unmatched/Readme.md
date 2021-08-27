@@ -4,7 +4,7 @@ The objective of this guide is to provide an full solution on building the neces
 
 There is also a SiFive Unmatched, prebuilt SDcard image at [https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuHippo-RISC-V.img.gz](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/UbuntuHippo-RISC-V.img.gz).
 
-This is still a moving target so the process might change in the future. I confirm that with used versions everything works.
+This is still a moving target so the process might change in the future. I confirm that with used versions everything works. **Please keep the versions as stated since patches baselines changes as revisions evolve.**
 
 The stack is composed on U-Boot SPL, OpenSBI (the second-stage boot loader) loading U-Boot and this present the Linux Kernel options (from `extlinux.conf`) allowing one to add and change Kernel versions.
 
@@ -18,7 +18,7 @@ Below is a diagram of the process:
                                     |                                  |    |                |    |                    |
 +--------------+   +----------+     |  +-----------+    +-----------+  |    | Unleashed Menu |    | Starting kernel ...|
 |              |   |          |     |  |           |    |           |  |    |                |    | [0.00] Linux versio|
-|  ROM - ZSBL  |   |  U-Boot  |     |  |           |    |           |  |    | 1. Kernel 5.12 |    | [0.00] Kernel comma|
+|  ROM - ZSBL  |   |  U-Boot  |     |  |           |    |           |  |    | 1. Kernel 5.13 |    | [0.00] Kernel comma|
 |  In the SoC  +-->+  SPL     +---->+  |  OpenSBI  +--->+  U-Boot + |  +--->+ 2. Kernel 5.x  +--->+ ..                 |
 |              |   |          |     |  |           |    |  DTB      |  |    |                |    | ...                |
 +--------------+   +----------+     |  |           |    |           |  |    |                |    |                    |
@@ -42,7 +42,7 @@ Below is a diagram of the process:
 * [Build OpenSBI](#build-opensbi)
 * [Build U-Boot](#build-u-boot)
 * [Linux Kernel](#linux-kernel)
-  * [Kernel 5.12 checkout and patches](#kernel-512-checkout-and-patches)
+  * [Kernel 5.13 checkout and patches](#kernel-513-checkout-and-patches)
   * [Building the Kernel](#building-the-kernel)
 * [Building or getting a root filesystem](#building-or-getting-a-root-filesystem)
 * [Creating an SDCard Image file](#creating-an-sdcard-image-file)
@@ -61,7 +61,7 @@ First install the RISC-V toolchain. You can build from source by using the comma
 ```sh
 git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
 cd riscv-gnu-toolchain
-sudo apt-get install -y autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev libncurses-dev device-tree-compiler libssl-dev
+sudo apt-get install -y autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev libncurses-dev device-tree-compiler libssl-dev gdisk swig
 ./configure --prefix=/opt/riscv
 sudo make linux -j6
 export PATH=/opt/riscv/bin:$PATH
@@ -75,7 +75,6 @@ Adjust the triplet in the `CROSS_COMPILE` according to the used toolchain. The o
 Clone the required repositories. You need OpenSBI (Second stage bootloader), U-Boot and the Linux kernel. I keep all in one directory.
 
 ```sh
-sudo apt install gdisk
 mkdir unmatched
 cd unmatched
 
@@ -91,9 +90,9 @@ git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 # SiFive patches
 git clone https://github.com/sifive/meta-sifive
 
-# Checkout latest patch tag (Check last)
+# Checkout meta-sifive patches
 pushd meta-sifive
-lasttag=$(git describe --tags `git rev-list --tags --max-count=1`)
+lasttag=2021.08
 echo $lasttag
 git checkout $lasttag
 popd
@@ -132,7 +131,8 @@ We use latest released version with Unmatched patches until they get upstreamed.
 
 ```bash
 pushd u-boot
-git checkout c4fddedc48f336eabc4ce3f74940e6aa372de18c
+git checkout 840658b093976390e9537724f802281c9c8439f5
+patch -p1 < ../meta-sifive/recipes-bsp/u-boot/files/0001-riscv32-Use-double-float-ABI-for-rv32.patch
 for f in ../meta-sifive/recipes-bsp/u-boot/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
 
 # To change clock rate, edit file (at own risk)
@@ -142,7 +142,7 @@ vi arch/riscv/dts/fu740-c000-u-boot.dtsi
 # Check if OpenSBI is exported
 ls -ltr $OPENSBI
 
-CROSS_COMPILE=riscv64-unknown-linux-gnu- make sifive_hifive_unmatched_fu740_defconfig
+CROSS_COMPILE=riscv64-unknown-linux-gnu- make sifive_unmatched_defconfig
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make menuconfig # if needed
 CROSS_COMPILE=riscv64-unknown-linux-gnu- make -j`nproc`
 popd
@@ -152,13 +152,13 @@ This will generate the file `u-boot.itb` and `spl/u-boot-spl.bin` to be flashed 
 
 ## Linux Kernel
 
-### Kernel 5.12 checkout and patches
+### Kernel 5.13 checkout and patches
 
-The patches supporting the Unmatched targets the 5.12 Kernel.
+The patches supporting the Unmatched targets the 5.13 Kernel.
 
 ```sh
 pushd linux
-git checkout linux-5.12.y
+git checkout linux-5.13.y
 ```
 
 Apply Unmatched patches until they get upstream.
@@ -172,13 +172,7 @@ for f in ../meta-sifive/recipes-kernel/linux/files/*.patch; do echo $f;patch -p1
 Apply the defconfig supporting Unmatched. This config has most requirements for containers and networking features built-in and is confirmed to work.
 
 ```sh
-cp ../patches/linux-5.12-defconfig ./.config
-```
-
-Patch to allow packaging kernel and modules for RISC-V arch
-
-```sh
-patch -p1 < ../patches/0001-kbuild-buildtar-add-riscv-support.patch
+cp ../patches/linux-5.13-defconfig ./.config
 ```
 
 If you prefer to have a Kernel without the `-dirty` naming due to applied patches, do:
@@ -387,7 +381,7 @@ Transfer the `u-boot-spl.bin` and `u-boot.itb` files and the three kernel `.deb`
 sudo dd if=u-boot.itb of=/dev/mmcblk0p2 bs=4k oflag=direct
 sudo dd if=u-boot-spl.bin of=/dev/mmcblk0p1 bs=4k oflag=direct
 
-#Install Kernel packages (set the version variable)
+#Install Kernel packages (set the version variable based on your built kernel)
 version=5.12.19
 sudo apt install ./*.deb
 
