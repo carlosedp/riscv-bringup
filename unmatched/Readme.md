@@ -113,7 +113,7 @@ for f in ../meta-sifive/recipes-bsp/opensbi/files/*.patch; do echo $f;patch -p1 
 for f in ../meta-sifive/recipes-bsp/opensbi/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
 
 # Build
-make CROSS_COMPILE=riscv64-unknown-linux-gnu- PLATFORM=generic
+make CROSS_COMPILE=riscv64-unknown-linux-gnu- PLATFORM=generic INSTALL_LIB_PATH=lib
 
 # Export OpenSBI dynamic firmware to be used by U-Boot
 export OPENSBI=`realpath build/platform/generic/firmware/fw_dynamic.bin`
@@ -134,6 +134,7 @@ pushd u-boot
 git checkout 840658b093976390e9537724f802281c9c8439f5
 patch -p1 < ../meta-sifive/recipes-bsp/u-boot/files/0001-riscv32-Use-double-float-ABI-for-rv32.patch
 for f in ../meta-sifive/recipes-bsp/u-boot/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
+patch -p1 < ../patches/uboot-patch-extraenv.diff
 
 # To change clock rate, edit file (at own risk)
 vi arch/riscv/dts/fu740-c000-u-boot.dtsi
@@ -154,17 +155,25 @@ This will generate the file `u-boot.itb` and `spl/u-boot-spl.bin` to be flashed 
 
 ### Kernel 5.13 checkout and patches
 
-The patches supporting the Unmatched targets the 5.13 Kernel.
+The patches supporting the Unmatched targets the 5.13 Kernel:
 
 ```sh
 pushd linux
-git checkout linux-5.13.y
+git checkout linux-5.13.9
 ```
 
-Apply Unmatched patches until they get upstream.
+Apply Unmatched patches until they get upstream and rebase on latest 5.13:
 
 ```sh
 for f in ../meta-sifive/recipes-kernel/linux/files/*.patch; do echo $f;patch -p1 < $f;done
+git rebase origin/linux-5.13.y
+```
+
+Apply extra patches supporting the RTC (Realtime Clock) and Reboot:
+
+```sh
+patch -p1 < ../patches/kernel-reboot.diff
+patch -p1 < ../patches/kernel-rtc.diff
 ```
 
 ### Building the Kernel
@@ -382,13 +391,14 @@ sudo dd if=u-boot.itb of=/dev/mmcblk0p2 bs=4k oflag=direct
 sudo dd if=u-boot-spl.bin of=/dev/mmcblk0p1 bs=4k oflag=direct
 
 #Install Kernel packages (set the version variable based on your built kernel)
-version=5.12.19
+version=5.13.13
 sudo apt install ./*.deb
 
 # Copy DTBs
 sudo cp -R /usr/lib/linux-image-$version/ /boot/dtbs/$version
 
 cat << EOF | sudo tee -a /boot/extlinux/extlinux.conf
+
 label kernel-$version
         menu label Linux kernel-$version
         kernel /boot/vmlinuz-$version

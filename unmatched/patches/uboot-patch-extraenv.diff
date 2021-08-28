@@ -1,0 +1,11 @@
+--- a/include/configs/sifive-unmatched.h
++++ b/include/configs/sifive-unmatched.h
+@@ -75,6 +75,8 @@
+ 	"partitions=" PARTS_DEFAULT "\0" \
+ 	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
+ 	"setled_blue=mw.l 0x10020024 0x0000ffff; mw.l 0x10020028 0x0000ffff; mw.l 0x1002002c 0x0\0" \
++	"fdt_high=0xffffffffffffffff\0" \
++	"initrd_high=0xffffffffffffffff\0" \
+ 	BOOTENV \
+ 	"boot_extlinux="                                                  			\
+ 		"run setled_blue; "								\
