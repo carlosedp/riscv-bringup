@@ -1,0 +1,18 @@
+FROM --platform=$BUILDPLATFORM golang:1.16 as builder
+ARG TARGETOS
+ARG TARGETARCH
+WORKDIR /go/src/github.com/carlosedp/riscv-bringup
+COPY . .
+
+RUN GOOS=linux GOARCH=$TARGETARCH go build -a -ldflags '-extldflags "-static"' -o echo-demo .
+
+FROM scratch
+ARG TARGETARCH
+
+COPY --from=builder /go/src/github.com/carlosedp/riscv-bringup/echo-demo  /echo-demo
+
+EXPOSE 8080
+
+USER 65532:65532
+ENTRYPOINT ["/echo-demo"]
+

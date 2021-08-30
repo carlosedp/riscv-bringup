@@ -1,5 +1,5 @@
 # build with docker build -t REPO/crossbuild-riscv64 -f Dockerfile.crossbuild-riscv64 .
-FROM python:3-buster
+FROM python:3-bullseye
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TOOLCHAIN_URL https://toolchains.bootlin.com/downloads/releases/toolchains/riscv64/tarballs/riscv64--glibc--bleeding-edge-2020.08-1.tar.bz2

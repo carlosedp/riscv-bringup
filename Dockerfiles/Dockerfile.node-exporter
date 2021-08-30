@@ -1,0 +1,9 @@
+FROM carlosedp/busybox:1.31
+ARG TARGETARCH
+LABEL maintainer="The Prometheus Authors <prometheus-developers@googlegroups.com>"
+
+COPY node_exporter-$TARGETARCH /bin/node_exporter
+
+EXPOSE      9100
+USER        nobody
+ENTRYPOINT  [ "/bin/node_exporter" ]

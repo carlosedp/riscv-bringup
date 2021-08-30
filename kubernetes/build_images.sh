@@ -61,9 +61,9 @@ done
 popd
 
 # Base image for kube-proxy and flannel
-BASEIMAGE=carlosedp/debian-iptables:sid-slim
+BASEIMAGE=debian:sid-slim
 REPO=carlosedp
-cat > Dockerfile <<- 'EOF'
+cat > Dockerfile.debian-iptables <<- 'EOF'
 ARG BASEIMAGE
 FROM $BASEIMAGE
 ARG TARGETARCH
@@ -76,7 +76,7 @@ RUN apt-get update && \
         kmod \
         netbase
 EOF
-docker buildx build -t ${REPO}/debian-iptables:sid-slim --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm,linux/riscv64 --build-arg=BASEIMAGE=$BASEIMAGE --push .
+docker buildx build -t ${REPO}/debian-iptables:sid-slim --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm,linux/riscv64 --build-arg=BASEIMAGE=$BASEIMAGE --push -f Dockerfile.debian-iptables .
 
 # Build images
 for bin in kube-apiserver kube-scheduler kube-controller-manager; do
@@ -186,36 +186,44 @@ docker buildx build -t ${REPO}/etcd:${VER} --platform linux/amd64,linux/arm64,li
 cd ..
 
 # Build Flannel
-ARCHITECTURES="amd64 arm64 arm ppc64le riscv64"
-ORIGINIMAGE=quay.io/coreos/flannel
 IMAGE=carlosedp/flannel
-VERSION=v0.13.1-rc2
-git clone https://github.com/flannel-io/flannel
-cd flannel
+VERSION=v0.14.0
 
-git checkout ${VERSION}
+cat > Dockerfile.flannel << 'EOF'
+# Build with:
+# docker buildx build -t $IMAGE:v0.14.0 --platform linux/amd64,linux/arm,linux/arm64,linux/ppc64le,linux/riscv64 --build-arg=VERSION=v0.14.0 -f Dockerfile.flannel --push .
+#
+FROM --platform=$BUILDPLATFORM golang:1.16 as builder
+ARG VERSION
+ARG TARGETOS
+ARG TARGETARCH
 
-cat > Dockerfile.riscv64 << EOF
+ENV SRCREPO https://github.com/flannel-io/flannel
+ENV TARGETDIR /go/src/github.com/flannel-io
+ENV BINARY_NAME flanneld
+
+RUN mkdir -p $TARGETDIR && \
+    cd $TARGETDIR && \
+    git clone $SRCREPO --depth 1 -b $VERSION
+
+RUN cd $TARGETDIR/flannel && \
+   make dist/flanneld && \
+   mv dist/flanneld .
+
 FROM carlosedp/debian-iptables:sid-slim
+ARG VERSION
+ARG TARGETOS
+ARG TARGETARCH
 LABEL maintainer="Carlos Eduardo <carlosedp@gmail.com>"
-ENV FLANNEL_ARCH=riscv64
+ENV FLANNEL_ARCH=$TARGETARCH
 RUN apt-get update && apt-get install -y --no-install-recommends iproute2 net-tools ca-certificates iptables strongswan && update-ca-certificates
 RUN apt-get install -y --no-install-recommends wireguard-tools
-COPY dist/flanneld-$FLANNEL_ARCH /opt/bin/flanneld
-COPY dist/mk-docker-opts.sh /opt/bin/
-COPY dist/iptables-wrapper-installer.sh /
-RUN /iptables-wrapper-installer.sh
+COPY --from=builder /go/src/github.com/flannel-io/flannel/flanneld /opt/bin/flanneld
+COPY --from=builder /go/src/github.com/flannel-io/flannel/dist/mk-docker-opts.sh /opt/bin/
+COPY --from=builder /go/src/github.com/flannel-io/flannel/dist/iptables-wrapper-installer.sh /
+RUN /iptables-wrapper-installer.sh --no-sanity-check
 ENTRYPOINT ["/opt/bin/flanneld"]
 EOF
 
-# Build image for riscv and push as carlosedp/flannel:v0.11.0-riscv64
-for arch in amd64 arm64 arm ppc64le; do
-    docker pull $ORIGINIMAGE:$VERSION-$arch
-    docker tag $ORIGINIMAGE:$VERSION-$arch $IMAGE:$VERSION-$arch
-    docker push $IMAGE:$VERSION-$arch
-    docker rmi $ORIGINIMAGE:$VERSION-$arch
-done
-docker manifest create --amend $IMAGE:$VERSION `echo $ARCHITECTURES | sed -e "s~[^ ]*~$IMAGE:$VERSION\-&~g"`
-for arch in $ARCHITECTURES; do docker manifest annotate --arch $arch $IMAGE:$VERSION $IMAGE:$VERSION-$arch; done
-docker manifest push --purge $IMAGE:$VERSION
+docker buildx build -t $IMAGE:v0.14.0 --platform linux/amd64,linux/arm,linux/arm64,linux/ppc64le,linux/riscv64 --build-arg=VERSION=v0.14.0 -f Dockerfile.flannel --push .
 

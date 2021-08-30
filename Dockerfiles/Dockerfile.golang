@@ -1,14 +1,27 @@
-# DOCKER_BUILDKIT=0 docker build -t carlosedp/golang:1.14-riscv64 -f Dockerfile.golang .
-FROM carlosedp/debian:sid-slim-riscv64
+# Run with
+# docker buildx build -t carlosedp/golang:1.16.7 --build-arg=VERSION=1.16.7 --platform linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64,linux/arm --push -f Dockerfile.golang .
 
-ENV GOLANG_VERSION 1.14
+FROM debian:sid-slim
+ARG VERSION
+ARG TARGETARCH
 
-RUN apt-get update && apt-get install -y ca-certificates curl && rm -rf /var/lib/apt/lists/*
+ENV GOLANG_VERSION $VERSION
 
-RUN curl -L https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/go-$GOLANG_VERSION-riscv64.tar.gz | tar vxf -C /usr/local/
+RUN apt-get update && apt-get install -y ca-certificates curl libc6 --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /usr/local && \
+    set -eux; \
+    if [ "$TARGETARCH" = "riscv64" ]; then   \
+        URL="https://github.com/carlosedp/riscv-bringup/releases/download/v1.0"; \
+    else                                    \
+        URL="https://golang.org/dl";           \
+    fi                                   && \
+    curl -L $URL/go${GOLANG_VERSION}.linux-$TARGETARCH.tar.gz --output go${GOLANG_VERSION}.tar.gz && \
+    tar vxf go${GOLANG_VERSION}.tar.gz -C /usr/local/ && \
+    rm go${GOLANG_VERSION}.tar.gz
 
 RUN export PATH="/usr/local/go/bin:$PATH"; \
-    go version
+    /usr/local/go/bin/go version
 
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
