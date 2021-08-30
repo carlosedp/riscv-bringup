@@ -166,6 +166,8 @@ Apply Unmatched patches until they get upstream and rebase on latest 5.13:
 
 ```sh
 for f in ../meta-sifive/recipes-kernel/linux/files/*.patch; do echo $f;patch -p1 < $f;done
+# On some Unmatched boards, the DA9063 PMIC is a newer revision not yet supported by upstream Kernel
+patch -p1 ../patches/0001-mfd-da9063-Add-support-for-latest-EA-silicon-revisio.patch
 git rebase origin/linux-5.13.y
 ```
 

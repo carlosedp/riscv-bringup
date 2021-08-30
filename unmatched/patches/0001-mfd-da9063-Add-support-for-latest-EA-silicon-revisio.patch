@@ -1,0 +1,50 @@
+From 1520f099a791abd3e4b0a88bb1d3a5418f078fc9 Mon Sep 17 00:00:00 2001
+From: Carlos de Paula <me@carlosedp.com>
+Date: Mon, 30 Aug 2021 16:31:30 -0300
+Subject: [PATCH] mfd: da9063: Add support for latest EA silicon revision
+
+This update adds new regmap to support the latest EA silicon
+which will be selected based on the chip and variant
+information read from the device.
+
+Signed-off-by: Carlos de Paula <me@carlosedp.com>
+---
+ drivers/mfd/da9063-i2c.c        | 2 ++
+ include/linux/mfd/da9063/core.h | 1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/drivers/mfd/da9063-i2c.c b/drivers/mfd/da9063-i2c.c
+index 4b7f707b7952..343ed6e96d87 100644
+--- a/drivers/mfd/da9063-i2c.c
++++ b/drivers/mfd/da9063-i2c.c
+@@ -391,6 +391,7 @@ static int da9063_i2c_probe(struct i2c_client *i2c,
+ 				&da9063_bb_da_volatile_table;
+ 			break;
+ 		case PMIC_DA9063_DA:
++		case PMIC_DA9063_EA:
+ 			da9063_regmap_config.rd_table =
+ 				&da9063_da_readable_table;
+ 			da9063_regmap_config.wr_table =
+@@ -416,6 +417,7 @@ static int da9063_i2c_probe(struct i2c_client *i2c,
+ 				&da9063l_bb_da_volatile_table;
+ 			break;
+ 		case PMIC_DA9063_DA:
++		case PMIC_DA9063_EA:
+ 			da9063_regmap_config.rd_table =
+ 				&da9063l_da_readable_table;
+ 			da9063_regmap_config.wr_table =
+diff --git a/include/linux/mfd/da9063/core.h b/include/linux/mfd/da9063/core.h
+index fa7a43f02f27..8db52324f416 100644
+--- a/include/linux/mfd/da9063/core.h
++++ b/include/linux/mfd/da9063/core.h
+@@ -36,6 +36,7 @@ enum da9063_variant_codes {
+ 	PMIC_DA9063_BB = 0x5,
+ 	PMIC_DA9063_CA = 0x6,
+ 	PMIC_DA9063_DA = 0x7,
++	PMIC_DA9063_EA = 0x8,
+ };
+ 
+ /* Interrupts */
+-- 
+2.30.2
+
