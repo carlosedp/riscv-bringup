@@ -1,0 +1,39 @@
+# WEBUI
+FROM node:12.11 as webui
+
+RUN mkdir -p /src/webui
+
+COPY ./traefik/webui/ /src/webui/
+
+WORKDIR /src/webui
+
+RUN npm install
+RUN npm run build
+
+# BUILD
+FROM golang:1.17 as gobuild
+
+COPY ./traefik /go/src/github.com/traefik/traefik
+
+WORKDIR /go/src/github.com/traefik/traefik
+
+RUN rm -rf /go/src/github.com/traefik/traefik/webui/static/
+COPY --from=webui /src/webui/static/ /go/src/github.com/traefik/traefik/webui/static/
+
+# required to merge non-code components into the final binary,
+# such as the web dashboard/UI
+RUN go generate
+
+# cross-compile
+ENV GOARCH=riscv64
+ENV GOOS=linux
+
+# Standard go build
+RUN mkdir dist
+RUN go build -o dist/traefik ./cmd/traefik
+RUN chmod +x dist/traefik
+
+EXPOSE 80
+VOLUME ["/tmp"]
+
+ENTRYPOINT ["dist/traefik"]
