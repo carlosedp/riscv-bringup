@@ -1,7 +1,7 @@
 FROM ubuntu:impish
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server gettext-base -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server -y && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /var/run/mysqld && \
