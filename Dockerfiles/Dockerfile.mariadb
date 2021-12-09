@@ -1,0 +1,15 @@
+FROM ubuntu:impish
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server gettext-base -y && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir /var/run/mysqld && \
+    chown -R mysql:mysql /var/run/mysqld
+
+VOLUME ["/var/lib/mysql"]
+
+USER mysql
+
+EXPOSE 3306
+CMD ["mysqld"]
