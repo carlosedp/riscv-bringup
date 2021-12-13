@@ -58,6 +58,7 @@ If you like this project and others I've been contributing and would like to sup
   * [Gin web framework](#gin-web-framework)
   * [go-isatty](#go-isatty)
   * [ginkgo](#ginkgo)
+  * [mquery](#mquery)
 * [Community](#community)
 * [References](#references)
 
@@ -643,6 +644,16 @@ Dependency for Gin Framework
 Dependency for building Kubernetes complete binaries
 
 * [x] PR <https://github.com/onsi/ginkgo/pull/632>
+
+### mquery
+
+<https://github.com/estesp/mquery>
+
+A simple utility and serverless-based backend for querying Docker v2 & OCI v1 container images and reporting on
+"manifest list"/OCI "index" multi-platform image support.
+
+* [x] Upstreamed / Works
+* [x] PR <https://github.com/estesp/mquery/pull/22>
 
 --------------------------------------------------------------------------------
 
