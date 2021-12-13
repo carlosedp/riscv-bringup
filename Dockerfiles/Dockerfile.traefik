@@ -1,9 +1,17 @@
+# Run: docker build -t carlosedp/traefik -f Dockerfile.traefik .
+
+# FETCH
+FROM alpine:3 as gitfetch
+RUN apk add --no-cache git
+
+RUN git clone --depth 1 https://github.com/traefik/traefik.git /traefik
+
 # WEBUI
 FROM node:12.11 as webui
 
 RUN mkdir -p /src/webui
 
-COPY ./traefik/webui/ /src/webui/
+COPY --from=gitfetch /traefik/webui/ /src/webui/
 
 WORKDIR /src/webui
 
@@ -13,7 +21,7 @@ RUN npm run build
 # BUILD
 FROM golang:1.17 as gobuild
 
-COPY ./traefik /go/src/github.com/traefik/traefik
+COPY --from=gitfetch /traefik /go/src/github.com/traefik/traefik
 
 WORKDIR /go/src/github.com/traefik/traefik
 
