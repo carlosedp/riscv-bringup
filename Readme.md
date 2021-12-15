@@ -103,7 +103,7 @@ To run Docker on your RISC-V Debian or Ubuntu environment, download a [deb packa
 
 For other distros get the [tarball here](https://github.com/carlosedp/riscv-bringup/releases/download/v1.0/docker-v20.10.2-dev_riscv64.tar.gz) and unpack to your `/` dir. If the docker service doesn't start on install script, re-run `systemctl start docker`.
 
-<details><summary>Docker-compose install instructions</summary></u>
+<details><summary>Docker-compose install instructions</summary>
 
 ```bash
 # In Debian image
@@ -526,6 +526,8 @@ mkdir dist
 GOARCH=riscv64 GOOS=linux go build -o dist/traefik ./cmd/traefik
 docker build -t carlosedp/traefik:v2.1-riscv64 .
 ```
+
+See also [a complete Traefik Dockerfile for cross-compiling](./Dockerfiles/Dockerfile.traefik).
 
 To run an example stack with Docker Compose, create the file below and start it with `docker-compose up -d`. To test, you can open the address `http://[IP]:8080/dashboard` or `curl http://localhost:8080/api/rawdata`. Prometheus metrics are exposed on `http://localhost:8080/metrics`.
 

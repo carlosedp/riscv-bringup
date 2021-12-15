@@ -1,3 +1,5 @@
+# Run: docker build -t carlosedp/mariadb -f Dockerfile.mariadb .
+
 FROM ubuntu:impish
 
 RUN apt-get update && \
