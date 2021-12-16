@@ -30,7 +30,7 @@ If you like this project and others I've been contributing and would like to sup
   * [Issues](#issues)
 * [Podman - libpod](#podman---libpod)
 * [CNI Plugins](#cni-plugins)
-  * [Issues](#issues-1)
+  * [Issues](#cni-plugins-issues)
 * [Base Container Images](#base-container-images)
 * [Docker images for projects](#docker-images-for-projects)
 * [Kubernetes](#kubernetes)
@@ -284,7 +284,7 @@ Podman is a library and tool for running OCI-based containers in Pods
 
 * [x] Builds and runs.
 
-### Issues
+### CNI Plugins Issues
 
 * [x] Podman CNI Issue - <https://github.com/containers/libpod/issues/3462>
 
@@ -295,9 +295,18 @@ Podman is a library and tool for running OCI-based containers in Pods
 * Debian Sid (Multiarch) -> [`carlosedp/debian:sid`](https://hub.docker.com/r/carlosedp/debian)
 * Debian Sid Slim (Multiarch) -> [`carlosedp/debian:sid-slim`](https://hub.docker.com/r/carlosedp/debian)
 * Debian Sid iptables Slim (Multiarch) -> [`carlosedp/debian-iptables:sid-slim`](https://hub.docker.com/r/carlosedp/debian-iptables)
-* Alpine -> No MUSL available yet
 * Busybox (1.31.0) -> [`carlosedp/busybox:1.31`](https://hub.docker.com/r/carlosedp/busybox)
 * Go 1.14 (Multiarch) -> [`carlosedp/golang:1.14`](https://hub.docker.com/r/carlosedp/golang)
+
+## Docker Community "per-architecture" repository
+
+* rabbitmq -> [riscv64/rabbitmq](https://hub.docker.com/r/riscv64/rabbitmq)
+* busybox -> [riscv64/busybox](https://hub.docker.com/r/riscv64/busybox)
+* buildpack-deps -> [riscv64/buildpack-deps](https://hub.docker.com/r/riscv64/buildpack-deps)
+* ubuntu -> [riscv64/ubuntu](https://hub.docker.com/r/riscv64/ubuntu)
+* debian -> [riscv64/debian](https://hub.docker.com/r/riscv64/debian)
+* hello-world -> [riscv64/hello-world](https://hub.docker.com/r/riscv64/hello-world)
+* alpine -> [riscv64/alpine](https://hub.docker.com/r/riscv64/alpine)
 
 ## Docker images for projects
 
