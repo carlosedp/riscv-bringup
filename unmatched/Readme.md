@@ -92,7 +92,7 @@ git clone https://github.com/sifive/meta-sifive
 
 # Checkout meta-sifive patches
 pushd meta-sifive
-lasttag=2021.08
+lasttag=2022.02
 echo $lasttag
 git checkout $lasttag
 popd
@@ -106,14 +106,11 @@ We apply Unmatched patches until they get upstreamed
 
 ```sh
 pushd opensbi
-# Checkout version that requires the external patches. This changes when upstreamed
-git checkout v0.9
-
-for f in ../meta-sifive/recipes-bsp/opensbi/files/*.patch; do echo $f;patch -p1 < $f;done
-for f in ../meta-sifive/recipes-bsp/opensbi/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
+# Checkout the working version
+git checkout 4998a712b2ab504eff306110879ee05af6050177
 
 # Build
-make CROSS_COMPILE=riscv64-unknown-linux-gnu- PLATFORM=generic INSTALL_LIB_PATH=lib
+make CROSS_COMPILE=riscv64-unknown-linux-gnu- PLATFORM=generic INSTALL_LIB_PATH=lib FW_PIC=n
 
 # Export OpenSBI dynamic firmware to be used by U-Boot
 export OPENSBI=`realpath build/platform/generic/firmware/fw_dynamic.bin`
@@ -131,14 +128,13 @@ We use latest released version with Unmatched patches until they get upstreamed.
 
 ```bash
 pushd u-boot
-git checkout 840658b093976390e9537724f802281c9c8439f5
-patch -p1 < ../meta-sifive/recipes-bsp/u-boot/files/0001-riscv32-Use-double-float-ABI-for-rv32.patch
-for f in ../meta-sifive/recipes-bsp/u-boot/files/unmatched/*.patch; do echo $f;patch -p1 < $f;done
-patch -p1 < ../patches/uboot-patch-extraenv.diff
+git checkout d637294e264adfeb29f390dfc393106fd4d41b17
+
+for f in ../meta-sifive/recipes-bsp/u-boot/files/riscv64/*.patch; do echo $f;patch -p1 < $f;done
 
 # To change clock rate, edit file (at own risk)
 vi arch/riscv/dts/fu740-c000-u-boot.dtsi
-# clock is at `assigned-clock-rates` key
+# clock is at `assigned-clock-rates` key, my board works at 1.5Ghz
 
 # Check if OpenSBI is exported
 ls -ltr $OPENSBI
@@ -159,7 +155,7 @@ The patches supporting the Unmatched targets the 5.13 Kernel:
 
 ```sh
 pushd linux
-git checkout linux-5.13.9
+git checkout linux-5.13.19
 ```
 
 Apply Unmatched patches until they get upstream and rebase on latest 5.13:
@@ -174,7 +170,6 @@ git rebase origin/linux-5.13.y
 Apply extra patches supporting the RTC (Realtime Clock) and Reboot:
 
 ```sh
-patch -p1 < ../patches/kernel-reboot.diff
 patch -p1 < ../patches/kernel-rtc.diff
 ```
 
@@ -383,7 +378,7 @@ Now reboot and check if U-boot loaded the Kernel and rootfs from NVME.
 
 ## Installing/Updating new Kernel and Bootloader packages
 
-To build new Kernel packages and U-boot binaries, follow the respective sections above.
+To build new Kernel packages and U-boot/OpenSBI binaries, follow the respective sections above.
 
 Transfer the `u-boot-spl.bin` and `u-boot.itb` files and the three kernel `.deb` files to the Unmatched.
 
@@ -393,7 +388,7 @@ sudo dd if=u-boot.itb of=/dev/mmcblk0p2 bs=4k oflag=direct
 sudo dd if=u-boot-spl.bin of=/dev/mmcblk0p1 bs=4k oflag=direct
 
 #Install Kernel packages (set the version variable based on your built kernel)
-version=5.13.13
+version=5.13.19
 sudo apt install ./*.deb
 
 # Copy DTBs
