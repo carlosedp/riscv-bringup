@@ -1,0 +1,117 @@
+# Generates Go binaries for cross-architecture platforms
+# Run with
+# VER=1.19.2 bash -c 'docker buildx build -t carlosedp/golang-bootstrap:$VER --build-arg=VERSION=$VER --build-arg=GITHUBTOKEN=gh_xxxxx --platform linux/riscv64 -f Dockerfile.golang-bootstrap .'
+# Use Dockerfile.golang to build final images
+
+# This is the base image for build platform
+FROM --platform=$BUILDPLATFORM golang AS buildbase
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    curl \
+    git-core \
+    gcc \
+    libc6-dev \
+    procps \
+    lsof \
+    psmisc \
+    tar \
+    bzip2 \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+# This is the build image for build platform to bootstrap Golang for target arch
+FROM --platform=$BUILDPLATFORM buildbase as bootstrap
+ARG VERSION
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+ARG BUILDPLATFORM
+
+WORKDIR /
+ENV GOLANG_VERSION $VERSION
+RUN git clone --depth 1  --branch go$GOLANG_VERSION https://github.com/golang/go gobootstrap \
+    && cd gobootstrap/src \
+    && GOOS=$TARGETOS GOARCH=$TARGETARCH ./bootstrap.bash
+
+RUN echo "Bootstrap package is at /go-$TARGETOS-$TARGETARCH-bootstrap.tbz"
+
+# This is the builder image for target architecture
+FROM debian:sid-slim as targethost-builder
+ARG GITHUBTOKEN
+ARG TARGETOS
+ARG TARGETARCH
+ARG VERSION
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    ca-certificates \
+    curl \
+    git-core \
+    procps \
+    lsof \
+    psmisc \
+    tar \
+    bzip2 \
+    gzip \
+    file \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=bootstrap /go-$TARGETOS-$TARGETARCH-bootstrap.tbz /
+
+WORKDIR /
+RUN tar vxf go-$TARGETOS-$TARGETARCH-bootstrap.tbz
+
+ENV GOLANG_VERSION $VERSION
+ENV GOROOT_BOOTSTRAP=$HOME/go-$TARGETOS-$TARGETARCH-bootstrap
+
+RUN git clone --depth 1  --branch go$GOLANG_VERSION https://github.com/golang/go go \
+    && cd go/src \
+    && ./make.bash \
+    # && GO_TEST_TIMEOUT_SCALE=10 ./run.bash \  # Test Go build
+    && cd ../..
+
+ENV FILENAME=go$VERSION.$TARGETOS-$TARGETARCH
+RUN tar -cvzf $FILENAME.tar.gz --exclude=pkg/obj --exclude=.git go
+
+ENV GITHUB_TOKEN $GITHUBTOKEN
+RUN curl \
+        -X POST \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -H "Content-Type: multipart/form-data" \
+        -H "Content-Type: $(file -b --mime-type $FILENAME.tar.gz)" \
+        -H "Accept: application/vnd.github+json" \
+        --data-binary \@$FILENAME.tar.gz \
+        "https://uploads.github.com/repos/carlosedp/riscv-bringup/releases/17743756/assets?name=$FILENAME.tar.gz"
+
+
+# Temporary target architecturue image to unpack Go tarball
+# FROM debian:sid-slim as temp-target
+# ARG TARGETOS
+# ARG TARGETARCH
+# ARG VERSION
+
+# ENV FILENAME=go$VERSION.$TARGETOS-$TARGETARCH.tar.gz
+# COPY --from=targethost-builder /$FILENAME /
+
+# WORKDIR /
+# RUN tar vxf $FILENAME && ./go/bin/go version
+
+# ## Final Golang user image for target architecture
+# FROM debian:sid-slim as output
+
+# COPY --from=temp-target /go /usr/local/
+
+# RUN export PATH="/usr/local/go/bin:$PATH"; \
+#     /usr/local/go/bin/go version
+
+# ENV GOPATH /go
+# ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+
+# RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
+# WORKDIR $GOPATH

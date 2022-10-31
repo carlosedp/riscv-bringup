@@ -1,5 +1,5 @@
 # Run with
-# docker buildx build -t carlosedp/golang:1.16.7 --build-arg=VERSION=1.16.7 --platform linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64,linux/arm --push -f Dockerfile.golang .
+# VER=1.19.2 bash -c 'docker buildx build -t carlosedp/golang:$VER -t carlosedp/golang:"$(echo $VER |cut -d. -f1-2)" --build-arg=VERSION=$VER --platform linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64,linux/arm --push -f Dockerfile.golang .'
 
 FROM debian:sid-slim
 ARG VERSION
@@ -11,11 +11,12 @@ RUN apt-get update && apt-get install -y ca-certificates curl libc6 --no-install
 
 RUN mkdir -p /usr/local && \
     set -eux; \
-    if [ "$TARGETARCH" = "riscv64" ]; then   \
+    if [ "$TARGETARCH" = "riscv64" ]; then                                       \
         URL="https://github.com/carlosedp/riscv-bringup/releases/download/v1.0"; \
-    else                                    \
-        URL="https://golang.org/dl";           \
-    fi                                   && \
+    else                                                                         \
+        URL="https://golang.org/dl";                                             \
+    fi &&                                                                        \
+    if [ "$TARGETARCH" = "arm" ]; then export TARGETARCH=armv6l; fi &&           \
     curl -L $URL/go${GOLANG_VERSION}.linux-$TARGETARCH.tar.gz --output go${GOLANG_VERSION}.tar.gz && \
     tar vxf go${GOLANG_VERSION}.tar.gz -C /usr/local/ && \
     rm go${GOLANG_VERSION}.tar.gz
