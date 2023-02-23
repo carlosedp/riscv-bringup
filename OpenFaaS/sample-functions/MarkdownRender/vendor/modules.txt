@@ -4,6 +4,6 @@ github.com/microcosm-cc/bluemonday
 github.com/russross/blackfriday
 # github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95
 github.com/shurcooL/sanitized_anchor_name
-# golang.org/x/net v0.0.0-20171107184841-a337091b0525
+# golang.org/x/net v0.7.0
 golang.org/x/net/html
 golang.org/x/net/html/atom
