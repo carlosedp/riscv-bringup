@@ -15,10 +15,10 @@ sudo chroot temp-rootfs /bin/bash
 
 # Add unreleased packages
 cat >/etc/apt/sources.list <<EOF
-deb http://deb.debian.org/debian/dists sid main
-deb http://deb.debian.org/debian/dists unstable main
-deb http://deb.debian.org/debian/dists unreleased main
-deb http://deb.debian.org/debian/dists experimental main
+deb http://deb.debian.org/debian sid main
+deb http://deb.debian.org/debian unstable main
+deb http://deb.debian.org/debian unreleased main
+deb http://deb.debian.org/debian experimental main
 EOF
 
 # Install essential packages
