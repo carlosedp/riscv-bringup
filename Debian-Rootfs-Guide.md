@@ -4,10 +4,10 @@ This guide walks thru the build of a Debian root filesystem from scratch.
 
 ```bash
 # Install pre-reqs
-sudo apt install debootstrap qemu qemu-user-static binfmt-support dpkg-cross debian-ports-archive-keyring --no-install-recommends
+sudo apt install debootstrap qemu qemu-user-static binfmt-support dpkg-cross debian-archive-keyring --no-install-recommends
 
 # Generate minimal bootstrap rootfs
-sudo debootstrap --arch=riscv64 --foreign --keyring /usr/share/keyrings/debian-ports-archive-keyring.gpg --include=debian-ports-archive-keyring sid ./temp-rootfs http://deb.debian.org/debian-ports
+sudo debootstrap --arch=riscv64 --foreign --keyring /usr/share/keyrings/debian-archive-keyring.gpg --include=debian-archive-keyring sid ./temp-rootfs http://deb.debian.org/debian
 
 # chroot to it. Requires "qemu-user-static qemu-system qemu-utils qemu-system-misc binfmt-support" packages on host
 sudo chroot temp-rootfs /bin/bash
@@ -15,10 +15,10 @@ sudo chroot temp-rootfs /bin/bash
 
 # Add unreleased packages
 cat >/etc/apt/sources.list <<EOF
-deb http://ftp.ports.debian.org/debian-ports sid main
-deb http://ftp.ports.debian.org/debian-ports unstable main
-deb http://ftp.ports.debian.org/debian-ports unreleased main
-deb http://ftp.ports.debian.org/debian-ports experimental main
+deb http://deb.debian.org/debian/dists sid main
+deb http://deb.debian.org/debian/dists unstable main
+deb http://deb.debian.org/debian/dists unreleased main
+deb http://deb.debian.org/debian/dists experimental main
 EOF
 
 # Install essential packages
