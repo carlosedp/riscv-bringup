@@ -2,14 +2,14 @@
 
 This guide walks thru the build of a Ubuntu root filesystem from scratch. Ubuntu supports riscv64 packages from Focal, released on 04/2020.
 
-Here we will build an Ubuntu Hirsute Hippo (latest version). I recommend doing this process can be done on a recent Ubuntu host (Focal or newer).
+Here we will build an Ubuntu Noble Hippo (latest version). I recommend doing this process can be done on a recent Ubuntu host (Focal or newer).
 
 ```bash
 # Install pre-reqs
 sudo apt install debootstrap qemu qemu-user-static binfmt-support dpkg-cross --no-install-recommends
 
 # Generate minimal bootstrap rootfs
-sudo debootstrap --arch=riscv64 --foreign hirsute ./temp-rootfs http://ports.ubuntu.com/ubuntu-ports
+sudo debootstrap --arch=riscv64 --foreign noble ./temp-rootfs http://ports.ubuntu.com/ubuntu-ports
 
 # chroot to it and finish debootstrap
 sudo chroot temp-rootfs /bin/bash
@@ -18,21 +18,21 @@ sudo chroot temp-rootfs /bin/bash
 
 # Add package sources
 cat >/etc/apt/sources.list <<EOF
-deb http://ports.ubuntu.com/ubuntu-ports hirsute main restricted
+deb http://ports.ubuntu.com/ubuntu-ports noble main restricted
 
-deb http://ports.ubuntu.com/ubuntu-ports hirsute-updates main restricted
+deb http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted
 
-deb http://ports.ubuntu.com/ubuntu-ports hirsute universe
-deb http://ports.ubuntu.com/ubuntu-ports hirsute-updates universe
+deb http://ports.ubuntu.com/ubuntu-ports noble universe
+deb http://ports.ubuntu.com/ubuntu-ports noble-updates universe
 
-deb http://ports.ubuntu.com/ubuntu-ports hirsute multiverse
-deb http://ports.ubuntu.com/ubuntu-ports hirsute-updates multiverse
+deb http://ports.ubuntu.com/ubuntu-ports noble multiverse
+deb http://ports.ubuntu.com/ubuntu-ports noble-updates multiverse
 
-deb http://ports.ubuntu.com/ubuntu-ports hirsute-backports main restricted universe multiverse
+deb http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse
 
-deb http://ports.ubuntu.com/ubuntu-ports hirsute-security main restricted
-deb http://ports.ubuntu.com/ubuntu-ports hirsute-security universe
-deb http://ports.ubuntu.com/ubuntu-ports hirsute-security multiverse
+deb http://ports.ubuntu.com/ubuntu-ports noble-security main restricted
+deb http://ports.ubuntu.com/ubuntu-ports noble-security universe
+deb http://ports.ubuntu.com/ubuntu-ports noble-security multiverse
 EOF
 
 # Install essential packages
