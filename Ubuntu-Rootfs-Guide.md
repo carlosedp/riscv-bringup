@@ -2,14 +2,14 @@
 
 This guide walks thru the build of a Ubuntu root filesystem from scratch. Ubuntu supports riscv64 packages from Focal, released on 04/2020.
 
-Here we will build an Ubuntu Noble Hippo (latest version). I recommend doing this process can be done on a recent Ubuntu host (Focal or newer).
+Here we will build an Ubuntu Jammy Jellyfish (latest version). I recommend doing this process can be done on a recent Ubuntu host (Noble or newer).
 
 ```bash
 # Install pre-reqs
 sudo apt install debootstrap qemu qemu-user-static binfmt-support dpkg-cross --no-install-recommends
 
 # Generate minimal bootstrap rootfs
-sudo debootstrap --arch=riscv64 --foreign noble ./temp-rootfs http://ports.ubuntu.com/ubuntu-ports
+sudo debootstrap --arch=riscv64 --foreign jammy ./temp-rootfs http://ports.ubuntu.com/ubuntu-ports
 
 # chroot to it and finish debootstrap
 sudo chroot temp-rootfs /bin/bash
@@ -18,21 +18,21 @@ sudo chroot temp-rootfs /bin/bash
 
 # Add package sources
 cat >/etc/apt/sources.list <<EOF
-deb http://ports.ubuntu.com/ubuntu-ports noble main restricted
+deb http://ports.ubuntu.com/ubuntu-ports jammy main restricted
 
-deb http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted
+deb http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted
 
-deb http://ports.ubuntu.com/ubuntu-ports noble universe
-deb http://ports.ubuntu.com/ubuntu-ports noble-updates universe
+deb http://ports.ubuntu.com/ubuntu-ports jammy universe
+deb http://ports.ubuntu.com/ubuntu-ports jammy-updates universe
 
-deb http://ports.ubuntu.com/ubuntu-ports noble multiverse
-deb http://ports.ubuntu.com/ubuntu-ports noble-updates multiverse
+deb http://ports.ubuntu.com/ubuntu-ports jammy multiverse
+deb http://ports.ubuntu.com/ubuntu-ports jammy-updates multiverse
 
-deb http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse
+deb http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse
 
-deb http://ports.ubuntu.com/ubuntu-ports noble-security main restricted
-deb http://ports.ubuntu.com/ubuntu-ports noble-security universe
-deb http://ports.ubuntu.com/ubuntu-ports noble-security multiverse
+deb http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted
+deb http://ports.ubuntu.com/ubuntu-ports jammy-security universe
+deb http://ports.ubuntu.com/ubuntu-ports jammy-security multiverse
 EOF
 
 # Install essential packages
@@ -74,7 +74,7 @@ rm -rf /var/cache/apt/
 
 # Exit chroot
 exit
-sudo tar -cSf Ubuntu-Hippo-rootfs.tar -C temp-rootfs .
-gzip Ubuntu-Hippo-rootfs.tar
+sudo tar -cSf Ubuntu-Jammy-rootfs.tar -C temp-rootfs .
+gzip Ubuntu-Jammy-rootfs.tar
 rm -rf temp-rootfs
 ```
